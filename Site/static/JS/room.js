@@ -358,7 +358,7 @@ console.log(data)
 
         function connect_user() {
 
-        let url_user = `ws://${window.location.host}/socket-server/user/${document.querySelector("#username_id").value}/`;
+        let url_user = `wss://${window.location.host}/socket-server/user/${document.querySelector("#username_id").value}/`;
         chatSocket_user = new WebSocket(url_user);
 
         chatSocket_user.onopen = function() {
@@ -580,7 +580,7 @@ console.log(data)
 //
 //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
 ////                                        this = "new WebSocket(this.url)";
-////                                        let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+////                                        let url = `wss://${window.location.host}/socket-server/${number_of_room}/`;
 ////                                        e = new WebSocket(url);
 //
 //
@@ -759,7 +759,7 @@ if(data.type == "search_users"){
 
                     (async () => {
                         const contact_ = contact;
-                        url_contact = `ws://${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
+                        url_contact = `wss://${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
                         console.log("url_contact:", contact_);
                         chatSocket_contact = new WebSocket(await url_contact);
 
@@ -849,7 +849,7 @@ if(data.type == "search_users"){
     //
     //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
     ////                                        this = "new WebSocket(this.url)";
-    ////                                        let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+    ////                                        let url = `wss://${window.location.host}/socket-server/${number_of_room}/`;
     ////                                        e = new WebSocket(url);
     //
     //
@@ -930,7 +930,7 @@ function setCookie(cname, cvalue, exdays) {
 }
 
 function connect_socket(number_of_room = 0) {
-    let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+    let url = `wss://${window.location.host}/socket-server/${number_of_room}/`;
     chatSocket[number_of_room] = new WebSocket(url);
 
   chatSocket[number_of_room].onopen = function() {
@@ -1417,7 +1417,7 @@ function getContacts_response(response) {
 //                                if(typeof chatSocket_current != "undefined"){
 //                                    chatSocket_current.close();
 //                                }
-//                                let url = `ws://${window.location.host}/socket-server/${room}/`;
+//                                let url = `wss://${window.location.host}/socket-server/${room}/`;
 //                                chatSocket_current = new WebSocket(url);
 //
 //
@@ -1707,7 +1707,7 @@ function getContacts_response(response) {
 //
 //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
 ////                                        this = "new WebSocket(this.url)";
-////                                        let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+////                                        let url = `wss://${window.location.host}/socket-server/${number_of_room}/`;
 ////                                        e = new WebSocket(url);
 //
 //
@@ -2600,7 +2600,7 @@ document.querySelector("#creation_group_CREATE").onclick = function(event){
 
                     (async () => {
                         const contact_ = contact;
-                        url_contact = `ws://${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
+                        url_contact = `wss://${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
                         console.log("url_contact:", contact_);
                         chatSocket_contact = new WebSocket(await url_contact);
 
