@@ -1,0 +1,20 @@
+{
+  "name": "Your App Name",
+  "short_name": "ShortName2",
+  "description": "Your app description",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/Images/icons8-angry-eye-100.png",
+      "sizes": "72x72",
+      "type": "image/icons8-angry-eye-100.png",
+      "purpose": "any maskable",
+      "density": "1.0"
+    }
+  ]
+}
