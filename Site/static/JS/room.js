@@ -26,29 +26,6 @@ function openCity(evt, cityName) {
 document.querySelectorAll(".tablinks")[0].click();
 
 
-function notifyMe() {
-    var notification = new Notification ("Все еще работаешь?", {
-        tag : "ache-mail",
-        body : "Пора сделать паузу и отдохнуть",
-        icon : "https://itproger.com/img/notify.png"
-    });
-}
-
-function notifSet() {
-    if (!("Notification" in window))
-        alert ("Ваш браузер не поддерживает уведомления.");
-    else if (Notification.permission === "granted")
-        setTimeout(notifyMe, 2000);
-    else if (Notification.permission !== "denied") {
-        Notification.requestPermission (function (permission) {
-            if (!('permission' in Notification))
-                Notification.permission = permission;
-            if (permission === "granted")
-                setTimeout(notifyMe, 2000);
-        });
-    }
-}
-
 function close_audio_div_func(){
     document.querySelector(".audio_title_div").setAttribute("style", "display: none");
     document.querySelector(".hidden_audio").pause();
@@ -168,7 +145,7 @@ timer_touch_contextMenu = setTimeout('',0);
 
 $(document).on('touchstart', function(e) {
     document.querySelector("body").classList.add("selection");
-    console.log("STARTED")
+    // console.log("STARTED")
     var x = e.originalEvent.touches[0].pageX;
     var y = e.originalEvent.touches[0].pageY;
 
@@ -186,7 +163,7 @@ $(document).on('touchstart', function(e) {
 document.addEventListener('touchend', (e) => {
     clearTimeout(timer_touch_contextMenu);
     document.querySelector("body").classList.remove("selection");
-    console.log("ENDED")
+    // console.log("ENDED")
     document.querySelector("body").oncontextmenu = function(e){
         e.preventDefault();
     }
@@ -198,8 +175,7 @@ shareMenu = contextMenu.querySelector(".share-menu");
 copy = contextMenu.querySelector(".uil uil-copy");
 
 
-
-document.addEventListener("click", () => {
+window.document.addEventListener("click", () => {
     contextMenu.style.display = "none";
 });
 
@@ -291,7 +267,7 @@ function txtencode(Incode, passCode)
 
 
 window.onload = function() {
-
+    ws_protocol = window.location.protocol == "https:" ? "wss://" : "ws://";
     room = document.getElementById("room").value;
     play_check = 1;
     load_check = 1;
@@ -358,7 +334,7 @@ console.log(data)
 
         function connect_user() {
 
-        let url_user = `ws://${window.location.host}/socket-server/user/${document.querySelector("#username_id").value}/`;
+        let url_user = `${ws_protocol}${window.location.host}/socket-server/user/${document.querySelector("#username_id").value}/`;
         chatSocket_user = new WebSocket(url_user);
 
         chatSocket_user.onopen = function() {
@@ -580,7 +556,7 @@ console.log(data)
 //
 //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
 ////                                        this = "new WebSocket(this.url)";
-////                                        let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+////                                        let url = `${ws_protocol}${window.location.host}/socket-server/${number_of_room}/`;
 ////                                        e = new WebSocket(url);
 //
 //
@@ -759,7 +735,7 @@ if(data.type == "search_users"){
 
                     (async () => {
                         const contact_ = contact;
-                        url_contact = `ws://${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
+                        url_contact = `${ws_protocol}${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
                         console.log("url_contact:", contact_);
                         chatSocket_contact = new WebSocket(await url_contact);
 
@@ -849,7 +825,7 @@ if(data.type == "search_users"){
     //
     //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
     ////                                        this = "new WebSocket(this.url)";
-    ////                                        let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+    ////                                        let url = `${ws_protocol}${window.location.host}/socket-server/${number_of_room}/`;
     ////                                        e = new WebSocket(url);
     //
     //
@@ -930,7 +906,7 @@ function setCookie(cname, cvalue, exdays) {
 }
 
 function connect_socket(number_of_room = 0) {
-    let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+    let url = `${ws_protocol}${window.location.host}/socket-server/${number_of_room}/`;
     chatSocket[number_of_room] = new WebSocket(url);
 
   chatSocket[number_of_room].onopen = function() {
@@ -939,7 +915,23 @@ function connect_socket(number_of_room = 0) {
   chatSocket[number_of_room].onmessage = function(e) {
     let data = JSON.parse(e.data);
     if(data.type == 'chat_message'){
-        if(data.data.value != "") room_list[data.room_id].querySelector(".room_last_message").textContent = txtdecode(data.data.value,"1234");
+        room_last_message = txtdecode(data.data.value,"1234");
+        if(data.data.value != "") room_list[data.room_id].querySelector(".room_last_message").textContent = room_last_message;
+        if(data.data.user != parseInt(document.querySelector("#username_id").value)){
+    Notification.requestPermission().then((result) => {
+        console.log(result);
+            if(result == "granted") {
+                notification = new Notification(
+                    room_list[data.room_id].querySelector(".users").textContent,
+                    {
+                        body: room_last_message,
+                        icon: "/static/Images/main_site_icon.png",
+                    }
+                );
+            }
+    });
+}
+
         if(room == data.room_id){
 
                 messages = data.data;
@@ -1417,7 +1409,7 @@ function getContacts_response(response) {
 //                                if(typeof chatSocket_current != "undefined"){
 //                                    chatSocket_current.close();
 //                                }
-//                                let url = `ws://${window.location.host}/socket-server/${room}/`;
+//                                let url = `${ws_protocol}${window.location.host}/socket-server/${room}/`;
 //                                chatSocket_current = new WebSocket(url);
 //
 //
@@ -1707,7 +1699,7 @@ function getContacts_response(response) {
 //
 //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
 ////                                        this = "new WebSocket(this.url)";
-////                                        let url = `ws://${window.location.host}/socket-server/${number_of_room}/`;
+////                                        let url = `${ws_protocol}${window.location.host}/socket-server/${number_of_room}/`;
 ////                                        e = new WebSocket(url);
 //
 //
@@ -2600,7 +2592,7 @@ document.querySelector("#creation_group_CREATE").onclick = function(event){
 
                     (async () => {
                         const contact_ = contact;
-                        url_contact = `ws://${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
+                        url_contact = `${ws_protocol}${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
                         console.log("url_contact:", contact_);
                         chatSocket_contact = new WebSocket(await url_contact);
 
@@ -2932,6 +2924,7 @@ document.documentElement.style.setProperty('--rooms_display', `flex`);
 
         document.querySelector(".search_field").oninput = function() {
             if($(".search_field").val().replace(/\s/g, '').length){
+                
 //                document.querySelector(".users_search").setAttribute("style", "display: flex");
                 if(chatSocket_user != null && chatSocket_user.readyState) {
                     document.documentElement.style.setProperty('--rooms_display', `none`);

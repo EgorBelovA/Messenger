@@ -59,7 +59,7 @@ MIDDLEWARE = [
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 INTERNAL_IPS = [
-    "127.0.0.1",
+    "0.0.0.0",
 ]
 
 ROOT_URLCONF = 'Chat.urls'
@@ -152,24 +152,24 @@ LOGOUT_REDIRECT_URL = 'login'
 
 
 
-# CHANNEL_LAYERS = {
-#     'default':{
-#         'BACKEND':'channels.layers.InMemoryChannelLayer'
-#     }
-# }
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 ASGI_APPLICATION = 'Chat.asgi.application'
 WSGI_APPLICATION = 'Chat.wsgi.application'
 
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-}
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('redis', 6379)],
+#         },
+#     },
+# }
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
