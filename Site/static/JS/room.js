@@ -177,7 +177,7 @@ copy = contextMenu.querySelector(".uil uil-copy");
 
 window.document.addEventListener("click", () => {
     contextMenu.style.display = "none";
-    getStreamCode();
+    // getStreamCode();
 });
 
 
