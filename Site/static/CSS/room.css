@@ -616,9 +616,9 @@ select {
   display: inline-block;
 }
 
-/*#search{
-    width: 90vh;
-}*/
+#search {
+  width: 100%;
+}
 
 .mes_img {
   margin-bottom: -4px;
@@ -1178,7 +1178,7 @@ html.is-animating .transition-fade {
 
 .search_div {
   display: flex;
-  width: 100%;
+  width: 100vh;
   height: 44px;
   background: rgba(30, 30, 30, 1);
   transition: background 1s;

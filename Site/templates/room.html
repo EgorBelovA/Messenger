@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Chat</title>
+    <title>Chillin` - Chat</title>
     <link rel="manifest" href="{% static 'manifest.json' %}" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta content="true" name="HandheldFriendly" />
@@ -73,6 +73,7 @@
             <span class="slider round"></span>
           </label>
         </div>
+        <div id="logout" class="settings_menu_div">Log Out</div>
       </div>
 
       <div class="search_div" id="search">
@@ -83,13 +84,10 @@
         />
 
         <input class="search_field" name="term" placeholder="Search" />
-        <!--                    <img class="search_cross" src="{% static 'Images/cross.png' %}">-->
         <div class="search_cross">╳</div>
       </div>
 
       <div class="users_search" method="POST"></div>
-
-      <!--                <input class="create_new_room" type="submit" value="CLICK">-->
     </div>
 
     <div id="create_new_group_room">
@@ -271,7 +269,7 @@
           action="send"
         >
           <div class="scroll_down">
-            <div id="arrow_down_scroll" class="fa fa-angle-left"></div>
+            <div id="arrow_down_scroll" class="fa fa-angle-down"></div>
           </div>
           {% csrf_token %}
 

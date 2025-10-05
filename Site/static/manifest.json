@@ -1,7 +1,7 @@
 {
-  "name": "Your App Name",
-  "short_name": "ShortName2",
-  "description": "Your app description",
+  "name": "Chillin`",
+  "short_name": "Chillin`",
+  "description": "Messenger for chatting with friends",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,9 +10,8 @@
   "scope": "/",
   "icons": [
     {
-      "src": "/Images/icons8-angry-eye-100.png",
+      "src": "/static/Images/icon_manifest.jpeg",
       "sizes": "72x72",
-      "type": "image/icons8-angry-eye-100.png",
       "purpose": "any maskable",
       "density": "1.0"
     }

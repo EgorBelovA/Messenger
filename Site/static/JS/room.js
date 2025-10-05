@@ -266,6 +266,10 @@ function txtencode(Incode, passCode)
 	return rexcode;
 }
 
+document.querySelector("#logout").onclick = function(){
+    window.location.href = "/logout";
+}
+
 
 window.onload = function() {
     ws_protocol = window.location.protocol == "https:" ? "wss://" : "ws://";
@@ -288,6 +292,16 @@ window.onload = function() {
     unread_messages = new Set();
     chatSocket_user = null;
     forcibly_close_the_socket = false;
+
+    const isSupported = () =>
+        'Notification' in window &&
+        'serviceWorker' in navigator &&
+        'PushManager' in window;
+    
+    
+    if(isSupported() && Notification.permission !== "granted" && Notification.permission !== "denied"){
+        Notification.requestPermission();
+    }
 
 
 
@@ -899,7 +913,6 @@ function getCookie(cname) {
   return "";
 }
 
-Notification.requestPermission();
 
 
 function setCookie(cname, cvalue, exdays) {
