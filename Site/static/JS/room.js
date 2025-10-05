@@ -35,15 +35,16 @@ function close_audio_div_func(){
 function go_home_page_func(){
         room = 0;
         document.querySelector("#room_id").value = room;
-        window.location.hash = room;
         document.querySelector("#name").value = "";
+        window.location.hash = room;
         load_check = 1;
         load_photo_check = 0;
 
-        document.querySelector(".search_field").focus();
+        // document.querySelector(".search_field").focus();
 
 
-        $("#display").empty();
+        // $("#display").empty();
+
 
 
 //        document.querySelector("#select_chat_to_start").style.display = "inline-block";
@@ -52,9 +53,27 @@ function go_home_page_func(){
 //        document.querySelector(".send_div").style.display = "none";
 //        document.querySelector("#opponent_title_name").style.display = "none";
         adapt();
+        document.querySelectorAll(".users_full_form").forEach(function(e){ e.classList.remove("active")});
 }
 
 prev_audio_link = "";
+
+function enableDoubleTap(element, callback) {
+    let lastTap = 0;
+    
+    element.addEventListener('click', function(event) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+
+        if (tapLength < 500 && tapLength > 0) {
+            event.preventDefault();
+            callback.call(this, event);
+            lastTap = 0;
+        } else {
+            lastTap = currentTime;
+        }
+    });
+}
 
 
 
@@ -294,7 +313,10 @@ window.onload = function() {
     forcibly_close_the_socket = false;
 
 
-    
+    // document.getElementsByTagName('html')[0].style.overflow = 'hidden';
+    // document.getElementsByTagName('body')[0].style.overflow = 'hidden';
+    // document.getElementsByTagName('html')[0].style.touchAction = 'none';
+    // document.getElementsByTagName('body')[0].style.userSelect = 'none';
 
 
 
@@ -1159,10 +1181,10 @@ function connect_socket(number_of_room = 0) {
 //                            console.log(all_photos_and_videos)
 
 
-                            if(counter_img % 2 != 0 && counter_img > 2)
-                                temp.querySelector(".mes_img").style.width = "432px";
-                            if(counter_img % 2 != 0 && counter_img > 2 && window.innerWidth <= 768)
-                                temp.querySelector(".mes_img").style.width = "90vw";
+                            // if(counter_img % 2 != 0 && counter_img > 2)
+                            //     temp.querySelector(".mes_img").style.width = "432px";
+                            // if(counter_img % 2 != 0 && counter_img > 2 && window.innerWidth <= 768)
+                            //     temp.querySelector(".mes_img").style.width = "90vw";
 
                             if(load_check)
                                 $("#display").prepend(temp_full);
@@ -1235,19 +1257,15 @@ function check_viewed(){
 
 
                             all_messages[temp.getAttribute('value')] = temp_full;
-                            temp.ondblclick = function(){
+
+                            enableDoubleTap(temp, function() {
                                 chatSocket[room].send(JSON.stringify({
-                                    'message_id': temp.getAttribute('value'),
+                                    'message_id': this.getAttribute('value'),
                                     'type': "message_reaction",
                                     'room_id': room,
+                                    'contacts_id': document.querySelector("#username_id").value,
                                 }));
-/*                                $.ajax({
-                                    cache: false,
-                                    type: 'POST',
-                                    url: '/message_reaction',
-                                    data: { csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(), reaction: "heart", message_id: temp.getAttribute('value')},
-                                });*/
-                            }
+                            });
 
                             temp.setAttribute("id", "last_message");
 
@@ -1730,6 +1748,9 @@ function getContacts_response(response) {
     window.onhashchange = function(e){
         if(window.location.hash.slice(1) != "0"){
             $(room_list[window.location.hash.slice(1)]).mousedown();
+        }
+        else{
+            go_home_page_func();
         }
     }
 
@@ -2229,13 +2250,15 @@ function check_viewed(event){
 //                            });
 
                             all_messages[temp.getAttribute('value')] = temp_full;
-                            temp.ondblclick = function(){
+
+                            enableDoubleTap(temp, function() {
                                 chatSocket[room].send(JSON.stringify({
-                                    'message_id': temp.getAttribute('value'),
+                                    'message_id': this.getAttribute('value'),
                                     'type': "message_reaction",
                                     'room_id': room,
+                                    'contacts_id': document.querySelector("#username_id").value,
                                 }));
-                            }
+                            });
 
                             if(key == check_mes_update-1) temp.setAttribute("id", "last_message");
 
@@ -2519,7 +2542,7 @@ function selected_messages_escape(event){
 
 window.addEventListener("keydown", function(event){
     if(event.keyCode == 27 && !selected_messages.size && window.location.hash.slice(1) != 0){
-        go_home_page_func();
+        window.location.hash = 0;
     }
 });
 
@@ -2965,8 +2988,9 @@ document.documentElement.style.setProperty('--rooms_display', `flex`);
         document.documentElement.style.setProperty('--vh', `${vh}px`);
 
         window.addEventListener('resize', () => {
-          let vh = window.innerHeight * 0.01;
-          document.documentElement.style.setProperty('--vh', `${vh}px`);
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+
         });
 
 
@@ -3468,6 +3492,3 @@ jQuery(function($) {
   });
 
 });
-
-
-

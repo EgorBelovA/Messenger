@@ -2,8 +2,9 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .models import *
-from django.contrib.auth import get_user
+from django.contrib.auth import get_user, get_user_model
 from django.core.files.storage import FileSystemStorage
+import logging
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -19,7 +20,7 @@ class ChatConsumer(WebsocketConsumer):
         self.accept()
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_disard)(
+        async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
         )
@@ -45,6 +46,8 @@ class ChatConsumer(WebsocketConsumer):
             room_name = text_data_json['room_name']
         if text_data.find("room_type") != -1:
             room_type = text_data_json['room_type']
+
+
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
@@ -72,14 +75,19 @@ class ChatConsumer(WebsocketConsumer):
     def message_reaction(self, event):
         type = event['type']
         message_id = event['message_id']
+        contacts_id = event['contacts_id']
 
-        message = Message.objects.get(id=message_id)
-        if message.liked:
-            message.liked = False
-        else:
-            message.liked = True
-        message.save()
-
+        User = get_user_model()
+        user = User.objects.get(email=self.scope['user']).id
+        if int(contacts_id) == user:
+            message = Message.objects.get(id=message_id)
+            if message.liked:
+                message.liked = False
+            else:
+                message.liked = True
+            print("SAVED")
+            message.save()
+        print(event)
         self.send(text_data=json.dumps({
             'type': type,
             'message_id': message_id
@@ -127,7 +135,7 @@ class UserConsumer(WebsocketConsumer):
         self.accept()
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_disard)(
+        async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
         )

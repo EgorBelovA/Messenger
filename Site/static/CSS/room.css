@@ -6,6 +6,20 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  font-family: 'Breath_Demo';
+  touch-action: pan-up;
+  -ms-touch-action: pan-up;
+  overflow: hidden;
+}
+
 body {
   display: flex;
   justify-content: center;
@@ -27,6 +41,8 @@ body.selection {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  touch-action: pan-up;
+  -ms-touch-action: pan-up;
 }
 
 @font-face {
@@ -191,6 +207,8 @@ select {
   flex-wrap: nowrap;
   position: relative;
   overflow: hidden;
+  touch-action: none;
+  -ms-touch-action: none;
 }
 
 .send_div {
@@ -334,10 +352,11 @@ select {
   background-color: rgba(30, 30, 30, 1);
   padding: 0.3%;
   height: 100vh;
-  weight: 100vw;
   overflow-y: scroll;
   overflow-x: hidden;
   transition: background 1s;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
 }
 
 .all_my_contacts {
@@ -352,6 +371,8 @@ select {
   overflow-y: scroll;
   overflow-x: hidden;
   transition: background 1s;
+  touch-action: none;
+  -ms-touch-action: none;
 }
 
 #creation_group_CREATE_CANCEL_div,
@@ -954,6 +975,7 @@ html.is-animating .transition-fade {
   -moz-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 1);
   box-shadow: 0px 0px 7px -5px rgba(0, 0, 0, 1);
   z-index: 999;
+  width: 600px;
 }
 
 #display {
@@ -979,6 +1001,8 @@ html.is-animating .transition-fade {
     var(--myColor3) 100%
   );
   transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 5s;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
 }
 
 .room_body {
@@ -1459,11 +1483,10 @@ img[data-src] {
   line-height: 40px;
   font-size: 30px;
   background: gba(25, 25, 25);
-  border: solid 1px rgb(100, 100, 100);
   border-radius: 100%;
   width: 40px;
   height: 40px;
-  font-size: 50px;
+  font-size: 45px;
   text-align: center;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -2103,7 +2126,6 @@ input[type='range']:focus::-ms-fill-upper {
   body {
     margin: 0 auto;
     overflow: hidden;
-    height: -webkit-fill-available;
   }
   body {
     position: relative;
@@ -2149,7 +2171,7 @@ input[type='range']:focus::-ms-fill-upper {
     width: calc(100vw - 6px);
   }
   .mes_img {
-    width: calc(90vw / 2);
+    width: calc(80vw / 2);
   }
   .settings_menu {
     width: 100vw;

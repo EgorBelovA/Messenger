@@ -158,7 +158,9 @@ class GetChats(APIView):
     def get(self, request):
         User = get_user_model()
         all_chats = Room.objects.filter(users=request.user.id)
+        all_chats = all_chats.order_by('-id')
         serializer = RoomSerializerMessage(all_chats, many=True)
+        # sorted_data = sorted(serializer, key=lambda x: x['field_name'].lower())
         my_user = request.user.id
         return Response({"all_chats": serializer.data, "my_user": my_user})
 
