@@ -899,24 +899,7 @@ function getCookie(cname) {
   return "";
 }
 
-setInterval(function() {
-   if(Notification.permission === "granted") {
-        time = new Date();
-        realTime = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
-        notification = new Notification(
-            "It's " + realTime,
-            {
-                body: "Come chat with your friends!",
-                icon: "/static/Images/main_site_icon.png",
-            }
-        );
-    }
-    else{
-        Notification.requestPermission();
-    }
-}, 6000);
-
-
+Notification.requestPermission();
 
 
 function setCookie(cname, cvalue, exdays) {
@@ -948,9 +931,6 @@ function connect_socket(number_of_room = 0) {
                 icon: "/static/Images/main_site_icon.png",
             }
         );
-    }
-    else{
-        Notification.requestPermission();
     }
 }
 
