@@ -899,6 +899,26 @@ function getCookie(cname) {
   return "";
 }
 
+setInterval(function() {
+   if(Notification.permission === "granted") {
+        time = new Date();
+        realTime = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
+        notification = new Notification(
+            "It's " + realTime,
+            {
+                body: "Come chat with your friends!",
+                icon: "/static/Images/main_site_icon.png",
+            }
+        );
+    }
+    else{
+        Notification.requestPermission();
+    }
+}, 6000);
+
+
+
+
 function setCookie(cname, cvalue, exdays) {
   const d = new Date();
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
