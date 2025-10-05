@@ -293,15 +293,9 @@ window.onload = function() {
     chatSocket_user = null;
     forcibly_close_the_socket = false;
 
-    const isSupported = () =>
-        'Notification' in window &&
-        'serviceWorker' in navigator &&
-        'PushManager' in window;
+
     
-    
-    if(isSupported() && Notification.permission !== "granted" && Notification.permission !== "denied"){
-        Notification.requestPermission();
-    }
+
 
 
 
@@ -312,7 +306,6 @@ $.ajax({
         document.querySelector("#username").value = data.user[0].id;
         document.querySelector("#username_id").value = data.user[0].id;
 
-console.log(data)
 
         if(data.user[0].image == ""){
             avatar = document.createElement("div");
@@ -727,6 +720,7 @@ if(data.type == "search_users"){
 
 
                             users_list.onmousedown = function(event) {
+                                
                 document.querySelector(".search_field").value = "";
                 document.documentElement.style.setProperty('--rooms_display', `flex`);
                 document.querySelectorAll(".users_full_form.search").forEach(function(e){
@@ -1490,7 +1484,7 @@ function getContacts_response(response) {
                     $(".users_search").empty();
                     var chat_counter = 0;
                     chat = response.all_chats;
-                    console.log(response)
+                    console.log(response);
                     for(item in chat){
 
                         var users_list = document.createElement("form");
@@ -3428,7 +3422,13 @@ prevNextIcon.forEach(icon => {
 jQuery(function($) {
 
   $(document).on("mousedown", ".users_full_form", function(e) {
-
+    const isSupported = () =>
+        'Notification' in window &&
+        'serviceWorker' in navigator &&
+        'PushManager' in window;
+    if(isSupported() && Notification.permission !== "granted" && Notification.permission !== "denied"){
+        Notification.requestPermission();
+    }
     var $self = $(this);
 
     if($self.is(".btn-disabled")) {
