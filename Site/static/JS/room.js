@@ -919,18 +919,19 @@ function connect_socket(number_of_room = 0) {
         room_last_message = txtdecode(data.data.value,"1234");
         if(data.data.value != "") room_list[data.room_id].querySelector(".room_last_message").textContent = room_last_message;
         if(data.data.user != parseInt(document.querySelector("#username_id").value)){
-    Notification.requestPermission().then((result) => {
-        console.log(result);
-            if(result == "granted") {
-                notification = new Notification(
-                    room_list[data.room_id].querySelector(".users").textContent,
-                    {
-                        body: room_last_message,
-                        icon: "/static/Images/main_site_icon.png",
-                    }
-                );
+
+    if(Notification.permission === "granted") {
+        notification = new Notification(
+            room_list[data.room_id].querySelector(".users").textContent,
+            {
+                body: room_last_message,
+                icon: "/static/Images/main_site_icon.png",
             }
-    });
+        );
+    }
+    else{
+        Notification.requestPermission();
+    }
 }
 
         if(room == data.room_id){
