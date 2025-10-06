@@ -64,20 +64,64 @@ prev_audio_link = "";
 
 function enableDoubleTap(element, callback) {
     let lastTap = 0;
+    let tapTimeout;
+    let isTapValid = true;
     
-    element.addEventListener('click', function(event) {
+    element.addEventListener('touchstart', function(event) {
+        isTapValid = true;
+        
+        if($(".textarea").is(':focus'))
+            $(".textarea").focus();
+    });
+    
+    element.addEventListener('touchmove', function(event) {
+        isTapValid = false;
+    });
+    
+    element.addEventListener('touchend', function(event) {
+        event.preventDefault();
         const currentTime = new Date().getTime();
         const tapLength = currentTime - lastTap;
+        
+        if (!isTapValid) {
+            lastTap = 0;
+            clearTimeout(tapTimeout);
+            return;
+        }
 
         if (tapLength < 500 && tapLength > 0) {
-            event.preventDefault();
+            clearTimeout(tapTimeout);
             callback.call(this, event);
             lastTap = 0;
         } else {
             lastTap = currentTime;
+            clearTimeout(tapTimeout);
+            
+            tapTimeout = setTimeout(() => {
+                $(".textarea").blur();
+            }, 500);
+        }
+    });
+    
+    element.addEventListener('click', function(event) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        
+        if (tapLength < 500 && tapLength > 0) {
+            clearTimeout(tapTimeout);
+            callback.call(this, event);
+            lastTap = 0;
+        } else {
+            lastTap = currentTime;
+            clearTimeout(tapTimeout);
+            
+            tapTimeout = setTimeout(() => {
+                $(".textarea").blur();
+            }, 500);
         }
     });
 }
+
 
 
 
@@ -166,20 +210,20 @@ function seek(){
 
 timer_touch_contextMenu = setTimeout('',0);
 
-$(document).on('touchstart', function(e) {
-    document.querySelector("body").classList.add("selection");
-    // console.log("STARTED")
-    var x = e.originalEvent.touches[0].pageX;
-    var y = e.originalEvent.touches[0].pageY;
+// $(document).on('touchstart', function(e) {
+//     document.querySelector("body").classList.add("selection");
+//     // console.log("STARTED")
+//     var x = e.originalEvent.touches[0].pageX;
+//     var y = e.originalEvent.touches[0].pageY;
 
-    timer_touch_contextMenu = setTimeout(function(){
+//     timer_touch_contextMenu = setTimeout(function(){
 
-        contextMenu.style.left = `${x}px`;
-        contextMenu.style.top = `${y}px`;
-        contextMenu.style.display = "unset";
+//         contextMenu.style.left = `${x}px`;
+//         contextMenu.style.top = `${y}px`;
+//         contextMenu.style.display = "unset";
 
-    }, 500);
-});
+//     }, 500);
+// });
 
 
 
@@ -247,6 +291,7 @@ function txtdecode(Incode, passCode)
 	var Incode = Incode.match(/\d+\w/g);
 	var rexcode = "";
 	var numPC = 0;
+    if(Incode == null) Incode = [];
 	for(var i=0; i<Incode.length; i++)
 	{
 		if(numPC == passCode.length) numPC = 0;
@@ -315,6 +360,22 @@ window.onload = function() {
     unread_messages = new Set();
     chatSocket_user = null;
     forcibly_close_the_socket = false;
+
+    const CURRENT_VERSION = '1.2.9';
+    const lastVersion = localStorage.getItem('app_version');
+
+    if (lastVersion && lastVersion !== CURRENT_VERSION) {
+    showUpdateNotification();
+    localStorage.setItem('app_version', CURRENT_VERSION);
+    } else {
+    localStorage.setItem('app_version', CURRENT_VERSION);
+    }
+
+    function showUpdateNotification() {
+    if (confirm('Click "OK" to update the app')) {
+        location.reload();
+    }
+    }
 
 
     if(window.location.hash.slice(1) == "" || window.location.hash.slice(1) == "0") document.querySelector("#post-form").classList.add("hidden");
@@ -2701,6 +2762,14 @@ document.querySelector("#create_new_group").onmousedown = function(event){
 
 
 
+//     $("textarea").on("input", function () {
+//     this.style.height = "0";
+//     const textareaHeight = this.scrollHeight + 8;
+//     this.style.height = textareaHeight + "px";
+    
+//     const container = this.closest('.send_div');
+//     container.style.height = textareaHeight+10 + "px";
+// });
 
 $("textarea").on("input", function () {
     this.style.height = 0;
@@ -3135,7 +3204,7 @@ function set_theme(theme_mode){
         const themeMeta = document.querySelector('meta[name="theme-color"]');
         themeMeta.content = "#1E1E1E";
         document.querySelector(".settings").setAttribute("style", "background: #222;");
-        document.querySelector("body").setAttribute("style", "background-color: #0f0f0f;");
+        document.querySelector("body").setAttribute("style", "background-color: #1E1E1E;");
         document.querySelector("#opponent_title_name").setAttribute("style", "background-color: #1E1E1E;");
         document.querySelector("#name").setAttribute("style", "color: white;");
         document.querySelector(".send_div").setAttribute("style", "background-color: #1E1E1E;");
@@ -3181,6 +3250,7 @@ document.querySelector('#opponent_title_name').addEventListener('click', (e) => 
         document.querySelector('.send_div_class').classList.add('active');
         document.querySelector('.room_body').classList.add('active');
         document.querySelector('#opponent_title_name').classList.add('active');
+        document.querySelector('.chat-background-image').classList.add('active');
     }
 })
 
@@ -3190,6 +3260,7 @@ document.querySelector('.close-menu').addEventListener('click', (e) => {
     document.querySelector('.send_div_class').classList.remove('active');
     document.querySelector('.room_body').classList.remove('active');
     document.querySelector('#opponent_title_name').classList.remove('active');
+    document.querySelector('.chat-background-image').classList.remove('active');
 })
 
 

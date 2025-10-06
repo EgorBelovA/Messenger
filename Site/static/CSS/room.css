@@ -251,11 +251,15 @@ select {
   background-blend-mode: overlay;
 
   transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 0s,
-    background 2s;
+    background 0.2s ease-in;
 
-  background-size: cover;
-  background-position: center;
+  background-position: 0% 0%, calc(50% - 100px) center !important;
+  background-size: cover, 500px auto !important;
   min-height: 100px;
+}
+
+.chat-background-image.active {
+  background-size: cover, 400px auto !important;
 }
 
 .send_div {
@@ -273,12 +277,12 @@ select {
 
 .send_div_class {
   width: 100%;
-  transition: width 0.5s, background 1s;
+  transition: width 0.2s ease-in, background 1s, height 0.2s;
 }
 
 .send_div_class.active {
   width: calc(100% - 400px);
-  transition: width 0.5s, background 1s;
+  transition: width 0.2s ease-in, background 1s;
 }
 
 .send_div.hidden {
@@ -319,6 +323,7 @@ select {
   margin: 5px;
   border: 0px solid #ccc;
   transition: color 1s, width 1s;
+  overflow: hidden;
 }
 
 .textarea:focus {
@@ -351,7 +356,7 @@ select {
   height: 50px;
   width: 100%;
   cursor: pointer;
-  transition: background 1s, width 0.4s;
+  transition: background 1s, width 0.2s ease-in;
   -webkit-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 1);
   -moz-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 1);
   box-shadow: 0px 0px 7px -5px rgba(0, 0, 0, 1);
@@ -361,7 +366,7 @@ select {
 
 #opponent_title_name.active {
   width: calc(100% - 400px);
-  transition: width 0.5s, background 1s;
+  transition: width 0.2s ease-in, background 1s;
 }
 
 #name {
@@ -815,11 +820,9 @@ select {
 }
 
 .tab button:hover {
-  background: rgba(150, 150, 150, 1);
 }
 
 .tab button.active {
-  background: rgba(180, 180, 180, 0.6);
   border-bottom: 3px solid var(--input_submit_color);
   transition: background 0.2s, border-color 0.7s;
 }
@@ -841,12 +844,12 @@ select {
   top: 0;
   right: 0;
   z-index: 999;
-  transition: transform 0.5s, background 1s;
+  transition: transform 0.2s ease-in, background 1s;
 }
 
 .attachments.active {
   transform: translateX(0%);
-  transition: transform 0.5s, background 1s;
+  transition: transform 0.2s ease-in, background 1s;
 }
 
 #viewed_check {
@@ -1126,7 +1129,7 @@ html.is-animating .transition-fade {
   height: 20px;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 86%;
+  width: 75%;
   overflow: hidden;
 }
 
@@ -2142,6 +2145,9 @@ input[type='range']:focus::-ms-fill-upper {
   .room_body {
     min-width: 100%;
   }
+  .chat-background-image {
+    background-size: cover, 400px auto !important;
+  }
 }
 
 @media screen and (max-width: 1200px) {
@@ -2180,20 +2186,26 @@ input[type='range']:focus::-ms-fill-upper {
   #opponent_title_name.active {
     width: 0;
     opacity: 0;
-    transition: width 0.5s;
-    transition: opacity 0.5s;
+    transition: width 0.2s ease-in;
+    transition: opacity 0.2s ease-in;
   }
   .room_body.active {
     width: 0;
     opacity: 0;
-    transition: width 0.5s;
-    transition: opacity 0.5s;
+    transition: width 0.2s ease-in;
+    transition: opacity 0.2s ease-in;
+  }
+  .send_div.hidden {
+    width: 0;
+    opacity: 0;
+    transition: width 0.2s ease-in;
+    transition: opacity 0.2s ease-in;
   }
   .send_div.active {
     width: 0;
     opacity: 0;
-    transition: width 0.5s;
-    transition: opacity 0.5s;
+    transition: width 0.2s ease-in;
+    transition: opacity 0.2s ease-in;
   }
 
   .attachments {
