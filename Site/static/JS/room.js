@@ -43,7 +43,8 @@ function go_home_page_func(){
         // document.querySelector(".search_field").focus();
 
 
-        // $("#display").empty();
+        $("#display").empty();
+        document.querySelector("#post-form").classList.add("hidden");
 
 
 
@@ -311,6 +312,8 @@ window.onload = function() {
     unread_messages = new Set();
     chatSocket_user = null;
     forcibly_close_the_socket = false;
+
+    if(window.location.hash.slice(1) == "" || window.location.hash.slice(1) == "0") document.querySelector("#post-form").classList.add("hidden");
 
 
     // document.getElementsByTagName('html')[0].style.overflow = 'hidden';
@@ -1746,13 +1749,19 @@ function getContacts_response(response) {
 
 
     window.onhashchange = function(e){
-        if(window.location.hash.slice(1) != "0"){
+        console.log("hash", window.location.hash.slice(1));
+        if(window.location.hash.slice(1) != "0" && window.location.hash.slice(1) != ""){
             $(room_list[window.location.hash.slice(1)]).mousedown();
         }
         else{
             go_home_page_func();
         }
     }
+
+    // window.onpopstate = function(event) {
+    //     window.location.hash = "0";
+    //     // go_home_page_func();
+    // };
 
 
 
@@ -3453,6 +3462,7 @@ jQuery(function($) {
     if(isSupported() && Notification.permission !== "granted" && Notification.permission !== "denied"){
         Notification.requestPermission();
     }
+    document.querySelector("#post-form").classList.remove("hidden");
     var $self = $(this);
 
     if($self.is(".btn-disabled")) {

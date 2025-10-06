@@ -2,5 +2,10 @@ db.sqlite3
 .idea
 venv
 media
-
-db.sqlite3
+db.json
+__pycache__/
+*.pyc
+.DS_Store
+*.swp
+*.swo
+*.log
