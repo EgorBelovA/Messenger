@@ -6,6 +6,30 @@
   box-sizing: border-box;
 }
 
+@property --myColor1 {
+  syntax: '<color>';
+  initial-value: rgba(20, 20, 20, 1);
+  inherits: false;
+}
+
+@property --myColor2 {
+  syntax: '<color>';
+  initial-value: rgba(20, 20, 20, 1);
+  inherits: false;
+}
+
+@property --myColor3 {
+  syntax: '<color>';
+  initial-value: rgba(20, 20, 20, 1);
+  inherits: false;
+}
+
+@property --shadow_degree {
+  syntax: '<angle>';
+  initial-value: 90deg;
+  inherits: false;
+}
+
 html,
 body {
   box-sizing: border-box;
@@ -15,8 +39,8 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   font-family: 'Breath_Demo';
-  touch-action: pan-up;
-  -ms-touch-action: pan-up;
+  touch-action: none;
+  -ms-touch-action: none;
   overflow: hidden;
 }
 
@@ -211,17 +235,40 @@ select {
   -ms-touch-action: none;
 }
 
+.chat-background-image {
+  background-image: url('../Images/alt_BG.png') !important;
+  background-color: rgba(15, 15, 15, 1);
+  max-width: 100%;
+
+  background: linear-gradient(
+      var(--shadow_degree, 45deg),
+      var(--myColor1, #000000) 0%,
+      var(--myColor2, #333333) 35%,
+      var(--myColor3, #666666) 100%
+    ),
+    url('../Images/alt_BG.png') !important;
+
+  background-blend-mode: overlay;
+
+  transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 0s,
+    background 2s;
+
+  background-size: cover;
+  background-position: center;
+  min-height: 100px;
+}
+
 .send_div {
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: rgba(30, 30, 30, 1);
-  padding: 0.1% 0 0.5% 0;
+  border-radius: 20px 20px 0 0;
+  padding: 5px 5px 0 5px;
   position: relative;
   transition: background 1s, width 1s;
-  -webkit-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 1);
-  -moz-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 1);
-  box-shadow: 0px 0px 7px -5px rgba(0, 0, 0, 1);
+  box-shadow: 0px -5px 10px -10px rgba(0, 0, 0, 1);
+  -webkit-box-shadow: 0px -5px 10px -10px rgba(0, 0, 0, 1);
 }
 
 .send_div_class {
@@ -294,30 +341,6 @@ select {
 
 .input_submit:hover {
   opacity: 0.8;
-}
-
-@property --myColor1 {
-  syntax: '<color>';
-  initial-value: rgba(20, 20, 20, 1);
-  inherits: false;
-}
-
-@property --myColor2 {
-  syntax: '<color>';
-  initial-value: rgba(20, 20, 20, 1);
-  inherits: false;
-}
-
-@property --myColor3 {
-  syntax: '<color>';
-  initial-value: rgba(20, 20, 20, 1);
-  inherits: false;
-}
-
-@property --shadow_degree {
-  syntax: '<angle>';
-  initial-value: 90deg;
-  inherits: false;
 }
 
 #opponent_title_name {
@@ -999,29 +1022,7 @@ html.is-animating .transition-fade {
 }
 
 .room_div {
-  background-image: url('../Images/alt_BG.png') !important;
-  background-color: rgba(15, 15, 15, 1);
   max-width: 100%;
-
-  background: linear-gradient(
-      var(--shadow_degree, 45deg),
-      var(--myColor1, #000000) 0%,
-      var(--myColor2, #333333) 35%,
-      var(--myColor3, #666666) 100%
-    ),
-    url('../Images/alt_BG.png') !important;
-
-  background-blend-mode: overlay;
-
-  transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 5s,
-    background 2s;
-
-  touch-action: pan-y;
-  -ms-touch-action: pan-y;
-
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   min-height: 100px;
 }
 
@@ -1497,7 +1498,7 @@ img[data-src] {
   position: absolute;
   display: inline-block;
   bottom: 60px;
-  right: 12px;
+  right: 8px;
   text-decoration: none;
   overflow: hidden;
   line-height: 40px;
@@ -2120,6 +2121,27 @@ input[type='range']:focus::-ms-fill-upper {
 #avatar_profile_set,
 #color_chat_change_div {
   padding: 10px;
+}
+
+@media (pointer: none), (pointer: coarse) {
+  .send_div {
+    /* bottom: 10px; */
+    min-width: 100%;
+    padding-bottom: 30px;
+  }
+  .send_div:focus-within {
+    bottom: 0px;
+    padding-bottom: 0px;
+  }
+  .scroll_down {
+    bottom: 80px;
+  }
+  #opponent_title_name {
+    min-width: 100%;
+  }
+  .room_body {
+    min-width: 100%;
+  }
 }
 
 @media screen and (max-width: 1200px) {

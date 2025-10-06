@@ -2,7 +2,10 @@ const controller = new AbortController();
 const signal = controller.signal;
 
 
-
+const isSupported = () =>
+    'Notification' in window &&
+    'serviceWorker' in navigator &&
+    'PushManager' in window;
 
 
 function openCity(evt, cityName) {
@@ -312,6 +315,7 @@ window.onload = function() {
     unread_messages = new Set();
     chatSocket_user = null;
     forcibly_close_the_socket = false;
+
 
     if(window.location.hash.slice(1) == "" || window.location.hash.slice(1) == "0") document.querySelector("#post-form").classList.add("hidden");
 
@@ -954,8 +958,9 @@ function connect_socket(number_of_room = 0) {
         room_last_message = txtdecode(data.data.value,"1234");
         if(data.data.value != "") room_list[data.room_id].querySelector(".room_last_message").textContent = room_last_message;
         if(data.data.user != parseInt(document.querySelector("#username_id").value)){
-
-    if(Notification.permission === "granted") {
+    
+    
+    if(isSupported && Notification.permission === "granted") {
         notification = new Notification(
             room_list[data.room_id].querySelector(".users").textContent,
             {
@@ -2572,7 +2577,7 @@ window.addEventListener("keydown", function(event){
 
 	document.querySelector("#shadow_degree_chat").oninput = function(e){
 	    shadow_degree = document.querySelector("#shadow_degree_chat").value*3.6;
-	    document.querySelector(".room_div").style.setProperty('--shadow_degree', `${shadow_degree}deg`);
+	    document.querySelector(".chat-background-image").style.setProperty('--shadow_degree', `${shadow_degree}deg`);
 	}
 
 	document.querySelector("#shadow_degree_chat").onchange = function(e){
@@ -2732,7 +2737,9 @@ $("textarea").on("input", function () {
             document.querySelector("#myModal").style.display = "none";
         }
 
-	document.querySelector(".input_submit").onclick = function(){
+
+	document.querySelector(".input_submit").ontouchstart = document.querySelector(".input_submit").onclick = function(e){
+        e.preventDefault();
 	    if($(".textarea").is(':focus'))
             $(".textarea").focus();
 	    if(!isEmpty(document.querySelector(".textarea").value) || document.querySelector("#file").files.length)
@@ -3008,6 +3015,7 @@ document.documentElement.style.setProperty('--rooms_display', `flex`);
         });
 
         $(document).ready(adapt);
+        
 
 
 
@@ -3017,7 +3025,7 @@ document.documentElement.style.setProperty('--rooms_display', `flex`);
             document.documentElement.style.setProperty('--dark_mode_color', `${room_BG_color_hex}`);
             document.documentElement.style.setProperty('--slider_shadow_degree', `${room_BG_color_hex}`);
             document.documentElement.style.setProperty('--slider_shadow_degree_bubble', `${pSBC(0.5, room_BG_color_hex)}`);
-            document.querySelector(".room_div").setAttribute('style', '--myColor1: ' + pSBC(-0.6, room_BG_color_hex) + '; --myColor2: ' + pSBC(-0.4, room_BG_color_hex) + '; --myColor3: ' + room_BG_color_hex + ';')
+            document.querySelector(".chat-background-image").setAttribute('style', '--myColor1: ' + pSBC(-0.6, room_BG_color_hex) + '; --myColor2: ' + pSBC(-0.4, room_BG_color_hex) + '; --myColor3: ' + pSBC(-0.9, room_BG_color_hex) + ';')
 /*            document.querySelector(".darker").style.cssText = "background: red;";
             console.log(document.querySelector(".darker").style.cssText)
             for(el in document.querySelectorAll(".darker"))
@@ -3095,6 +3103,8 @@ function set_theme(theme_mode){
         document.documentElement.style.setProperty('--textarea_font', `${main_color}`);
         document.documentElement.style.setProperty('--attachment_tabs', `${attachment_tabs}`);
         document.documentElement.style.setProperty('--attachment_tabs_font', `${main_color}`);
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        themeMeta.content = "#FFF";
         document.querySelector(".settings").setAttribute("style", "background: #EEE;");
         document.querySelector("body").setAttribute("style", "background-color: #FFF;");
         document.querySelector("#opponent_title_name").setAttribute("style", "background-color: #FFF;");
@@ -3122,6 +3132,8 @@ function set_theme(theme_mode){
         document.documentElement.style.setProperty('--textarea_font', `${main_color}`);
         document.documentElement.style.setProperty('--attachment_tabs', `${attachment_tabs}`);
         document.documentElement.style.setProperty('--attachment_tabs_font', `${main_color}`);
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        themeMeta.content = "#1E1E1E";
         document.querySelector(".settings").setAttribute("style", "background: #222;");
         document.querySelector("body").setAttribute("style", "background-color: #0f0f0f;");
         document.querySelector("#opponent_title_name").setAttribute("style", "background-color: #1E1E1E;");
@@ -3144,12 +3156,12 @@ function set_theme(theme_mode){
 shadow_degree = getCookie("room_BG_shadow");
 document.querySelector("#color_chat_change").value = room_BG_color_hex = getCookie("room_BG_color_hex");
 document.querySelector("#shadow_degree_chat").value = shadow_degree/3.6;
-setTimeout(function(){document.querySelector(".room_div").style.setProperty('--shadow_degree', `${shadow_degree}deg`);},0)
+setTimeout(function(){document.querySelector(".chat-background-image").style.setProperty('--shadow_degree', `${shadow_degree}deg`);},0)
 document.documentElement.style.setProperty('--slider_shadow_degree', `${room_BG_color_hex}`);
 document.documentElement.style.setProperty('--slider_shadow_degree_bubble', `${pSBC(0.5, room_BG_color_hex)}`);
 document.documentElement.style.setProperty('--input_submit_color', `${room_BG_color_hex}`);
 document.documentElement.style.setProperty('--dark_mode_color', `${room_BG_color_hex}`);
-document.querySelector(".room_div").setAttribute('style', '--myColor1: ' + pSBC(-0.6, room_BG_color_hex) + '; --myColor2: ' + pSBC(-0.4, room_BG_color_hex) + '; --myColor3: ' + room_BG_color_hex + ';')
+document.querySelector(".chat-background-image").setAttribute('style', '--myColor1: ' + pSBC(-0.8, room_BG_color_hex) + '; --myColor2: ' + pSBC(-0.6, room_BG_color_hex) + '; --myColor3: ' + pSBC(-2.4, room_BG_color_hex) + ';');
 
 
 
@@ -3419,30 +3431,31 @@ prevNextIcon.forEach(icon => {
             let vw = window.innerWidth;
             allow = window.innerWidth - 400;
             if(vw <= 1700){
-                document.querySelector(".main_chat_window").setAttribute("style","width: " + allow + "px;");
-//                document.querySelector(".choose_list").setAttribute("style","max-width: 18vw;");
-//                document.querySelector(".choose_list").setAttribute("style","min-width: 18vw;");
+                document.querySelector(".main_chat_window").style.width = allow + "px";
             }
             if(vw <= 768){
-/*                document.querySelector('.temp_full').style.direction = "rtl";*/
                 document.querySelector(".go_home_page").setAttribute("style","display: unset;");
                 document.querySelector("#name").style.textIndent = "0px";
-                document.querySelector(".main_chat_window").setAttribute("style","width: 100vw;");
+                // document.querySelector(".main_chat_window").setAttribute("style","width: 100vw;");
+                document.querySelector(".main_chat_window").style.width = "100vw";
                 if(document.querySelector("#room_id").value != 0){
                     document.querySelector(".choose_list").setAttribute("style","display: none;");
                 }
                 else{
                     document.querySelector(".choose_list").setAttribute("style","display: flex;");
-                    document.querySelector(".main_chat_window").setAttribute("style","display: none");
+                    // document.querySelector(".main_chat_window").setAttribute("style","display: none");
+                    // document.querySelector(".main_chat_window").style.display = "none";
                 }
             }
             if(vw > 768){
                 document.querySelector(".go_home_page").setAttribute("style","display: none;");
-                document.querySelector(".main_chat_window").setAttribute("style","width: " + allow + "px;");
+                // document.querySelector(".main_chat_window").setAttribute("style","width: " + allow + "px;");
+                document.querySelector(".main_chat_window").style.width = allow + "px";
                 document.querySelector(".choose_list").setAttribute("style","display: flex;");
             }
             if(vw > 1700){
-                document.querySelector(".main_chat_window").setAttribute("style","width: 1200;");
+                // document.querySelector(".main_chat_window").setAttribute("style","width: 1200;");
+                document.querySelector(".main_chat_window").style.width = "1200px";
                 document.querySelector(".choose_list").setAttribute("style","max-width: 400;");
                 document.querySelector(".choose_list").setAttribute("style","min-width: 400;");
             }
@@ -3455,10 +3468,7 @@ prevNextIcon.forEach(icon => {
 jQuery(function($) {
 
   $(document).on("mousedown", ".users_full_form", function(e) {
-    const isSupported = () =>
-        'Notification' in window &&
-        'serviceWorker' in navigator &&
-        'PushManager' in window;
+
     if(isSupported() && Notification.permission !== "granted" && Notification.permission !== "denied"){
         Notification.requestPermission();
     }

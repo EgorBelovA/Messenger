@@ -4,8 +4,6 @@
   "description": "Messenger for chatting with friends",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [
