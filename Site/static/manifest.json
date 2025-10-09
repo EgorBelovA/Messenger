@@ -4,7 +4,6 @@
   "description": "Messenger for chatting with friends",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "scope": "/",
   "icons": [
     {

@@ -7,12 +7,24 @@
     <meta name="theme-color" />
     <meta
       name="viewport"
-      content="width=device-width,initial-scale=1 viewport-fit=cover"
+      content="width=device-width,initial-scale=1
+    viewport-fit=cover , shrink-to-fit=no"
     />
     <meta content="true" name="HandheldFriendly" />
     <meta content="width" name="MobileOptimized" />
     <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <link rel="stylesheet" href="{% static 'CSS/room.css' %}" />
+
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
     <script src="https://unpkg.com/swup@3.0.2/dist/Swup.umd.js"></script>
     <link
       rel="shortcut icon"
@@ -79,19 +91,24 @@
         </div>
         <div id="logout" class="settings_menu_div">Log Out</div>
       </div>
+      <div class="left-menu">
+        <div class="shadow-header"></div>
 
-      <div class="search_div" id="search">
-        <input
-          type="image"
-          src="{% static 'Images/hamburger_menu.png' %}"
-          class="dropbtn"
-        />
+        <div class="users_search" method="POST"></div>
 
-        <input class="search_field" name="term" placeholder="Search" />
-        <div class="search_cross">╳</div>
+        <div class="search_div" id="search">
+          <input
+            type="image"
+            src="{% static 'Images/hamburger_menu.png' %}"
+            class="dropbtn"
+          />
+          <div class="liquidGlass-effect"></div>
+          <div class="liquidGlass-tint"></div>
+          <div class="liquidGlass-shine"></div>
+          <input class="search_field" name="term" placeholder="Search" />
+          <div class="search_cross" style="display: none !important">╳</div>
+        </div>
       </div>
-
-      <div class="users_search" method="POST"></div>
     </div>
 
     <div id="create_new_group_room">
@@ -263,6 +280,9 @@
 
       <audio class="hidden_audio"><source type="audio/mpeg" /></audio>
 
+      <div class="overflow-visible-scroll">
+        <div class="overflow-display"></div>
+      </div>
       <div class="offset room_div room_body" id="display"></div>
 
       <form
@@ -444,3 +464,60 @@
   </body>
   <script src="{% static 'JS/room.js' %}"></script>
 </html>
+
+<svg style="display: none">
+  <filter
+    id="glass-distortion"
+    x="0%"
+    y="0%"
+    width="100%"
+    height="100%"
+    filterUnits="objectBoundingBox"
+  >
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="0.01 0.01"
+      numOctaves="1"
+      seed="5"
+      result="turbulence"
+    />
+    <!-- Seeds: 14, 17,  -->
+
+    <feComponentTransfer in="turbulence" result="mapped">
+      <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+      <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+      <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+    </feComponentTransfer>
+
+    <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+
+    <feSpecularLighting
+      in="softMap"
+      surfaceScale="5"
+      specularConstant="1"
+      specularExponent="100"
+      lighting-color="white"
+      result="specLight"
+    >
+      <fePointLight x="-200" y="-200" z="300" />
+    </feSpecularLighting>
+
+    <feComposite
+      in="specLight"
+      operator="arithmetic"
+      k1="0"
+      k2="1"
+      k3="1"
+      k4="0"
+      result="litImage"
+    />
+
+    <feDisplacementMap
+      in="SourceGraphic"
+      in2="softMap"
+      scale="150"
+      xChannelSelector="R"
+      yChannelSelector="G"
+    />
+  </filter>
+</svg>
