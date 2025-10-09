@@ -369,30 +369,81 @@ window.onload = function () {
   chatSocket_user = null;
   forcibly_close_the_socket = false;
 
-  //   document.querySelector('#display').onscroll = function (event) {
+  let send_div_height = document.querySelector('.send_div').clientHeight;
+  let opponent_title_name_height = document.querySelector(
+    '#opponent_title_name'
+  ).clientHeight;
+
+  document.documentElement.style.setProperty(
+    '--send_div_height',
+    `${send_div_height}px`
+  );
+
+  // Функция throttle
+  function throttle(func, delay) {
+    let timeoutId;
+    let lastExecTime = 0;
+
+    return function (...args) {
+      const currentTime = Date.now();
+
+      if (currentTime - lastExecTime >= delay) {
+        func.apply(this, args);
+        lastExecTime = currentTime;
+      } else {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          func.apply(this, args);
+          lastExecTime = Date.now();
+        }, delay - (currentTime - lastExecTime));
+      }
+    };
+  }
+  console.log(
+    'height: ' + document.querySelector('#opponent_title_name').clientHeight
+  );
+
+  // Оптимизированный обработчик скролла с throttle
+  document.querySelector('#display').onscroll = throttle(function (event) {
+    document.querySelector('.display_clone').scrollTop =
+      event.target.scrollTop +
+      window.innerHeight -
+      opponent_title_name_height -
+      send_div_height;
+  }, 50); // ~60fps
+
+  // Альтернативный вариант с requestAnimationFrame для максимальной плавности
+  //   function rafThrottle(func) {
+  //     let isRunning = false;
+
+  //     return function (...args) {
+  //       if (!isRunning) {
+  //         isRunning = true;
+  //         requestAnimationFrame(() => {
+  //           func.apply(this, args);
+  //           isRunning = false;
+  //         });
+  //       }
+  //     };
+  //   }
+
+  //   // Использование с requestAnimationFrame
+  //   document.querySelector('#display').onscroll = rafThrottle(function (event) {
+  //     document.querySelector('.display_clone').scrollTop =
+  //       event.target.scrollTop + window.innerHeight - 170;
+  //   });
+
+  //   document.querySelector('.overflow-visible-scroll').onscroll = function (
+  //     event
+  //   ) {
   //     document.querySelector('.overflow-display').style.minHeight = `${
   //       document.querySelector('#display').scrollHeight + 100
   //     }px`;
-  //     document.querySelector('.overflow-visible-scroll').scrollTop =
-  //       event.target.scrollTop;
+  //     // console.log(document.querySelector('#display').scrollHeight);
+  //     document.querySelector('#display').scrollTop = event.target.scrollTop;
+
+  //     // console.log(event.target.scrollTop);
   //   };
-  //   setTimeout(function () {
-  //     document.querySelector('.overflow-display').style.minHeight = `${
-  //       document.querySelector('#display').scrollHeight + 100
-  //     }px`;
-  //   }, 2000);
-
-  document.querySelector('.overflow-visible-scroll').onscroll = function (
-    event
-  ) {
-    document.querySelector('.overflow-display').style.minHeight = `${
-      document.querySelector('#display').scrollHeight + 100
-    }px`;
-    // console.log(document.querySelector('#display').scrollHeight);
-    document.querySelector('#display').scrollTop = event.target.scrollTop;
-
-    // console.log(event.target.scrollTop);
-  };
 
   document.querySelector('.choose_list').onscroll = function (event) {
     document
@@ -403,24 +454,67 @@ window.onload = function () {
       );
   };
 
-  document.querySelector('.textarea').onfocus = function (event) {
-    document.querySelector('.room_div').style.bottom = '380px';
-    //   setTimeout(function () {
-    //     document.querySelector('body').scrollIntoView({
-    //       behavior: 'smooth',
-    //       block: 'start',
-    //       inline: 'nearest',
-    //     });
-    //   }, 100);
-  };
-
   document.querySelector('.textarea').onblur = function (event) {
     document.querySelector('.room_div').style.bottom = '0px';
   };
 
-  document.querySelector('body').onscroll = function (event) {
+  document.querySelector('.choose_list').addEventListener('scrollend', (e) => {
+    console.log('scrollend');
+  });
+  //   document.addEventListener('scroll', (e) => {
+  //     if (document.documentElement.scrollTop > 0) {
+  //       document.documentElement.scrollTop = 0;
+  //     }
+  //   });
+  //   console.log(document.offsetHeight);
+  let send_div_height_focus_var = 0;
+  document.querySelector('.search_div').addEventListener('touchstart', (e) => {
+    console.log('touchstart');
+    this.focus();
+  });
+  function scrollWindowToZero() {
     window.scrollTo(0, 0);
-  };
+  }
+
+  const fullWindowHeight = window.innerHeight;
+
+  // Check if visualViewport is supported
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', (event) => {
+      // Remove existing listener to prevent duplicates
+      document.removeEventListener('scroll', scrollWindowToZero);
+
+      // Add scroll listener with proper options
+      document.addEventListener('scroll', scrollWindowToZero, {
+        passive: false,
+        once: true,
+      });
+
+      const searchDiv = document.querySelector('.search_div');
+      if (searchDiv) {
+        searchDiv.style.setProperty(
+          '--search_div_height_focus',
+          `${fullWindowHeight - event.target.height}px`
+        );
+      }
+
+      document.documentElement.style.setProperty(
+        '--send_div_height_focus',
+        `${fullWindowHeight - event.target.height}px`
+      );
+
+      send_div_height_focus_var = fullWindowHeight - event.target.height;
+    });
+  }
+
+  document.querySelector('.textarea').addEventListener('focus', (e) => {
+    document.querySelector('.room_div').classList.add('focus');
+  });
+
+  document.querySelector('.textarea').addEventListener('blur', (e) => {
+    document.querySelector('.room_div').classList.remove('focus');
+  });
+
   const CURRENT_VERSION = '1.3.2';
   const lastVersion = localStorage.getItem('app_version');
 
@@ -2665,6 +2759,14 @@ window.onload = function () {
         });
     }
 
+    // Clone with events and data (true, true)
+    // console.log('display', document.querySelector('#display'));
+    // Копируем HTML из #display в .display_clone
+    setTimeout(function () {
+      document.querySelector('.display_clone').innerHTML =
+        document.querySelector('#display').innerHTML;
+    }, 500);
+
     if (load_check) load_check = 0;
   }
 
@@ -2954,14 +3056,14 @@ window.onload = function () {
   shadow_degree = 0;
 
   document.querySelector('#shadow_degree_chat').oninput = function (e) {
-    shadow_degree = document.querySelector('#shadow_degree_chat').value * 3.6;
+    shadow_degree = document.querySelector('#shadow_degree_chat').value;
     document
       .querySelector('.chat-background-image')
       .style.setProperty('--shadow_degree', `${shadow_degree}deg`);
   };
 
   document.querySelector('#shadow_degree_chat').onchange = function (e) {
-    setCookie('room_BG_shadow', this.value * 3.6, 7);
+    setCookie('room_BG_shadow', this.value, 7);
   };
 
   //	document.querySelector("#chat_background_image").oninput = function(e){
@@ -3558,6 +3660,10 @@ window.onload = function () {
             pSBC(-0.9, room_BG_color_hex) +
             ';'
         );
+      document.documentElement.style.setProperty(
+        '--selected_chat_color',
+        `${pSBC(-0.8, room_BG_color_hex)}`
+      );
       /*            document.querySelector(".darker").style.cssText = "background: red;";
             console.log(document.querySelector(".darker").style.cssText)
             for(el in document.querySelectorAll(".darker"))
@@ -3731,7 +3837,7 @@ window.onload = function () {
         .setAttribute('style', 'background-color: #1E1E1E;');
       document
         .querySelector('.search_div')
-        .setAttribute('style', 'background-color: #1E1E1E80;');
+        .setAttribute('style', 'background-color: #1E1E1E99;');
       //   document
       //     .querySelector('.search_field')
       //     .setAttribute('style', 'background-color: rgba(41,49,51);');
@@ -3751,7 +3857,7 @@ window.onload = function () {
   shadow_degree = getCookie('room_BG_shadow');
   document.querySelector('#color_chat_change').value = room_BG_color_hex =
     getCookie('room_BG_color_hex');
-  document.querySelector('#shadow_degree_chat').value = shadow_degree / 3.6;
+  document.querySelector('#shadow_degree_chat').value = shadow_degree;
   setTimeout(function () {
     document
       .querySelector('.chat-background-image')
@@ -3785,6 +3891,10 @@ window.onload = function () {
         pSBC(-2.4, room_BG_color_hex) +
         ';'
     );
+  document.documentElement.style.setProperty(
+    '--selected_chat_color',
+    `${pSBC(-0.8, room_BG_color_hex)}`
+  );
 
   click = true;
 
@@ -4101,7 +4211,7 @@ function adapt() {
 }
 
 jQuery(function ($) {
-  $(document).on('mousedown', '.users_full_form', function (e) {
+  $(document).on('mousedown touchstart', '.users_full_form', function (e) {
     if (
       isSupported() &&
       Notification.permission !== 'granted' &&

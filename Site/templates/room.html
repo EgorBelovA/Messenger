@@ -8,7 +8,7 @@
     <meta
       name="viewport"
       content="width=device-width,initial-scale=1
-    viewport-fit=cover , shrink-to-fit=no"
+    viewport-fit=cover , shrink-to-fit=no, user-scalable=0"
     />
     <meta content="true" name="HandheldFriendly" />
     <meta content="width" name="MobileOptimized" />
@@ -94,8 +94,6 @@
       <div class="left-menu">
         <div class="shadow-header"></div>
 
-        <div class="users_search" method="POST"></div>
-
         <div class="search_div" id="search">
           <input
             type="image"
@@ -108,6 +106,7 @@
           <input class="search_field" name="term" placeholder="Search" />
           <div class="search_cross" style="display: none !important">╳</div>
         </div>
+        <div id="users_search" class="users_search" method="POST"></div>
       </div>
     </div>
 
@@ -171,7 +170,7 @@
           id="shadow_degree_chat"
           type="range"
           min="0"
-          max="100"
+          max="360"
           step="1"
           value="0"
         />
@@ -280,9 +279,10 @@
 
       <audio class="hidden_audio"><source type="audio/mpeg" /></audio>
 
-      <div class="overflow-visible-scroll">
+      <!-- <div class="overflow-visible-scroll">
         <div class="overflow-display"></div>
-      </div>
+      </div> -->
+      <div class="display_clone"></div>
       <div class="offset room_div room_body" id="display"></div>
 
       <form
