@@ -1,5 +1,4 @@
 const controller = new AbortController();
-const signal = controller.signal;
 
 const isSupported = () =>
   'Notification' in window &&
@@ -42,7 +41,7 @@ function go_home_page_func() {
   load_check = 1;
   load_photo_check = 0;
 
-  // document.querySelector(".search_field").focus();
+  //   document.querySelector(".search_field").focus();
 
   $('#display').empty();
   document.querySelector('#post-form').classList.add('hidden');
@@ -348,6 +347,8 @@ document.querySelector('#logout').onclick = function () {
 };
 
 window.onload = function () {
+  const signal = controller.signal;
+
   ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
   room = document.getElementById('room').value;
   play_check = 1;
@@ -467,44 +468,63 @@ window.onload = function () {
   //     }
   //   });
   //   console.log(document.offsetHeight);
-  let send_div_height_focus_var = 0;
-  document.querySelector('.search_div').addEventListener('touchstart', (e) => {
-    console.log('touchstart');
-    this.focus();
-  });
+  //   let send_div_height_focus_var = 0;
+  //   document.querySelector('.search_div').addEventListener('touchstart', (e) => {
+  //     console.log('touchstart');
+  //     this.focus();
+  //   });
   function scrollWindowToZero() {
+    console.log('scrollWindowToZero');
     window.scrollTo(0, 0);
   }
 
-  const fullWindowHeight = window.innerHeight;
+  //   let fullWindowHeight = window.innerHeight;
 
-  // Check if visualViewport is supported
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', (event) => {
-      // Remove existing listener to prevent duplicates
-      document.removeEventListener('scroll', scrollWindowToZero);
+  function viewportResize(event) {
+    // Declare variables properly
+    const fullWindowHeight = window.innerHeight;
+    const send_div_height_focus_var = event
+      ? fullWindowHeight - event.target.height
+      : 0;
 
-      // Add scroll listener with proper options
-      document.addEventListener('scroll', scrollWindowToZero, {
-        passive: false,
-        once: true,
-      });
+    const isChrome =
+      navigator.userAgent.indexOf('Chrome') > -1 &&
+      navigator.userAgent.indexOf('Edge') == -1;
+    const isAndroid = navigator.userAgent.indexOf('Android') > -1;
 
-      const searchDiv = document.querySelector('.search_div');
-      if (searchDiv) {
-        searchDiv.style.setProperty(
-          '--search_div_height_focus',
-          `${fullWindowHeight - event.target.height}px`
-        );
-      }
+    const search_div_height_focus_var = event
+      ? fullWindowHeight -
+        event.target.height +
+        (isAndroid && isChrome ? 90 : 0)
+      : 0;
 
-      document.documentElement.style.setProperty(
-        '--send_div_height_focus',
-        `${fullWindowHeight - event.target.height}px`
+    console.log('send_div_height_focus_var', search_div_height_focus_var);
+
+    // Remove existing scroll listener to avoid duplicates
+    document.removeEventListener('scroll', scrollWindowToZero);
+
+    // Add scroll listener with proper options
+    document.addEventListener('scroll', scrollWindowToZero);
+
+    // Safely update styles only if elements exist
+    const searchDiv = document.querySelector('.search_div');
+    if (searchDiv) {
+      searchDiv.style.setProperty(
+        '--search_div_height_focus',
+        `${search_div_height_focus_var}px`
       );
+    }
 
-      send_div_height_focus_var = fullWindowHeight - event.target.height;
-    });
+    document.documentElement.style.setProperty(
+      '--send_div_height_focus',
+      `${send_div_height_focus_var}px`
+    );
+  }
+
+  setTimeout(viewportResize, 100);
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', viewportResize);
   }
 
   document.querySelector('.textarea').addEventListener('focus', (e) => {
@@ -3585,6 +3605,25 @@ window.onload = function () {
   };
 
   document.documentElement.style.setProperty('--rooms_display', `flex`);
+  document.querySelector('.search_field').onfocus = function (e) {
+    console.log('focusnow');
+    // setTimeout(function () {
+    //   console.log('1s');
+    //   // document.querySelector('.search_field').focus({ preventScroll: true });
+    //   window.scrollTo(0, 100);
+    // }, 1000);
+    // e.preventDefault();
+    // e.target.focus({ preventScroll: true });
+    // document.documentElement.style.setProperty('--rooms_display', `none`);
+  };
+
+  document.querySelector('.search_field').onblur = function () {
+    if (
+      document.querySelector('.search_field').value.replace(/\s/g, '').length ==
+      0
+    )
+      document.documentElement.style.setProperty('--rooms_display', `flex`);
+  };
 
   document.querySelector('.search_field').oninput = function () {
     if ($('.search_field').val().replace(/\s/g, '').length) {
@@ -3594,7 +3633,7 @@ window.onload = function () {
         getUsers(document.querySelector('.search_field').value);
       }
     } else {
-      document.documentElement.style.setProperty('--rooms_display', `flex`);
+      //   document.documentElement.style.setProperty('--rooms_display', `flex`);
       document
         .querySelectorAll('.users_full_form.search')
         .forEach(function (e) {
@@ -3605,6 +3644,7 @@ window.onload = function () {
 
   document.querySelector('.search_cross').onmousedown = function () {
     document.querySelector('.search_field').value = '';
+    // document.documentElement.style.setProperty('--rooms_display', `flex`);
   };
 
   document.getElementById('file').addEventListener('change', function (e) {
@@ -3900,6 +3940,10 @@ window.onload = function () {
 
   $('.dropbtn').click(function () {
     document.querySelector('.settings_menu').classList.add('active');
+  });
+
+  $('.reloadLocationButton').click(function () {
+    location.reload();
   });
 
   document
