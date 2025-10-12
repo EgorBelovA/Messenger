@@ -91,6 +91,7 @@
           </label>
         </div>
         <div id="logout" class="settings_menu_div">Log Out</div>
+        <div class="reloadLocationButton settings_menu_div">Clear Cache</div>
       </div>
       <div class="left-menu">
         <div class="shadow-header"></div>
@@ -101,7 +102,7 @@
             src="{% static 'Images/hamburger_menu.png' %}"
             class="dropbtn"
           />
-          <div class="reloadLocationButton">Rld</div>
+
           <div class="liquidGlass-effect"></div>
           <div class="liquidGlass-tint"></div>
           <div class="liquidGlass-shine"></div>
@@ -261,7 +262,11 @@
       <div id="opponent_title_name">
         {% csrf_token %}
         <div class="go_home_page" onclick="go_home_page_func()"><</div>
-        <input type="reset" id="name" value="{{users}}" />
+        <!-- <input type="reset" id="name" value="{{users}}" /> -->
+        <div id="name"></div>
+        <div class="opponent_photo_div">
+          <img class="user-info-avatar" src="" class="user-info-avatar" />
+        </div>
         <input type="hidden" id="username_id" value="{{username.id}}" />
       </div>
 
@@ -285,7 +290,9 @@
         <div class="overflow-display"></div>
       </div> -->
       <div class="display_clone"></div>
-      <div class="offset room_div room_body" id="display"></div>
+      <div class="scroll_enable">
+        <div class="offset room_div room_body" id="display"></div>
+      </div>
 
       <form
         id="post-form"

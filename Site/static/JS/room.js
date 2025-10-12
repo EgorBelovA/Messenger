@@ -35,9 +35,11 @@ function close_audio_div_func() {
 
 function go_home_page_func() {
   room = 0;
+  document.documentElement.style.setProperty('--swipe-margi-inactive', `100%`);
   document.querySelector('#room_id').value = room;
   document.querySelector('#name').value = '';
-  window.location.hash = room;
+  //   window.location.hash = room;
+  window.history.replaceState(null, null, `#${room}`);
   load_check = 1;
   load_photo_check = 0;
 
@@ -348,6 +350,7 @@ document.querySelector('#logout').onclick = function () {
 
 window.onload = function () {
   const signal = controller.signal;
+  window.history.replaceState(null, null, null);
 
   ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
   room = document.getElementById('room').value;
@@ -380,7 +383,6 @@ window.onload = function () {
     `${send_div_height}px`
   );
 
-  // Функция throttle
   function throttle(func, delay) {
     let timeoutId;
     let lastExecTime = 0;
@@ -400,17 +402,102 @@ window.onload = function () {
       }
     };
   }
-  console.log(
-    'height: ' + document.querySelector('#opponent_title_name').clientHeight
-  );
 
-  // Оптимизированный обработчик скролла с throttle
+  var startX = 0;
+  var startY = 0;
+  var startTime = 0;
+  var swipeThreshold = window.innerWidth / 2;
+  var velocityThreshold = 200;
+  var deltaX = 0;
+  var deltaY = 0;
+  var isSwiping = false;
+
+  document.querySelector('#display').ontouchstart = function (event) {
+    deltaX = 0;
+    deltaY = 0;
+    startX = event.changedTouches[0].clientX;
+    startY = event.changedTouches[0].clientY;
+    startTime = Date.now();
+    isSwiping = false;
+    document.documentElement.style.setProperty('--swipe-margin', `${0}px`);
+    document.querySelector('.main_chat_window').classList.add('swipe');
+    document
+      .querySelector('#display')
+      .addEventListener('touchmove', handleSwipeDirection);
+  };
+
+  document.querySelector('#display').ontouchend = function (event) {
+    var endTime = Date.now();
+    var duration = endTime - startTime;
+    var shouldSwipe = false;
+
+    currentX = event.changedTouches[0].clientX;
+    currentY = event.changedTouches[0].clientY;
+    deltaX = currentX - startX;
+    deltaY = currentY - startY;
+
+    document.querySelector('#display').classList.remove('swipe');
+    document.querySelector('.main_chat_window').classList.remove('swipe');
+    // console.log(duration);
+    if (isSwiping && deltaX > 0) {
+      if (duration <= velocityThreshold) {
+        shouldSwipe = true;
+      } else if (deltaX > swipeThreshold) {
+        shouldSwipe = true;
+      }
+
+      if (shouldSwipe) {
+        sender_ajax.abort();
+        window.history.replaceState(null, null, `#${0}`);
+        hashChange();
+      }
+    }
+
+    document
+      .querySelector('#display')
+      .removeEventListener('touchmove', handleSwipeDirection);
+    isSwiping = false;
+  };
+
+  function handleSwipeDirection(event) {
+    var currentTime = Date.now();
+    var duration = currentTime - startTime;
+
+    currentX = event.changedTouches[0].clientX;
+    currentY = event.changedTouches[0].clientY;
+    deltaX = currentX - startX;
+    deltaY = currentY - startY;
+
+    if (!isSwiping) {
+      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        isSwiping = true;
+        document.querySelector('#display').classList.add('swipe');
+      } else if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+        document.querySelector('.main_chat_window').classList.remove('swipe');
+        return;
+      }
+    }
+
+    if (isSwiping && deltaX > 0) {
+      event.preventDefault();
+
+      // Добавляем инерцию на основе скорости
+      var velocity = Math.abs(deltaX) / Math.max(duration, 1);
+      var extraMargin = velocity * 10; // дополнительное смещение для быстрых свайпов
+
+      document.documentElement.style.setProperty(
+        '--swipe-margin',
+        `${deltaX + extraMargin}px`
+      );
+    }
+  }
+
   document.querySelector('#display').onscroll = throttle(function (event) {
-    document.querySelector('.display_clone').scrollTop =
-      event.target.scrollTop +
-      window.innerHeight -
-      opponent_title_name_height -
-      send_div_height;
+    // document.querySelector('.display_clone').scrollTop =
+    //   event.target.scrollTop +
+    //   window.innerHeight -
+    //   opponent_title_name_height -
+    //   send_div_height;
   }, 50); // ~60fps
 
   // Альтернативный вариант с requestAnimationFrame для максимальной плавности
@@ -474,8 +561,8 @@ window.onload = function () {
   //     this.focus();
   //   });
   function scrollWindowToZero() {
-    console.log('scrollWindowToZero');
-    window.scrollTo(0, 0);
+    // console.log('scrollWindowToZero');
+    // window.scrollTo(0, 0);
   }
 
   //   let fullWindowHeight = window.innerHeight;
@@ -614,9 +701,9 @@ window.onload = function () {
       document.querySelector('#user_settings_email_div').textContent =
         data.user[0].email;
 
-      document
-        .querySelector('#user_settings_image_div')
-        .appendChild(avatar.cloneNode(true));
+      //   document
+      //     .querySelector('#user_settings_image_div')
+      //     .appendChild(avatar.cloneNode(true));
 
       function connect_user() {
         let url_user = `${ws_protocol}${
@@ -790,9 +877,10 @@ window.onload = function () {
                       e.classList.remove('active');
                     });
                   this.classList.add('active');
-                  window.location.hash =
-                    document.querySelector('#room_id').value;
+                  //   window.location.hash =
+                  //     document.querySelector('#room_id').value;
                   room = document.querySelector('#room_id').value;
+                  window.history.replaceState(null, null, `#${room}`);
 
                   check_redirect = 0;
                   load_check = 1;
@@ -850,7 +938,7 @@ window.onload = function () {
                       .appendChild(shadow);
                   }
                 } else
-                  document.querySelector('#display').scrollTo({
+                  document.querySelector('.scroll_enable').scrollTo({
                     top: document.querySelector('#display').scrollHeight,
                     behavior: 'smooth',
                   });
@@ -1138,7 +1226,7 @@ window.onload = function () {
                         .appendChild(shadow);
                     }
                   } else
-                    document.querySelector('#display').scrollTo({
+                    document.querySelector('.scroll_enable').scrollTo({
                       top: document.querySelector('#display').scrollHeight,
                       behavior: 'smooth',
                     });
@@ -1202,14 +1290,14 @@ window.onload = function () {
       .querySelector('#opponent_title_name')
       .setAttribute('style', 'display: flex');
     document.querySelector('.send_div').setAttribute('style', 'display: flex');
-    if (window.screen.availWidth <= 576) {
-      document
-        .querySelector('.choose_list')
-        .setAttribute('style', 'display: none');
-      document
-        .querySelector('.main_chat_window')
-        .setAttribute('style', 'width: 99vw');
-    }
+    // if (window.screen.availWidth <= 576) {
+    //   document
+    //     .querySelector('.choose_list')
+    //     .setAttribute('style', 'display: none');
+    //   document
+    //     .querySelector('.main_chat_window')
+    //     .setAttribute('style', 'width: 99vw');
+    // }
   }
 
   //document.querySelector("#select_chat_to_start").style.opacity = 1;
@@ -1670,7 +1758,7 @@ window.onload = function () {
             };
 
           if (auto_scroll) {
-            document.querySelector('.room_body').scrollTo({
+            document.querySelector('.scroll_enable').scrollTo({
               top: document.querySelector('.room_body').scrollHeight,
               behavior: 'smooth',
             });
@@ -1681,7 +1769,7 @@ window.onload = function () {
             .addEventListener('click', function (event) {
               event.preventDefault();
               auto_scroll = true;
-              document.querySelector('.room_body').scrollTo({
+              document.querySelector('.scroll_enable').scrollTo({
                 behavior: 'smooth',
                 top: document.querySelector('.room_body').scrollHeight,
               });
@@ -2015,23 +2103,38 @@ window.onload = function () {
           list = document.querySelector('.users_search');
 
           users_list.onmousedown = function (event) {
+            shouldSwipe = false;
             event.preventDefault();
+            document.documentElement.style.setProperty(
+              '--swipe-margi-inactive',
+              `0%`
+            );
             if (room != this.getElementsByTagName('input')[1].value) {
               //                                document.querySelector("#select_chat_to_start").style.display = "none";
               block_date_dict = [];
               sender_ajax.abort();
               document.querySelector('#room_id').value =
                 this.getElementsByTagName('input')[1].value;
-              document.querySelector('#name').value =
+              document.querySelector('#name').textContent =
                 this.querySelector('.users').textContent;
+              sourceElement = this.querySelector('.user-info-avatar');
+              targetElement = document
+                .querySelector('.opponent_photo_div')
+                .querySelector('.user-info-avatar');
+              if (sourceElement && targetElement) {
+                clonedElement = sourceElement.cloneNode(true);
+                targetElement.replaceWith(clonedElement);
+              }
               document
                 .querySelectorAll('.users_full_form')
                 .forEach(function (e) {
                   e.classList.remove('active');
                 });
               this.classList.add('active');
-              window.location.hash = document.querySelector('#room_id').value;
+              //   window.location.hash = document.querySelector('#room_id').value;
+
               room = document.querySelector('#room_id').value;
+              window.history.replaceState(null, null, `#${room}`);
 
               check_redirect = 0;
               load_check = 1;
@@ -2089,7 +2192,7 @@ window.onload = function () {
                   .appendChild(shadow);
               }
             } else
-              document.querySelector('#display').scrollTo({
+              document.querySelector('.scroll_enable').scrollTo({
                 top: document.querySelector('#display').scrollHeight,
                 behavior: 'smooth',
               });
@@ -2119,8 +2222,14 @@ window.onload = function () {
     });
   }
 
-  window.onhashchange = function (e) {
-    console.log('hash', window.location.hash.slice(1));
+  document.querySelector('.scroll_enable').ontouchstart = function (event) {
+    console.log('touchstart');
+  };
+
+  function hashChange() {
+    // e.preventDefault;
+    // console.log('hash', window.location.hash.slice(1));
+
     if (
       window.location.hash.slice(1) != '0' &&
       window.location.hash.slice(1) != ''
@@ -2129,7 +2238,7 @@ window.onload = function () {
     } else {
       go_home_page_func();
     }
-  };
+  }
 
   // window.onpopstate = function(event) {
   //     window.location.hash = "0";
@@ -2234,7 +2343,7 @@ window.onload = function () {
     document.querySelector('#opponent_title_name').style.display = 'flex';
     document.querySelector('.send_div').style.display = 'flex';
     all_messages_dives = [];
-    console.log(response);
+    // console.log(response);
     last_read = null;
 
     messages_response = response;
@@ -2252,11 +2361,10 @@ window.onload = function () {
       scroll_more = 0;
     }
 
-    console.log(check_mes_update - 1, mes_amount - 25);
-
-    //				for (var key = check_mes_update - 1; key >= mes_amount - 25; --key) {
+    // for (var key = check_mes_update - 1; key >= mes_amount - 25; --key) {
     for (var key = messages.length - 1; key >= 0; --key) {
       block_date = document.createElement('div');
+      //   console.log(key);
 
       if (
         this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) &&
@@ -2733,10 +2841,10 @@ window.onload = function () {
 
       all_messages[temp.getAttribute('value')] = temp_full;
 
-      enableDoubleTap(temp, function () {
+      enableDoubleTap(temp_full, function () {
         chatSocket[room].send(
           JSON.stringify({
-            message_id: this.getAttribute('value'),
+            message_id: this.firstChild.getAttribute('value'),
             type: 'message_reaction',
             room_id: room,
             contacts_id: document.querySelector('#username_id').value,
@@ -2774,7 +2882,7 @@ window.onload = function () {
           inline: 'nearest',
         });
       else
-        document.querySelector('#display').scrollTo({
+        document.querySelector('.scroll_enable').scrollTo({
           top: document.querySelector('#display').scrollHeight,
         });
     }
@@ -2822,7 +2930,7 @@ window.onload = function () {
     .querySelector('.scroll_down')
     .addEventListener('click', function (event) {
       event.preventDefault();
-      document.querySelector('#display').scrollTo({
+      document.querySelector('.scroll_enable').scrollTo({
         behavior: 'smooth',
         top: document.querySelector('#display').scrollHeight,
       });
@@ -2924,41 +3032,43 @@ window.onload = function () {
   };
 
   prev_scroll_height = 0;
-  document.querySelector('#display').addEventListener('scroll', function () {
-    if (
-      document.querySelector('.room_body').clientHeight +
-        document.querySelector('.room_body').scrollTop ==
-      document.querySelector('.room_body').scrollHeight
-    )
-      scroll_appear = false;
-    if (
-      !scroll_appear &&
-      document.querySelector('.room_body').scrollHeight -
-        document.querySelector('.room_body').scrollTop >
-        document.querySelector('.room_body').clientHeight * 1.5
-    ) {
+  document
+    .querySelector('.scroll_enable')
+    .addEventListener('scroll', function () {
       if (
-        !document.querySelector('.scroll_down').classList.contains('active')
+        document.querySelector('.scroll_enable').clientHeight +
+          document.querySelector('.scroll_enable').scrollTop ==
+        document.querySelector('.scroll_enable').scrollHeight
+      )
+        scroll_appear = false;
+      if (
+        !scroll_appear &&
+        document.querySelector('.scroll_enable').scrollHeight -
+          document.querySelector('.scroll_enable').scrollTop >
+          document.querySelector('.scroll_enable').clientHeight + 50
       ) {
-        document.querySelector('.scroll_down').classList.add('active');
-        console.log('SCROLLED');
-        scroll_more += 25;
-        auto_scroll = false;
-        // if(check_mes_update - scroll_more > 0)
-        // message_initialization(messages_response);
+        if (
+          !document.querySelector('.scroll_down').classList.contains('active')
+        ) {
+          document.querySelector('.scroll_down').classList.add('active');
+          console.log('SCROLLED');
+          scroll_more += 25;
+          auto_scroll = false;
+          // if(check_mes_update - scroll_more > 0)
+          // message_initialization(messages_response);
+        }
+      } else if (
+        document.querySelector('.scroll_down').classList.contains('active')
+      ) {
+        document.querySelector('.scroll_down').classList.remove('active');
       }
-    } else if (
-      document.querySelector('.scroll_down').classList.contains('active')
-    ) {
-      document.querySelector('.scroll_down').classList.remove('active');
-    }
-    /*                                if(document.querySelector(".room_body").scrollTop < document.querySelector(".room_body").scrollHeight*0.1){
+      /*                                if(document.querySelector(".room_body").scrollTop < document.querySelector(".room_body").scrollHeight*0.1){
                                     load_check = 0;
                                     check_mes_update += 25;
                                     mes_amount += 25;
                                     sender();
                                 }*/
-  });
+    });
 
   function select_messages(event, click_check = true) {
     evnt = event.target.closest('.temp_full');
@@ -4217,13 +4327,14 @@ function adapt() {
     document
       .querySelector('.go_home_page')
       .setAttribute('style', 'display: unset;');
+    document.querySelector('.opponent_photo_div').style.display = 'unset';
     document.querySelector('#name').style.textIndent = '0px';
     // document.querySelector(".main_chat_window").setAttribute("style","width: 100vw;");
     document.querySelector('.main_chat_window').style.width = '100vw';
     if (document.querySelector('#room_id').value != 0) {
-      document
-        .querySelector('.choose_list')
-        .setAttribute('style', 'display: none;');
+      //   document
+      //     .querySelector('.choose_list')
+      //     .setAttribute('style', 'display: none;');
     } else {
       document
         .querySelector('.choose_list')
@@ -4236,6 +4347,7 @@ function adapt() {
     document
       .querySelector('.go_home_page')
       .setAttribute('style', 'display: none;');
+    document.querySelector('.opponent_photo_div').style.display = 'none';
     // document.querySelector(".main_chat_window").setAttribute("style","width: " + allow + "px;");
     document.querySelector('.main_chat_window').style.width = allow + 'px';
     document
@@ -4255,7 +4367,7 @@ function adapt() {
 }
 
 jQuery(function ($) {
-  $(document).on('mousedown touchstart', '.users_full_form', function (e) {
+  $(document).on('mousedown', '.users_full_form', function (e) {
     if (
       isSupported() &&
       Notification.permission !== 'granted' &&
