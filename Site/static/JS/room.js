@@ -35,7 +35,7 @@ function close_audio_div_func() {
 
 function go_home_page_func() {
   room = 0;
-  document.documentElement.style.setProperty('--swipe-margi-inactive', `100%`);
+  document.documentElement.style.setProperty('--swipe-margin-inactive', `100%`);
   document.querySelector('#room_id').value = room;
   document.querySelector('#name').value = '';
   //   window.location.hash = room;
@@ -1620,7 +1620,7 @@ window.onload = function () {
 
           let vw = window.innerWidth;
           if (vw <= 768) {
-            temp_full.style.direction = 'rtl';
+            temp.classList.add('right');
             if (messages.user != document.querySelector('#username_id').value) {
               temp_full.style.direction = 'ltr';
             }
@@ -2142,9 +2142,8 @@ window.onload = function () {
 
       users_list.onmousedown = function (event) {
         event.preventDefault();
-
         document.documentElement.style.setProperty(
-          '--swipe-margi-inactive',
+          '--swipe-margin-inactive',
           `0%`
         );
         if (room != this.getElementsByTagName('input')[1].value) {
@@ -2770,7 +2769,7 @@ window.onload = function () {
           document.querySelector('#username_id').value
         ) {
           temp_full.style.direction = 'ltr';
-        } else temp_full.style.direction = 'rtl';
+        } else temp.classList.add('right');
       }
 
       temp_full.appendChild(temp);
@@ -2915,10 +2914,10 @@ window.onload = function () {
     // Clone with events and data (true, true)
     // console.log('display', document.querySelector('#display'));
     // Копируем HTML из #display в .display_clone
-    setTimeout(function () {
-      document.querySelector('.display_clone').innerHTML =
-        document.querySelector('#display').innerHTML;
-    }, 500);
+    // setTimeout(function () {
+    //   document.querySelector('.display_clone').innerHTML =
+    //     document.querySelector('#display').innerHTML;
+    // }, 500);
 
     if (load_check) load_check = 0;
   }
@@ -3059,7 +3058,7 @@ window.onload = function () {
   prev_scroll_height = 0;
   document
     .querySelector('.scroll_enable')
-    .addEventListener('scroll', function () {
+    .addEventListener('scroll', function (event) {
       if (
         document.querySelector('.scroll_enable').clientHeight +
           document.querySelector('.scroll_enable').scrollTop ==
@@ -4349,7 +4348,6 @@ function adapt() {
     document
       .querySelector('.go_home_page')
       .setAttribute('style', 'display: unset;');
-    document.querySelector('.opponent_photo_div').style.display = 'unset';
     document.querySelector('#name').style.textIndent = '0px';
     // document.querySelector(".main_chat_window").setAttribute("style","width: 100vw;");
     document.querySelector('.main_chat_window').style.width = '100vw';
@@ -4369,7 +4367,6 @@ function adapt() {
     document
       .querySelector('.go_home_page')
       .setAttribute('style', 'display: none;');
-    document.querySelector('.opponent_photo_div').style.display = 'none';
     // document.querySelector(".main_chat_window").setAttribute("style","width: " + allow + "px;");
     document.querySelector('.main_chat_window').style.width = allow + 'px';
     document

@@ -44,8 +44,8 @@ body {
 
   /* min-height: 100vh; */
   /* min-height: -webkit-fill-available; */
-  /* overflow: hidden; */
 
+  overflow: hidden;
   height: 100%;
 }
 
@@ -61,18 +61,10 @@ body {
   /*    font-family: "Roboto";*/
   font-family: 'Roboto', sans-serif;
   min-height: 100vh;
-
   background-size: cover;
   background-attachment: fixed;
   background-color: rgb(15, 15, 15);
   transition: background-color 1s;
-}
-
-body.room {
-  overflow: hidden;
-  position: fixed;
-  touch-action: none;
-  -ms-touch-action: none;
 }
 
 body.selection {
@@ -237,9 +229,11 @@ select {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 :root {
-  --swipe-margi-inactive: 100%;
+  --swipe-margin-inactive: 100%;
 }
+
 .main_chat_window {
   height: calc(var(--vh, 1vh) * 100);
   width: 1300px;
@@ -247,13 +241,13 @@ select {
   justify-content: space-between;
   flex-direction: column;
   flex-wrap: nowrap;
-  transform: translateX(0);
   overflow: hidden;
   touch-action: none;
   -ms-touch-action: none;
-  transform: translateX(0px);
-  z-index: 9999;
+  transform: translateX(0);
+  z-index: 999;
   will-change: transform;
+  position: relative;
 }
 
 .scroll_enable.swipe {
@@ -261,7 +255,6 @@ select {
 }
 
 .main_chat_window.swipe {
-  /* pointer-events: none; */
   will-change: transform;
   transform: translateX(var(--swipe-margin));
   transition: transform 0s;
@@ -416,7 +409,7 @@ select {
   );
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   /* justify-content: space-between; */
   height: 50px;
@@ -444,9 +437,11 @@ select {
   float: left;
   color: #fff;
   transition: padding 1s, color 1s;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  max-width: 70%;
+  overflow: hidden;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  order: 2;
 }
 
 .users_search {
@@ -624,11 +619,6 @@ select {
   position: relative;
 
   /* transition: color 1s, background 1s, opacity 1s; */
-}
-
-.message.active {
-  opacity: 1;
-  transition: opacity 0.3s;
 }
 
 .darker {
@@ -1258,20 +1248,6 @@ html.is-animating .transition-fade {
   display: none;
 }
 
-.chat_name {
-}
-
-.room_last_message_date {
-  color: rgb(150, 150, 150);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  text-overflow: ellipsis;
-  font-size: 14px;
-  overflow-wrap: break-word;
-  overflow: hidden;
-}
-
 .users_full_form {
   display: flex;
   flex-direction: row;
@@ -1325,41 +1301,69 @@ html.is-animating .transition-fade {
 }
 
 .users {
-  height: 20px;
-  border: 0px;
-  font-size: 18px;
-  overflow: hidden;
-  color: var(--user_font_color);
-  text-align: left;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  transition: color 1s;
-  min-width: 100%;
-  text-overflow: ellipsis;
-
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+
+  height: 20px;
+  min-width: 100%;
+  max-width: 100%;
+
+  font-size: 18px;
+  color: var(--user_font_color);
+  text-align: left;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+
+  border: 0;
+  transition: color 1s;
+  overflow: hidden;
 
   padding-bottom: var(--mask-height);
-  --mask-image-content: linear-gradient(
+  -webkit-mask-image: linear-gradient(
     to bottom,
     transparent,
     black var(--mask-height),
     black calc(3% - var(--mask-height)),
     transparent
   );
-  --mask-size-content: calc(100% - var(--scrollbar-width)) 100%;
-  --mask-image-scrollbar: linear-gradient(black, black);
-  --mask-size-scrollbar: var(--scrollbar-width) 100%;
-  mask-image: var(--mask-image-content), var(--mask-image-scrollbar);
-  mask-size: var(--mask-size-content), var(--mask-size-scrollbar);
-  mask-position: 0 0, 100% 0;
-  mask-repeat: no-repeat, no-repeat;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black var(--mask-height),
+    black calc(3% - var(--mask-height)),
+    transparent
+  );
+  -webkit-mask-size: calc(100% - var(--scrollbar-width)) 100%;
+  mask-size: calc(100% - var(--scrollbar-width)) 100%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.chat_name {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.room_last_message_date {
+  color: rgb(150, 150, 150);
+  font-size: 14px;
+
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .username_and_last_message {
@@ -1388,6 +1392,10 @@ html.is-animating .transition-fade {
   border-radius: 100%;
   background-size: cover;
   object-fit: cover;
+}
+
+.opponent_photo_div {
+  order: 1;
 }
 
 .opponent_photo_div > .user-info-avatar {
@@ -1552,6 +1560,10 @@ img[data-src] {
   width: 100%;
 }
 
+.message_div.right {
+  margin-left: auto;
+}
+
 .temp_full.active {
   background: rgba(0, 0, 0, 0.3);
   transition: background 0.7s;
@@ -1583,7 +1595,7 @@ img[data-src] {
   -webkit-box-shadow: 0px 7px 10px -10px rgba(0, 0, 0, 0.3);
   -moz-box-shadow: 0px 7px 10px -10px rgba(0, 0, 0, 0.3);
   box-shadow: 0px 7px 10px -10px rgba(0, 0, 0, 0.3);
-  transition: margin-left 0.4s;
+  transition: margin-left 0.4s, width 0.4s;
   /* transition: all 1s !important; */
 }
 
@@ -2429,6 +2441,31 @@ button {
   font: inherit;
 }
 @media (pointer: none), (pointer: coarse) {
+  #name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .opponent_photo_div {
+    order: 3 !important;
+  }
+
+  #opponent_title_name {
+    justify-content: space-between;
+  }
+  body {
+    /* overflow: hidden; */
+    overflow: visible;
+    position: relative;
+  }
+
+  body.room {
+    overflow: hidden;
+    position: fixed;
+    touch-action: none;
+    -ms-touch-action: none;
+  }
+
   .users_full_form:hover {
     background: unset;
   }
@@ -2501,7 +2538,7 @@ button {
   }
 
   .main_chat_window {
-    transform: translateX(var(--swipe-margi-inactive));
+    transform: translateX(var(--swipe-margin-inactive));
     position: fixed;
   }
 
