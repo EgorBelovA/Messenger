@@ -154,13 +154,17 @@ def send(request):
 #     return JsonResponse({"messages": list(messages.values()), "files": {}})
 
 
+from django.db.models import Max
+from datetime import datetime
 class GetChats(APIView):
     def get(self, request):
         User = get_user_model()
-        all_chats = Room.objects.filter(users=request.user.id)
-        all_chats = all_chats.order_by('-id')
+        # Получаем все чаты пользователя и аннотируем датой последнего сообщения
+        all_chats = Room.objects.filter(users=request.user.id).annotate(
+            last_message_date=Max('room__date')
+        ).order_by('-last_message_date')
+        
         serializer = RoomSerializerMessage(all_chats, many=True)
-        # sorted_data = sorted(serializer, key=lambda x: x['field_name'].lower())
         my_user = request.user.id
         return Response({"all_chats": serializer.data, "my_user": my_user})
 

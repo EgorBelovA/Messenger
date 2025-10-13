@@ -139,7 +139,6 @@ function enableDoubleTap(element, callback) {
 
 function audio_play(index) {
   link = audio_files[index];
-  console.log('READ', index);
 
   lastIndexOf_ =
     link.lastIndexOf('_') == -1 ? link.lastIndexOf('.') : link.lastIndexOf('_');
@@ -187,13 +186,8 @@ function audio_play(index) {
           index != 0
         ) {
           audio_play(index - 1);
-          console.log(index);
           document.querySelector('.hidden_audio').currentTime = 0;
           clearInterval(audio_interval);
-          console.log(
-            document.querySelector('.hidden_audio').currentTime,
-            document.querySelector('.hidden_audio').duration
-          );
         }
       }, 25);
     })();
@@ -215,11 +209,6 @@ function audio_play(index) {
     //            }
   }
 }
-
-// document.addEventListener('click', function (e) {
-//   console.log('Класс элемента:', e.target.className);
-//   console.log('Полный элемент:', e.target);
-// });
 
 function seek() {
   document.querySelector('.hidden_audio').currentTime =
@@ -352,6 +341,8 @@ window.onload = function () {
   const signal = controller.signal;
   window.history.replaceState(null, null, null);
 
+  all_data_rooms = [];
+
   ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
   room = document.getElementById('room').value;
   play_check = 1;
@@ -423,7 +414,7 @@ window.onload = function () {
     document.querySelector('.main_chat_window').classList.add('swipe');
     document
       .querySelector('#display')
-      .addEventListener('touchmove', handleSwipeDirection);
+      .addEventListener('touchmove', throttle(handleSwipeDirection, 10));
   };
 
   document.querySelector('#display').ontouchend = function (event) {
@@ -436,7 +427,7 @@ window.onload = function () {
     deltaX = currentX - startX;
     deltaY = currentY - startY;
 
-    document.querySelector('#display').classList.remove('swipe');
+    document.querySelector('.scroll_enable').classList.remove('swipe');
     document.querySelector('.main_chat_window').classList.remove('swipe');
     // console.log(duration);
     if (isSwiping && deltaX > 0) {
@@ -471,7 +462,7 @@ window.onload = function () {
     if (!isSwiping) {
       if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
         isSwiping = true;
-        document.querySelector('#display').classList.add('swipe');
+        document.querySelector('.scroll_enable').classList.add('swipe');
       } else if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
         document.querySelector('.main_chat_window').classList.remove('swipe');
         return;
@@ -546,9 +537,6 @@ window.onload = function () {
     document.querySelector('.room_div').style.bottom = '0px';
   };
 
-  document.querySelector('.choose_list').addEventListener('scrollend', (e) => {
-    console.log('scrollend');
-  });
   //   document.addEventListener('scroll', (e) => {
   //     if (document.documentElement.scrollTop > 0) {
   //       document.documentElement.scrollTop = 0;
@@ -585,7 +573,7 @@ window.onload = function () {
         (isAndroid && isChrome ? 90 : 0)
       : 0;
 
-    console.log('send_div_height_focus_var', search_div_height_focus_var);
+    // console.log('send_div_height_focus_var', search_div_height_focus_var);
 
     // Remove existing scroll listener to avoid duplicates
     document.removeEventListener('scroll', scrollWindowToZero);
@@ -718,7 +706,6 @@ window.onload = function () {
           if (data.type == 'create_new_room') {
             var chat_counter = 0;
             chat = [data.room];
-            console.log(chat);
             for (item in chat) {
               var users_list = document.createElement('form');
               var avatar = document.createElement('div');
@@ -837,8 +824,6 @@ window.onload = function () {
 
               document.querySelector('.users_search').prepend(users_list);
 
-              console.log(document.querySelector('.users_search'), users_list);
-
               room_list[user_contact_id.value] = users_list;
               list = document.querySelector('.users_search');
 
@@ -870,7 +855,7 @@ window.onload = function () {
                   document.querySelector('#room_id').value =
                     this.getElementsByTagName('input')[1].value;
                   document.querySelector('#name').value =
-                    this.querySelector('.users').textContent;
+                    this.querySelector('.chat_name').textContent;
                   document
                     .querySelectorAll('.users_full_form')
                     .forEach(function (e) {
@@ -881,6 +866,7 @@ window.onload = function () {
                   //     document.querySelector('#room_id').value;
                   room = document.querySelector('#room_id').value;
                   window.history.replaceState(null, null, `#${room}`);
+                  hashChange();
 
                   check_redirect = 0;
                   load_check = 1;
@@ -895,7 +881,6 @@ window.onload = function () {
                   adapt();
                   check_new_mes = '';
                   avatar_attachments = this.firstChild.cloneNode(true);
-                  console.log(avatar_attachments);
 
                   avatar_attachments_username = document.createElement('div');
                   avatar_attachments_username.setAttribute(
@@ -975,7 +960,6 @@ window.onload = function () {
               });
 
             search_new_user = JSON.parse(JSON.parse(e.data).search);
-            console.log(search_new_user);
 
             var chat_counter = 0;
             chat = search_new_user;
@@ -1091,8 +1075,6 @@ window.onload = function () {
                 room_list[user_contact_id.value] = users_list;
                 list = document.querySelector('.users_search');
 
-                console.log(room_list);
-
                 users_list.onmousedown = function (event) {
                   document.querySelector('.search_field').value = '';
                   document.documentElement.style.setProperty(
@@ -1129,7 +1111,6 @@ window.onload = function () {
                         (async () => {
                           const contact_ = contact;
                           url_contact = `${ws_protocol}${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
-                          console.log('url_contact:', contact_);
                           chatSocket_contact = new WebSocket(await url_contact);
 
                           chatSocket_contact.onopen = function () {
@@ -1178,7 +1159,6 @@ window.onload = function () {
                     adapt();
                     check_new_mes = '';
                     avatar_attachments = this.firstChild.cloneNode(true);
-                    console.log(avatar_attachments);
 
                     avatar_attachments_username = document.createElement('div');
                     avatar_attachments_username.setAttribute(
@@ -1334,6 +1314,8 @@ window.onload = function () {
     chatSocket[number_of_room].onmessage = function (e) {
       let data = JSON.parse(e.data);
       if (data.type == 'chat_message') {
+        all_data_rooms[data.room_id].messages.push(data.data);
+
         room_last_message = txtdecode(data.data.value, '1234');
         if (data.data.value != '')
           room_list[data.room_id].querySelector(
@@ -1942,6 +1924,48 @@ window.onload = function () {
   /*window.onbeforeunload = function(){
 
 }*/
+  function lastMessageDateFormat(date) {
+    var inputDate = new Date(date);
+    var now = new Date();
+
+    // Разница в миллисекундах
+    var diffMs = now - inputDate;
+    var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    // Время в формате HH:MM AM/PM
+    var hours = inputDate.getHours();
+    var minutes = inputDate.getMinutes();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm;
+
+    // Сегодня
+    if (diffDays === 0) {
+      return strTime;
+    }
+
+    if (diffDays === 1) {
+      return strTime;
+    }
+
+    if (diffDays < 7) {
+      var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      return days[inputDate.getDay()];
+    }
+
+    if (inputDate.getFullYear() === now.getFullYear()) {
+      var day = inputDate.getDate();
+      var month = inputDate.getMonth() + 1;
+      return (month < 10 ? '0' + month : month) + '/' + day;
+    }
+
+    var day = inputDate.getDate();
+    var month = inputDate.getMonth() + 1;
+    var year = inputDate.getFullYear().toString().slice(-2);
+    return (month < 10 ? '0' + month : month) + '/' + day + '/' + year;
+  }
 
   function getUsers(substring) {
     chatSocket_user.send(
@@ -1954,6 +1978,7 @@ window.onload = function () {
 
   room_list = [];
   $(document).ready(getRooms);
+
   function getRooms() {
     $.ajax({
       type: 'GET',
@@ -1962,269 +1987,279 @@ window.onload = function () {
         $('.users_search').empty();
         var chat_counter = 0;
         chat = response.all_chats;
-        console.log(response);
-        for (item in chat) {
-          var users_list = document.createElement('form');
-          var avatar = document.createElement('div');
-          avatar.setAttribute('class', 'user-info-avatar');
-          var opponent_ind = 0;
-
-          if (chat[item].room_type == 'G' || chat[item].room_type == 'C') {
-            if (chat[item].image != null) {
-              avatar = document.createElement('img');
-              avatar.src =
-                '//' +
-                window.location.host +
-                '/media/' +
-                chat[item].image.slice(12);
-              avatar.setAttribute('class', 'avatar_profile');
-            }
-            opponent = chat[item].name;
-          }
-
-          if (chat[item].room_type == 'D') {
-            if (chat[item].users[0].id == response.my_user) opponent_ind = 1;
-            else opponent_ind = 0;
-
-            opponent = chat[item].users[opponent_ind].username;
-
-            if (chat[item].users[opponent_ind].image != null) {
-              console.log(chat[item].users[opponent_ind].image);
-              avatar.style.backgroundImage =
-                'url(//' +
-                window.location.host +
-                '/media/' +
-                chat[item].users[opponent_ind].image.slice(12) +
-                ')';
-              //   avatar = document.createElement('img');
-              //   avatar.src =
-              //     '//' +
-              //     window.location.host +
-              //     '/media/' +
-              //     chat[item].users[opponent_ind].image.slice(12);
-              //   avatar.setAttribute('class', 'avatar_profile');
-            }
-          }
-
-          var user_contact_id = document.createElement('input');
-          var user_contact_name = document.createElement('div');
-
-          var last_message = document.createElement('div');
-          var username_and_last_message = document.createElement('div');
-          username_and_last_message.setAttribute(
-            'class',
-            'username_and_last_message'
-          );
-          var csrf = document.createElement('input');
-          var csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0]
-            .value;
-          var unread_counter = document.createElement('div');
-
-          //                        unread_messages_counter = 0;
-          //                        for(viewed in response.all_chats[item].room){
-          //                            if(!response.all_chats[item].room[viewed].viewed.includes(response.my_user) && response.all_chats[item].room[viewed].user != response.my_user)
-          //                                ++unread_messages_counter;
-          //                        }
-
-          //                        for(all_messages_list = response.messages.length-1; all_messages_list >= 0; --all_messages_list){
-          //                            if(response.messages[all_messages_list].room == response.all_chats[item].id){
-          //                                if(response.messages[all_messages_list].value != "") last_message.innerHTML = txtdecode(response.messages[all_messages_list].value, "1234");
-          //                                break;
-          //                            }
-          //                        }
-
-          last_message.setAttribute('class', 'room_last_message');
-
-          csrf.setAttribute('type', 'hidden');
-          csrf.setAttribute('name', 'csrfmiddlewaretoken');
-          csrf.setAttribute('value', csrfToken);
-          csrf.setAttribute('style', 'display: none');
-
-          if (
-            chat[item].users[opponent_ind].image == null &&
-            chat[item].image == null
-          ) {
-            if (chat[item].room_type == 'D')
-              name = chat[item].users[opponent_ind].username;
-            if (chat[item].room_type == 'G' || chat[item].room_type == 'C')
-              name = chat[item].name;
-
-            if (name != null) var letter = name.substr(0, 1).toUpperCase();
-            else var letter = '';
-            avatar.innerHTML = letter;
-
-            if (name.lastIndexOf(' ') != -1) {
-              var letter_2 = name
-                .substr(name.lastIndexOf(' ') + 1, 1)
-                .toUpperCase();
-              avatar.innerHTML += letter_2;
-            }
-
-            var backgroundColor = stringToColor(name);
-            avatar.style.backgroundColor = backgroundColor;
-            avatar.setAttribute(
-              'style',
-              'background: linear-gradient(0deg, ' +
-                pSBC(-0.6, backgroundColor) +
-                ' 0%, ' +
-                pSBC(-0.4, backgroundColor) +
-                ' 35%, ' +
-                backgroundColor +
-                ' 100%);'
-            );
-          }
-
-          user_contact_id.value = chat[item].id;
-          user_contact_id.setAttribute('type', 'hidden');
-          user_contact_id.setAttribute('name', 'chats');
-          user_contact_id.setAttribute('style', 'display: none');
-
-          users_list.setAttribute('method', 'POST');
-          users_list.setAttribute('class', 'users_full_form');
-          users_list.setAttribute('name', 'form-submit-users');
-
-          user_contact_name.textContent = opponent;
-          user_contact_name.setAttribute('class', 'users');
-
-          username_and_last_message.appendChild(user_contact_name);
-          username_and_last_message.appendChild(last_message);
-
-          //                        unread_counter.textContent = unread_messages_counter;
-          //                        unread_counter.setAttribute("class", "rooms_list_unread_counter");
-
-          users_list.appendChild(avatar);
-          users_list.appendChild(csrf);
-          users_list.appendChild(user_contact_id);
-          users_list.appendChild(username_and_last_message);
-          //                        users_list.appendChild(unread_counter);
-          document.querySelector('.users_search').append(users_list);
-
-          room_list[user_contact_id.value] = users_list;
-          list = document.querySelector('.users_search');
-
-          users_list.onmousedown = function (event) {
-            shouldSwipe = false;
-            event.preventDefault();
-            document.documentElement.style.setProperty(
-              '--swipe-margi-inactive',
-              `0%`
-            );
-            if (room != this.getElementsByTagName('input')[1].value) {
-              //                                document.querySelector("#select_chat_to_start").style.display = "none";
-              block_date_dict = [];
-              sender_ajax.abort();
-              document.querySelector('#room_id').value =
-                this.getElementsByTagName('input')[1].value;
-              document.querySelector('#name').textContent =
-                this.querySelector('.users').textContent;
-              sourceElement = this.querySelector('.user-info-avatar');
-              targetElement = document
-                .querySelector('.opponent_photo_div')
-                .querySelector('.user-info-avatar');
-              if (sourceElement && targetElement) {
-                clonedElement = sourceElement.cloneNode(true);
-                targetElement.replaceWith(clonedElement);
-              }
-              document
-                .querySelectorAll('.users_full_form')
-                .forEach(function (e) {
-                  e.classList.remove('active');
-                });
-              this.classList.add('active');
-              //   window.location.hash = document.querySelector('#room_id').value;
-
-              room = document.querySelector('#room_id').value;
-              window.history.replaceState(null, null, `#${room}`);
-
-              check_redirect = 0;
-              load_check = 1;
-              load_photo_check = 0;
-              $('#display').empty();
-              $('#attachment_videos').empty();
-              $('#attachment_photos').empty();
-              $('#attachment_files').empty();
-              $('#attachment_music').empty();
-              $('#attachment_links').empty();
-              sender();
-              adapt();
-              check_new_mes = '';
-              avatar_attachments = this.firstChild.cloneNode(true);
-              console.log(avatar_attachments);
-
-              avatar_attachments_username = document.createElement('div');
-              avatar_attachments_username.setAttribute(
-                'id',
-                'avatar_attachments_username'
-              );
-
-              opponent_username_attachment = document.createElement('div');
-              opponent_username_attachment.textContent =
-                document.querySelector('#name').value;
-              opponent_username_attachment.setAttribute(
-                'id',
-                'avatar_attachments_username'
-              );
-              avatar_attachments_username.appendChild(
-                opponent_username_attachment
-              );
-
-              $('#opponent_photo_avatar').empty();
-              document
-                .querySelector('#opponent_photo_avatar')
-                .appendChild(avatar_attachments_username);
-              document
-                .querySelector('#opponent_photo_avatar')
-                .appendChild(avatar_attachments);
-              if (avatar_attachments.classList.contains('user-info-avatar'))
-                avatar_attachments.setAttribute(
-                  'class',
-                  'user-info-avatar_attachments'
-                );
-              if (avatar_attachments.classList.contains('avatar_profile')) {
-                avatar_attachments.setAttribute(
-                  'class',
-                  'avatar_profile_attachments'
-                );
-                shadow = document.createElement('div');
-                shadow.setAttribute('id', 'attachment_avatar_shadow');
-                document
-                  .querySelector('#opponent_photo_avatar')
-                  .appendChild(shadow);
-              }
-            } else
-              document.querySelector('.scroll_enable').scrollTo({
-                top: document.querySelector('#display').scrollHeight,
-                behavior: 'smooth',
-              });
-          };
-
-          if (user_contact_id.value == window.location.hash.slice(1))
-            $(list.getElementsByTagName('form')[chat_counter]).mousedown();
-
-          if (list.getElementsByTagName('form')[chat_counter] != undefined)
-            //                                chatSocket[user_contact_id.value] = new WebSocket(url);
-
-            //                                chatSocket[user_contact_id.value].onclose = function(e){
-            //
-            //                                        number_of_room = this.url.slice(this.url.indexOf("socket-server")+14, this.url.lastIndexOf("/"));
-            ////                                        this = "new WebSocket(this.url)";
-            ////                                        let url = `${ws_protocol}${window.location.host}/socket-server/${number_of_room}/`;
-            ////                                        e = new WebSocket(url);
-            //
-            //
-            //                                }
-
-            connect_socket(user_contact_id.value);
-
-          ++chat_counter;
+        const promises = [];
+        for (const id in chat) {
+          promises.push(sender(chat[id].id));
         }
+
+        Promise.all(promises)
+          .then(() => {
+            console.log('All sender calls completed, creating UI...');
+            create(chat, response, chat_counter);
+          })
+          .catch((error) => {
+            console.error('Error in sender promises:', error);
+            createChatUI(chat, response, chat_counter);
+          });
       },
     });
   }
 
-  document.querySelector('.scroll_enable').ontouchstart = function (event) {
-    console.log('touchstart');
-  };
+  function createChatUI(chat, response, chat_counter) {
+    for (item in chat) {
+      var users_list = document.createElement('form');
+      var avatar = document.createElement('div');
+      avatar.setAttribute('class', 'user-info-avatar');
+      var opponent_ind = 0;
+
+      if (chat[item].room_type == 'G' || chat[item].room_type == 'C') {
+        if (chat[item].image != null) {
+          avatar = document.createElement('img');
+          avatar.src =
+            '//' +
+            window.location.host +
+            '/media/' +
+            chat[item].image.slice(12);
+          avatar.setAttribute('class', 'avatar_profile');
+        }
+        opponent = chat[item].name;
+      }
+
+      if (chat[item].room_type == 'D') {
+        if (chat[item].users[0].id == response.my_user) opponent_ind = 1;
+        else opponent_ind = 0;
+
+        opponent = chat[item].users[opponent_ind].username;
+
+        if (chat[item].users[opponent_ind].image != null) {
+          avatar.style.backgroundImage =
+            'url(//' +
+            window.location.host +
+            '/media/' +
+            chat[item].users[opponent_ind].image.slice(12) +
+            ')';
+        }
+      }
+
+      var user_contact_id = document.createElement('input');
+      var user_contact_name = document.createElement('div');
+
+      var last_message = document.createElement('div');
+      var username_and_last_message = document.createElement('div');
+      username_and_last_message.setAttribute(
+        'class',
+        'username_and_last_message'
+      );
+      var csrf = document.createElement('input');
+      var csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0]
+        .value;
+      var unread_counter = document.createElement('div');
+
+      last_message.setAttribute('class', 'room_last_message');
+
+      csrf.setAttribute('type', 'hidden');
+      csrf.setAttribute('name', 'csrfmiddlewaretoken');
+      csrf.setAttribute('value', csrfToken);
+      csrf.setAttribute('style', 'display: none');
+
+      if (
+        chat[item].users[opponent_ind].image == null &&
+        chat[item].image == null
+      ) {
+        if (chat[item].room_type == 'D')
+          name = chat[item].users[opponent_ind].username;
+        if (chat[item].room_type == 'G' || chat[item].room_type == 'C')
+          name = chat[item].name;
+
+        if (name != null) var letter = name.substr(0, 1).toUpperCase();
+        else var letter = '';
+        avatar.innerHTML = letter;
+
+        if (name.lastIndexOf(' ') != -1) {
+          var letter_2 = name
+            .substr(name.lastIndexOf(' ') + 1, 1)
+            .toUpperCase();
+          avatar.innerHTML += letter_2;
+        }
+
+        var backgroundColor = stringToColor(name);
+        avatar.style.backgroundColor = backgroundColor;
+        avatar.setAttribute(
+          'style',
+          'background: linear-gradient(0deg, ' +
+            pSBC(-0.6, backgroundColor) +
+            ' 0%, ' +
+            pSBC(-0.4, backgroundColor) +
+            ' 35%, ' +
+            backgroundColor +
+            ' 100%);'
+        );
+      }
+
+      user_contact_id.value = chat[item].id;
+      user_contact_id.setAttribute('type', 'hidden');
+      user_contact_id.setAttribute('name', 'chats');
+      user_contact_id.setAttribute('style', 'display: none');
+
+      users_list.setAttribute('method', 'POST');
+      users_list.setAttribute('class', 'users_full_form');
+      users_list.setAttribute('name', 'form-submit-users');
+
+      user_contact_name.setAttribute('class', 'users');
+
+      username_and_last_message.appendChild(user_contact_name);
+      username_and_last_message.appendChild(last_message);
+
+      users_list.appendChild(avatar);
+      users_list.appendChild(csrf);
+      users_list.appendChild(user_contact_id);
+      users_list.appendChild(username_and_last_message);
+      document.querySelector('.users_search').append(users_list);
+
+      room_list[user_contact_id.value] = users_list;
+      list = document.querySelector('.users_search');
+
+      const lastMsg =
+        all_data_rooms[user_contact_id.value].messages[
+          all_data_rooms[user_contact_id.value].messages.length - 1
+        ];
+
+      const room_last_message = txtdecode(lastMsg.value, '1234');
+      last_message.textContent = room_last_message;
+
+      roomLastMessageDate = document.createElement('div');
+      roomLastMessageDate.setAttribute('class', 'room_last_message_date');
+      roomLastMessageDate.textContent = lastMessageDateFormat(lastMsg.date);
+
+      chatName = document.createElement('div');
+      chatName.setAttribute('class', 'chat_name');
+      chatName.textContent = opponent;
+
+      user_contact_name.appendChild(chatName);
+      user_contact_name.appendChild(roomLastMessageDate);
+
+      users_list.onmousedown = function (event) {
+        event.preventDefault();
+
+        document.documentElement.style.setProperty(
+          '--swipe-margi-inactive',
+          `0%`
+        );
+        if (room != this.getElementsByTagName('input')[1].value) {
+          block_date_dict = [];
+          sender_ajax.abort();
+          document.querySelector('#room_id').value =
+            this.getElementsByTagName('input')[1].value;
+          document.querySelector('#name').textContent =
+            this.querySelector('.chat_name').textContent;
+          sourceElement = this.querySelector('.user-info-avatar');
+          targetElement = document
+            .querySelector('.opponent_photo_div')
+            .querySelector('.user-info-avatar');
+          if (sourceElement && targetElement) {
+            clonedElement = sourceElement.cloneNode(true);
+            targetElement.replaceWith(clonedElement);
+          }
+          document.querySelectorAll('.users_full_form').forEach(function (e) {
+            e.classList.remove('active');
+          });
+          this.classList.add('active');
+          room = document.querySelector('#room_id').value;
+
+          window.history.replaceState(null, null, `#${room}`);
+          hashChange();
+
+          check_redirect = 0;
+          load_check = 1;
+          load_photo_check = 0;
+          $('#display').empty();
+          $('#attachment_videos').empty();
+          $('#attachment_photos').empty();
+          $('#attachment_files').empty();
+          $('#attachment_music').empty();
+          $('#attachment_links').empty();
+          adapt();
+          getRoomData();
+
+          check_new_mes = '';
+          avatar_attachments = this.firstChild.cloneNode(true);
+
+          avatar_attachments_username = document.createElement('div');
+          avatar_attachments_username.setAttribute(
+            'id',
+            'avatar_attachments_username'
+          );
+
+          opponent_username_attachment = document.createElement('div');
+          opponent_username_attachment.textContent =
+            document.querySelector('#name').value;
+          opponent_username_attachment.setAttribute(
+            'id',
+            'avatar_attachments_username'
+          );
+          avatar_attachments_username.appendChild(opponent_username_attachment);
+
+          $('#opponent_photo_avatar').empty();
+          document
+            .querySelector('#opponent_photo_avatar')
+            .appendChild(avatar_attachments_username);
+          document
+            .querySelector('#opponent_photo_avatar')
+            .appendChild(avatar_attachments);
+          if (avatar_attachments.classList.contains('user-info-avatar'))
+            avatar_attachments.setAttribute(
+              'class',
+              'user-info-avatar_attachments'
+            );
+          if (avatar_attachments.classList.contains('avatar_profile')) {
+            avatar_attachments.setAttribute(
+              'class',
+              'avatar_profile_attachments'
+            );
+            shadow = document.createElement('div');
+            shadow.setAttribute('id', 'attachment_avatar_shadow');
+            document
+              .querySelector('#opponent_photo_avatar')
+              .appendChild(shadow);
+          }
+        } else
+          document.querySelector('.scroll_enable').scrollTo({
+            top: document.querySelector('#display').scrollHeight,
+            behavior: 'smooth',
+          });
+      };
+
+      if (user_contact_id.value == window.location.hash.slice(1))
+        $(list.getElementsByTagName('form')[chat_counter]).mousedown();
+      if (list.getElementsByTagName('form')[chat_counter] != undefined)
+        connect_socket(user_contact_id.value);
+
+      ++chat_counter;
+    }
+  }
+
+  function getRoomData() {
+    message_initialization(all_data_rooms[room]);
+  }
+
+  function sender(room) {
+    return new Promise((resolve, reject) => {
+      ajax_url_sender = '/GetMessages/' + room + '/';
+
+      $.ajax({
+        type: 'GET',
+        url: ajax_url_sender,
+        success: function (response) {
+          all_data_rooms[room] = response;
+          resolve(response); // Resolve the promise when done
+        },
+        error: function (xhr, status, error) {
+          console.error('Error in sender for room', room, error);
+          reject(error); // Reject if there's an error
+        },
+      });
+    });
+  }
 
   function hashChange() {
     // e.preventDefault;
@@ -2235,8 +2270,10 @@ window.onload = function () {
       window.location.hash.slice(1) != ''
     ) {
       $(room_list[window.location.hash.slice(1)]).mousedown();
+      document.querySelector('body').classList.add('room');
     } else {
       go_home_page_func();
+      document.querySelector('body').classList.remove('room');
     }
   }
 
@@ -2284,7 +2321,6 @@ window.onload = function () {
       all_messages[mes_react_id].querySelector('#liked_check').style.display ==
       ''
     ) {
-      console.log(all_messages[mes_react_id].querySelector('#liked_check'));
       all_messages[mes_react_id].querySelector('#liked_check').style.display =
         'unset';
       all_messages[mes_react_id].querySelector(
@@ -2321,18 +2357,6 @@ window.onload = function () {
     'November',
     'December',
   ];
-
-  function sender() {
-    ajax_url_sender = '/GetMessages/' + room + '/';
-
-    sender_ajax = $.ajax({
-      type: 'GET',
-      url: ajax_url_sender,
-      success: function (response) {
-        message_initialization(response);
-      },
-    });
-  }
 
   //document.querySelector(".main_chat_window").appendChild(document.querySelector("#select_chat_to_start"));
 
@@ -2386,7 +2410,6 @@ window.onload = function () {
       var file_new_name = '';
       mes = response.messages[key].value;
       mes_value = response.messages[key].value;
-
       if (mes != '') mes = txtdecode(mes, '1234');
       mes = urlify(mes);
       //   mes = '<xmp>' + mes + '</xmp>';
@@ -3051,7 +3074,6 @@ window.onload = function () {
           !document.querySelector('.scroll_down').classList.contains('active')
         ) {
           document.querySelector('.scroll_down').classList.add('active');
-          console.log('SCROLLED');
           scroll_more += 25;
           auto_scroll = false;
           // if(check_mes_update - scroll_more > 0)
@@ -3283,7 +3305,6 @@ window.onload = function () {
           (async () => {
             const contact_ = contact;
             url_contact = `${ws_protocol}${window.location.host}/socket-server/user/${create_new_group_list_contacts[contact]}/`;
-            console.log('url_contact:', contact_);
             chatSocket_contact = new WebSocket(await url_contact);
 
             chatSocket_contact.onopen = function () {
@@ -3716,7 +3737,6 @@ window.onload = function () {
 
   document.documentElement.style.setProperty('--rooms_display', `flex`);
   document.querySelector('.search_field').onfocus = function (e) {
-    console.log('focusnow');
     // setTimeout(function () {
     //   console.log('1s');
     //   // document.querySelector('.search_field').focus({ preventScroll: true });
