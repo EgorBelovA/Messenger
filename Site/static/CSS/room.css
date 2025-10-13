@@ -1080,7 +1080,7 @@ html.is-animating .transition-fade {
   display: flex;
   flex-direction: column;
   /* align-items: center; */
-  overflow-y: visible;
+  overflow-y: scroll;
   /* overflow: hidden; */
   max-width: 400px;
   min-width: 400px;
@@ -2496,6 +2496,10 @@ button {
     opacity: 0;
   }
 
+  .choose_list {
+    overflow-y: visible;
+  }
+
   .main_chat_window {
     transform: translateX(var(--swipe-margi-inactive));
     position: fixed;
@@ -2579,7 +2583,7 @@ button {
     user-select: none;
     z-index: 3;
     display: flex;
-    position: fixed !important;
+    position: sticky;
     flex-direction: row;
     justify-content: center;
     align-items: center;

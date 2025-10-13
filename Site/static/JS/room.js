@@ -1136,7 +1136,7 @@ window.onload = function () {
                     document.querySelector('#room_id').value =
                       this.getElementsByTagName('input')[1].value;
                     document.querySelector('#name').value =
-                      this.querySelector('.users').textContent;
+                      this.querySelector('.chat_name').textContent;
                     document
                       .querySelectorAll('.users_full_form')
                       .forEach(function (e) {
@@ -1327,7 +1327,7 @@ window.onload = function () {
         ) {
           if (isSupported && Notification.permission === 'granted') {
             notification = new Notification(
-              room_list[data.room_id].querySelector('.users').textContent,
+              room_list[data.room_id].querySelector('.chat_name').textContent,
               {
                 body: room_last_message,
                 icon: '/static/Images/main_site_icon.png',
@@ -1984,6 +1984,7 @@ window.onload = function () {
       type: 'GET',
       url: '/getChats/',
       success: function (response) {
+        console.log(response);
         $('.users_search').empty();
         var chat_counter = 0;
         chat = response.all_chats;
@@ -1995,7 +1996,7 @@ window.onload = function () {
         Promise.all(promises)
           .then(() => {
             console.log('All sender calls completed, creating UI...');
-            create(chat, response, chat_counter);
+            createChatUI(chat, response, chat_counter);
           })
           .catch((error) => {
             console.error('Error in sender promises:', error);
@@ -2124,19 +2125,20 @@ window.onload = function () {
           all_data_rooms[user_contact_id.value].messages.length - 1
         ];
 
-      const room_last_message = txtdecode(lastMsg.value, '1234');
-      last_message.textContent = room_last_message;
-
-      roomLastMessageDate = document.createElement('div');
-      roomLastMessageDate.setAttribute('class', 'room_last_message_date');
-      roomLastMessageDate.textContent = lastMessageDateFormat(lastMsg.date);
-
       chatName = document.createElement('div');
       chatName.setAttribute('class', 'chat_name');
       chatName.textContent = opponent;
-
       user_contact_name.appendChild(chatName);
-      user_contact_name.appendChild(roomLastMessageDate);
+
+      if (lastMsg != '' && lastMsg != null && lastMsg != undefined) {
+        const room_last_message = txtdecode(lastMsg.value, '1234');
+        last_message.textContent = room_last_message;
+
+        roomLastMessageDate = document.createElement('div');
+        roomLastMessageDate.setAttribute('class', 'room_last_message_date');
+        roomLastMessageDate.textContent = lastMessageDateFormat(lastMsg.date);
+        user_contact_name.appendChild(roomLastMessageDate);
+      }
 
       users_list.onmousedown = function (event) {
         event.preventDefault();
