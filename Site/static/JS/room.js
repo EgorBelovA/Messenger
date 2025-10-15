@@ -345,6 +345,7 @@ document.querySelector('#logout').onclick = function () {
 };
 
 window.onload = function () {
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
   const signal = controller.signal;
   window.history.replaceState(null, null, null);
 
@@ -380,6 +381,11 @@ window.onload = function () {
     '--send_div_height',
     `${send_div_height}px`
   );
+  const sendDiv = document.querySelector('.send_div');
+
+  sendDiv.ontouchstart = function () {
+    $('.textarea').focus();
+  };
 
   function throttle(func, delay) {
     let timeoutId;
@@ -1991,10 +1997,11 @@ window.onload = function () {
       type: 'GET',
       url: '/getChats/',
       success: function (response) {
-        // console.log(response);
+        console.log(response);
         $('.users_search').empty();
         var chat_counter = 0;
         chat = response.all_chats;
+
         const promises = [];
         for (const id in chat) {
           promises.push(sender(chat[id].id));
@@ -2272,6 +2279,8 @@ window.onload = function () {
   }
 
   function hashChange() {
+    all_messages_dives = [];
+
     // e.preventDefault;
     // console.log('hash', window.location.hash.slice(1));
     if (
@@ -2379,7 +2388,6 @@ window.onload = function () {
     check_last_message_bar = false;
     document.querySelector('#opponent_title_name').style.display = 'flex';
     document.querySelector('.send_div').style.display = 'flex';
-    all_messages_dives = [];
     // console.log(response);
     last_read = null;
 
@@ -2783,6 +2791,7 @@ window.onload = function () {
       let timesToSelect = Date();
       let touchStartTime = 0;
       let touchTimer = null;
+      let modalTimer = null;
 
       temp.addEventListener(
         'touchstart',
@@ -2794,6 +2803,8 @@ window.onload = function () {
             temp.classList.add('select');
             modalTimer = setTimeout(function () {
               document.querySelector('#myModal').style.display = 'block';
+              themeMeta.content = '#0e0e0e';
+              document.querySelector('body').style.backgroundColor = '#0e0e0e';
             }, 250);
           }, 100);
         },
@@ -2806,6 +2817,7 @@ window.onload = function () {
           clearTimeout(modalTimer);
           touchTimer = null;
           modalTimer = null;
+          themeMeta.content = '#050505';
           //   temp.classList.remove('select');
         }
       });
@@ -2816,7 +2828,17 @@ window.onload = function () {
           clearTimeout(modalTimer);
           touchTimer = null;
           modalTimer = null;
-          //   temp.classList.remove('select');
+          temp.classList.remove('select');
+        }
+      });
+
+      temp.addEventListener('touchmove', function (e) {
+        if (touchTimer) {
+          clearTimeout(touchTimer);
+          clearTimeout(modalTimer);
+          touchTimer = null;
+          modalTimer = null;
+          temp.classList.remove('select');
         }
       });
 
@@ -2830,7 +2852,6 @@ window.onload = function () {
       $('#display').prepend(temp_full);
 
       all_messages_dives.push(temp_full);
-
       temp_full.addEventListener('contextmenu', (e) => {
         var tooltip = document.getElementById('myTooltip');
         var selectionText = getSelectionText();
@@ -3468,13 +3489,15 @@ window.onload = function () {
     if (str.trim() == '') return true;
     return false;
   }
-
-  document.querySelector('#myModal').click = document.querySelector(
-    '#myModal'
-  ).ontouchend = function (e) {
+  const modalContainer = document.querySelector('#myModal');
+  modalContainer.mousedown = modalContainer.ontouchstart = function (e) {
+    console.log(all_messages_dives);
     all_messages_dives.forEach((element) => {
+      console.log(element);
       element.querySelector('.message_div').classList.remove('select');
     });
+    document.querySelector('body').style.backgroundColor = '#1e1e1e';
+    themeMeta.content = '#0a0a0a';
     this.style.display = 'none';
   };
 
@@ -3483,10 +3506,24 @@ window.onload = function () {
     document.querySelector('#myModal').style.display = 'none';
   };
 
-  document.querySelector('.input_submit').ontouchstart = document.querySelector(
-    '.input_submit'
-  ).onclick = function (e) {
+  const button = document.querySelector('.input_submit');
+  button.ontouchstart = button.onclick = function (e) {
     e.preventDefault();
+    console.log('clicked');
+    const currentButton = this;
+
+    // Блокируем кнопку на время анимации
+    currentButton.style.pointerEvents = 'none';
+
+    // Перезапускаем анимацию
+    void currentButton.offsetWidth;
+    currentButton.classList.add('send');
+
+    setTimeout(function () {
+      currentButton.classList.remove('send');
+      // Разблокируем кнопку после анимации
+      currentButton.style.pointerEvents = 'auto';
+    }, 200);
     if ($('.textarea').is(':focus')) $('.textarea').focus();
     if (
       !isEmpty(document.querySelector('.textarea').value) ||
@@ -3501,16 +3538,16 @@ window.onload = function () {
     e.preventDefault();
     let message = txtencode(e.target.message.value, '1234');
 
-    loading_sign = document.createElement('div');
-    loading_sign_image = document.createElement('img');
-    loading_sign_image.classList.add('loading_sign_image');
-    loading_sign_image.src =
-      '//' + window.location.host + '/static/Images/loading_sign.gif';
-    loading_sign.appendChild(loading_sign_image);
-    if (
-      !document.querySelector('.send_div').querySelector('.loading_sign_image')
-    )
-      document.querySelector('.send_div').append(loading_sign);
+    // loading_sign = document.createElement('div');
+    // loading_sign_image = document.createElement('img');
+    // loading_sign_image.classList.add('loading_sign_image');
+    // loading_sign_image.src =
+    //   '//' + window.location.host + '/static/Images/loading_sign.gif';
+    // loading_sign.appendChild(loading_sign_image);
+    // if (
+    //   !document.querySelector('.send_div').querySelector('.loading_sign_image')
+    // )
+    //   document.querySelector('.send_div').append(loading_sign);
     send_allowed = false;
 
     const formData = new FormData(this);
@@ -3597,7 +3634,8 @@ window.onload = function () {
     });
   }
 
-  document.querySelector('#input_attach').onclick = function () {
+  document.querySelector('#file_div').onclick = function () {
+    console.log(123);
     document.querySelector('#file').click();
   };
 
@@ -3996,7 +4034,6 @@ window.onload = function () {
         '--attachment_tabs_font',
         `${main_color}`
       );
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
       themeMeta.content = '#FFF';
       document
         .querySelector('.settings')
@@ -4033,7 +4070,7 @@ window.onload = function () {
     } else if (getCookie('theme_mode') == 'D') {
       message_color = 'rgba(41,49,51)';
       main_color = '#FFF';
-      darker_ = '#414352';
+      darker_ = '#404155ff';
       attachment_tabs = '##1E1E1E';
       document.documentElement.style.setProperty(
         '--message_color',
@@ -4060,36 +4097,35 @@ window.onload = function () {
         '--attachment_tabs_font',
         `${main_color}`
       );
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
-      themeMeta.content = '#1E1E1E';
+      themeMeta.content = '#0a0a0a';
       document
         .querySelector('.settings')
         .setAttribute('style', 'background: #222;');
       document
         .querySelector('body')
-        .setAttribute('style', 'background-color: #1E1E1E;');
+        .setAttribute('style', 'background-color: #0a0a0a;');
       //   document
       //     .querySelector('#opponent_title_name')
       //     .setAttribute('style', 'background-color: #1E1E1EE6;');
       document.querySelector('#name').setAttribute('style', 'color: white;');
-      document
-        .querySelector('.send_div')
-        .setAttribute('style', 'background-color: #1E1E1EE6;');
+      //   document
+      //     .querySelector('.send_div')
+      //     .setAttribute('style', 'background-color: #1E1E1EE6;');
       document
         .querySelector('.users_search')
-        .setAttribute('style', 'background-color: #1E1E1E;');
+        .setAttribute('style', 'background-color: #0a0a0a;');
       document
         .querySelector('.search_div')
-        .setAttribute('style', 'background-color: #1E1E1E99;');
+        .setAttribute('style', 'background-color: #0a0a0a99;');
       //   document
       //     .querySelector('.search_field')
       //     .setAttribute('style', 'background-color: rgba(41,49,51);');
       document
         .querySelector('.attachments')
-        .setAttribute('style', 'background-color: rgba(30,30,30);');
+        .setAttribute('style', 'background-color: #0a0a0a;');
       document
         .querySelector('.settings_menu')
-        .setAttribute('style', 'background-color: rgba(30,30,30);');
+        .setAttribute('style', 'background-color: #0a0a0a;');
       document
         .querySelector('.scroll_down')
         .setAttribute('style', 'background: rgb(25,25,25, 0.8);');
@@ -4129,11 +4165,17 @@ window.onload = function () {
       '--myColor1: ' +
         pSBC(-0.8, room_BG_color_hex) +
         '; --myColor2: ' +
-        pSBC(-0.6, room_BG_color_hex) +
+        pSBC(-0.4, room_BG_color_hex) +
         '; --myColor3: ' +
-        pSBC(-2.4, room_BG_color_hex) +
+        pSBC(-1.4, room_BG_color_hex) +
         ';'
     );
+  //   document
+  //     .querySelector('.chat-background-image')
+  //     .setAttribute(
+  //       'style',
+  //       '--myColor1: #000; --myColor2: #000; --myColor3: #000; --myColor3: #000;'
+  //     );
   document.documentElement.style.setProperty(
     '--selected_chat_color',
     `${pSBC(-0.8, room_BG_color_hex)}`

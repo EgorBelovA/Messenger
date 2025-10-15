@@ -159,7 +159,6 @@ from datetime import datetime
 class GetChats(APIView):
     def get(self, request):
         User = get_user_model()
-        # Получаем все чаты пользователя и аннотируем датой последнего сообщения
         all_chats = Room.objects.filter(users=request.user.id).annotate(
             last_message_date=Max('room__date')
         ).order_by('-last_message_date')
