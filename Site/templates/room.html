@@ -293,19 +293,16 @@
         <div class="overflow-display"></div>
       </div> -->
       <div class="display_clone"></div>
-      <div class="scroll_enable">
-        <div class="offset room_div room_body" id="display"></div>
+      <div class="offset room_div room_body" id="display"></div>
+      <div class="scroll_down">
+        <div id="arrow_down_scroll" class="fa fa-angle-down"></div>
       </div>
-
       <form
         id="post-form"
         class="send_div send_div_class"
         enctype="multipart/form-data"
         action="send"
       >
-        <div class="scroll_down">
-          <div id="arrow_down_scroll" class="fa fa-angle-down"></div>
-        </div>
         {% csrf_token %}
 
         <div id="file_div">
@@ -379,10 +376,9 @@
       <!--              <progress id="progressBar" value="0" max="100" style="width:300px;"></progress>-->
       <!--              <h3 id="status"></h3>-->
       <!--              <p id="loaded_n_total"></p>-->
-    </div>
-
-    <div id="myModal" class="modal">
-      <span class="close">&times;</span>
+      <div id="myModal" class="modal">
+        <span class="close"></span>
+      </div>
     </div>
 
     <div id="media_display">

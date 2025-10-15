@@ -39,13 +39,12 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   font-family: 'Breath_Demo';
-  /* touch-action: none;
-  -ms-touch-action: none; */
-
+  touch-action: none;
+  -ms-touch-action: none;
   /* min-height: 100vh; */
   /* min-height: -webkit-fill-available; */
-
   overflow: hidden;
+
   height: 100%;
 }
 
@@ -60,7 +59,7 @@ body {
   /*    background: url(../Images/room_BG.jpg);*/
   /*    font-family: "Roboto";*/
   font-family: 'Roboto', sans-serif;
-  min-height: 100vh;
+
   background-size: cover;
   background-attachment: fixed;
   background-color: rgb(15, 15, 15);
@@ -250,10 +249,6 @@ select {
   position: relative;
 }
 
-.scroll_enable.swipe {
-  overflow: hidden !important;
-}
-
 .main_chat_window.swipe {
   will-change: transform;
   transform: translateX(var(--swipe-margin));
@@ -264,13 +259,13 @@ select {
   transition: transform 0.15s ease-out;
 }
 
-#main_window_clone {
+/* #main_window_clone {
   position: absolute;
   min-width: 100%;
   min-height: 100%;
   max-height: 300px;
   overflow-y: scroll;
-}
+} */
 
 .chat-background-image {
   background-image: url('../Images/alt_BG.png') !important;
@@ -290,15 +285,15 @@ select {
 
   background-blend-mode: overlay;
 
-  transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 0s,
-    background 0.2s ease-in;
-
   background-position: 0% 0%, calc(50% - 100px) center !important;
-  /* background-size: cover, 500px auto !important; */
+  background-size: cover, 500px auto !important;
   min-height: 100px;
+  transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 0s,
+    background 0.2s ease-in !important;
 }
 
 .chat-background-image.active {
+  transition: background 0.2s ease-in;
   background-size: cover, 400px auto !important;
 }
 
@@ -309,15 +304,15 @@ select {
   /* background-color: rgba(30, 30, 30, 0.9); */
   background: linear-gradient(
     180deg,
-    rgba(30, 30, 30, 0.9) 0%,
+    rgba(30, 30, 30, 0.8) 0%,
     rgba(30, 30, 30, 1) 100%
   ) !important;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   border-radius: 20px 20px 0 0;
   padding: 5px 5px 0 5px;
-  position: relative;
-  /* bottom: 0; */
+  position: fixed;
+  bottom: 0;
   /* margin-bottom: 200px; */
   /* background: rgba(30, 30, 30, 0) !important; */
   transition: background 1s, width 1s;
@@ -404,7 +399,7 @@ select {
   /* background: rgba(30, 30, 30, 0.8); */
   background: linear-gradient(
     0deg,
-    rgba(30, 30, 30, 0.9) 0%,
+    rgba(30, 30, 30, 0.8) 0%,
     rgba(30, 30, 30, 1) 100%
   );
   display: flex;
@@ -413,6 +408,8 @@ select {
   align-items: center;
   /* justify-content: space-between; */
   height: 50px;
+  max-height: 50px;
+  min-height: 50px;
   width: 100%;
   cursor: pointer;
   transition: background 1s, width 0.2s ease-in;
@@ -420,10 +417,10 @@ select {
   -moz-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 1);
   box-shadow: 0px 0px 7px -5px rgba(0, 0, 0, 1);
   z-index: 99;
-  position: relative;
-  /* top: 0; */
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
 }
 
 #opponent_title_name.active {
@@ -609,6 +606,7 @@ select {
   margin: 0;
   overflow: hidden;
   padding: 8px 10px 3px 10px;
+  border-radius: 1rem;
   text-align: left;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -617,7 +615,7 @@ select {
   /* backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px); */
   position: relative;
-
+  transition: transform 0.1s ease-in;
   /* transition: color 1s, background 1s, opacity 1s; */
 }
 
@@ -767,7 +765,7 @@ select {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1000; /* Sit on top */
+  z-index: 1000;
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -776,8 +774,8 @@ select {
   overflow: auto; /* Enable scroll if needed */
   background-color: rgb(0, 0, 0); /* Fallback color */
   background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-  /* backdrop-filter: blur(3px); */
-  /* -webkit-backdrop-filter: blur(3px); */
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   -webkit-animation: 0.3s 1 fadeIn;
   animation: 0.3s 1 fadeIn;
 }
@@ -1070,7 +1068,7 @@ html.is-animating .transition-fade {
   display: flex;
   flex-direction: column;
   /* align-items: center; */
-  overflow-y: scroll;
+  overflow-y: auto;
   /* overflow: hidden; */
   max-width: 400px;
   min-width: 400px;
@@ -1107,6 +1105,12 @@ html.is-animating .transition-fade {
   /* background-image: url('../Images/alt_BG.png') !important; */
   touch-action: manipulation;
   -ms-touch-action: manipulation;
+  padding-bottom: 50px;
+  padding-top: 50px;
+}
+
+#display::-webkit-scrollbar {
+  display: none;
 }
 
 /* .room_div::-webkit-scrollbar-track {
@@ -1147,22 +1151,16 @@ html.is-animating .transition-fade {
   /* background-color: red; */
 }
 
-.scroll_enable {
-  width: 100%;
-  height: 100%;
-  overflow-y: scroll !important;
-  padding-bottom: 3px;
-}
-
 .room_div {
-  position: relative;
+  position: absolute;
   max-width: 100%;
   min-height: 100px;
+  min-width: 768px;
   /* display: none !important; */
   /* padding-bottom: 45px; */
   /* opacity: 0.2 !important; */
   margin: 0 auto !important;
-  overflow-y: visible !important;
+  overflow-y: scroll !important;
   display: -webkit-flex !important;
   display: flex !important;
   -webkit-flex-direction: column !important;
@@ -1183,7 +1181,7 @@ html.is-animating .transition-fade {
   /* overflow-x: hidden; */
   transition: width 0.4s;
   width: 100%;
-  height: calc(100% + 1px);
+  height: 100%;
 }
 
 .room_body.active {
@@ -1482,8 +1480,12 @@ html.is-animating .transition-fade {
 
 .search_div {
   display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 100vw;
-  height: 44px;
+  height: 50px;
+  max-height: 50px;
   background: rgba(30, 30, 30, 1);
   transition: background 1s, bottom 400ms cubic-bezier(0.075, 0.82, 0.165, 1),
     transform 2400ms cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -1494,6 +1496,8 @@ html.is-animating .transition-fade {
   border: none;
   width: calc(100% - 46px);
   height: 30px;
+  border-radius: 30px;
+  padding: 10px;
   font-size: 16px;
   background-color: rgba(41, 49, 51);
   color: #f1f1f1;
@@ -1558,10 +1562,6 @@ img[data-src] {
   bottom: 0;
   position: relative;
   width: 100%;
-}
-
-.message_div.right {
-  margin-left: auto;
 }
 
 .temp_full.active {
@@ -1779,7 +1779,7 @@ img[data-src] {
   border-radius: 100%;
   width: 38px;
   height: 38px;
-  font-size: 45px;
+  /* font-size: 45px; */
   text-align: center;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -1789,6 +1789,8 @@ img[data-src] {
   opacity: 0;
   transition: opacity 0.1 ease-in, background 1s, transform 0.1s ease-in;
   transform: scale(0);
+  backdrop-filter: blur(2px);
+  /* -webkit-backdrop-filter: blur(2px); */
 }
 
 .scroll_down:hover {
@@ -1800,6 +1802,8 @@ img[data-src] {
   opacity: 1;
   transition: opacity 0.1s ease-in, transform 0.1s ease-in;
   transform: scale(1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 #audio-slider {
@@ -2186,7 +2190,7 @@ input[type=checkbox]:checked:after {
 }
 
 #attachments_title {
-  height: 43px;
+  height: 50px;
   display: flex;
   align-items: center;
 }
@@ -2391,6 +2395,12 @@ input[type='range']:focus::-ms-fill-upper {
   padding: 10px;
 }
 
+.unread_message_bar {
+  text-align: center;
+  background-color: rgba(127, 127, 127, 0.7);
+  width: 100%;
+}
+
 #shadow_degree_chat,
 #avatar_profile_set,
 #color_chat_change_div {
@@ -2414,33 +2424,25 @@ input[type='range']:focus::-ms-fill-upper {
   -moz-appearance: none;
 }
 
-/* Re-enable for non-input elements if needed */
-div,
-span,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  appearance: auto;
-  -webkit-appearance: auto;
-  -moz-appearance: auto;
-} /* Just remove the basic styling */
-input,
-textarea,
-select,
-button {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  border: none;
-  background: none;
-  outline: none;
-  font: inherit;
-}
-@media (pointer: none), (pointer: coarse) {
+/* @media (pointer: none), (pointer: coarse)  */
+@media screen and (max-width: 768px) {
+  @keyframes message_div_selected_animation {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  .message_div.select {
+    z-index: 10009 !important;
+    touch-action: manipulation;
+    animation: message_div_selected_animation 0.5s ease-in-out;
+  }
+
   #name {
     position: absolute;
     left: 50%;
@@ -2453,17 +2455,14 @@ button {
   #opponent_title_name {
     justify-content: space-between;
   }
+  html,
   body {
-    /* overflow: hidden; */
-    overflow: visible;
-    position: relative;
-  }
-
-  body.room {
+    margin: 0 auto;
     overflow: hidden;
     position: fixed;
-    touch-action: none;
-    -ms-touch-action: none;
+  }
+  body {
+    position: relative;
   }
 
   .users_full_form:hover {
@@ -2531,10 +2530,6 @@ button {
     z-index: 5;
     right: 45px;
     opacity: 0;
-  }
-
-  .choose_list {
-    overflow-y: visible;
   }
 
   .main_chat_window {
@@ -2711,6 +2706,9 @@ button {
 }
 
 @media screen and (max-width: 768px) {
+  .message_div.right {
+    margin-left: auto;
+  }
   /* .main_chat_window {
     transform: translateX(0);
   } */

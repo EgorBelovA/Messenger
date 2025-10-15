@@ -193,7 +193,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # except ImportError:
 #     from .prod_settings import  *
 
-SECRET_KEY = 'django-ins-xhv4h8)%5yt*fscw-tgx%ndh5bbxjo%cu&7a^b%a%@umj53ae5'
+SECRET_KEY = 'django-ins-xhv4h8%5yt*fscw-tgx%ndh5bbxjou&7a^b@umj53ae5'
 
 DEBUG = True
 
@@ -210,12 +210,20 @@ ALLOWED_HOSTS = ["*"]
 #     }
 # }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'main_cache'),
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://redis:6379/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 DATABASES = {
     'default': {
