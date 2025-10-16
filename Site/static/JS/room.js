@@ -144,6 +144,14 @@ function enableDoubleTap(element, callback) {
   });
 }
 
+window.addEventListener('beforeunload', (event) => {
+  if (window.location.hash) {
+    event.preventDefault();
+    event.returnValue = '';
+    return '';
+  }
+});
+
 function audio_play(index) {
   link = audio_files[index];
 
@@ -381,11 +389,11 @@ window.onload = function () {
     '--send_div_height',
     `${send_div_height}px`
   );
-  const sendDiv = document.querySelector('.send_div');
+  // const sendDiv = document.querySelector('.send_div');
 
-  sendDiv.ontouchstart = function () {
-    $('.textarea').focus();
-  };
+  // sendDiv.ontouchstart = function () {
+  //   $('.textarea').focus();
+  // };
 
   function throttle(func, delay) {
     let timeoutId;
@@ -615,11 +623,37 @@ window.onload = function () {
     window.visualViewport.addEventListener('resize', viewportResize);
   }
 
-  document.querySelector('.textarea').addEventListener('focus', (e) => {
+  const textareaElement = document.querySelector('.textarea');
+  let textareaLongPress = false;
+  let textareaLongPressTimeout = null;
+
+  textareaElement.ontouchstart = async function () {
+    textareaLongPressTimeout = setTimeout(() => {
+      textareaLongPress = true;
+    }, 1000);
+  };
+
+  textareaElement.ontouchend = function () {
+    textareaElement.focus();
+  };
+
+  textareaElement.addEventListener('focus', async (e) => {
+    if (textareaLongPress) {
+      const textArea = this;
+      console.log('focus');
+      try {
+        const clipboardText = await navigator.clipboard.readText();
+        textArea.value = clipboardText;
+      } catch (err) {
+        console.error('Failed to read clipboard:', err);
+      }
+      clearTimeout(textareaLongPressTimeout);
+      textareaLongPress = false;
+    }
     document.querySelector('.room_div').classList.add('focus');
   });
 
-  document.querySelector('.textarea').addEventListener('blur', (e) => {
+  textareaElement.addEventListener('blur', (e) => {
     document.querySelector('.room_div').classList.remove('focus');
   });
 
@@ -3635,7 +3669,6 @@ window.onload = function () {
   }
 
   document.querySelector('#file_div').onclick = function () {
-    console.log(123);
     document.querySelector('#file').click();
   };
 

@@ -23,43 +23,64 @@ from django.forms.models import model_to_dict
 from social_django import *
 from asgiref.sync import sync_to_async
 
+from django.contrib.auth import login, authenticate
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 
+# views.py
+# views.py
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
-# @login_required(login_url='login')
-# def room(request, room = 0):
-#     User = get_user_model()
-#     all_chats = Room.objects.filter(users=request.user)
-#     all_users = User.objects.all()
-#     if(room == 0):
-#         return render(request, 'room.html', {"all_chats": all_chats, "all_users": all_users})
-#     if(Room.objects.filter(id=room).filter(users=request.user).exists()):
-#         mes = Message.objects.all()
-#         for item in mes:
-#             for fl in item.file.all():
-#                 print(fl.file)
-#         username = request.user
-#         opponent = Room.objects.get(id=room).users.exclude(id=request.user.id)[0]
-#         room_details = Room.objects.get(id=room)
-#         return render(request, 'room.html', {
-#             'username': username,
-#             'room': room,
-#             'room_details': room_details,
-#             'users': opponent,
-#             "all_chats": all_chats,
-#             "all_users": all_users,
-#         })
-#     else:
-#         return redirect('room')
-
-
-@login_required(login_url='login')
-def room(request, room = 0):
+def home(request, room=0):
+    if request.user.is_authenticated:
+        return render_main_app(request, room)
+    else:
+        if request.method == 'POST':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                
+                # Check if it's an AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Login successful'
+                    })
+                else:
+                    return redirect('home')
+            else:
+                # Check if it's an AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Invalid username or password'
+                    }, status=400)
+                else:
+                    return render(request, 'pages/login.html', {'error': 'Invalid credentials'})
+        
+        # Regular GET request
+        return render(request, 'pages/login.html')
+def render_main_app(request, room=0):
+    """Render the main chat application for authenticated users"""
     User = get_user_model()
     all_chats = Room.objects.filter(users=request.user)
     all_users = User.objects.all()
-    if(room == 0):
-        return render(request, 'room.html', {"all_chats": all_chats, "all_users": all_users})
-    if(Room.objects.filter(id=room).filter(users=request.user).exists()):
+    
+    if room == 0:
+        return render(request, 'room.html', {
+            "all_chats": all_chats, 
+            "all_users": all_users,
+            "user": request.user  # Make sure user is passed to template
+        })
+    
+    if Room.objects.filter(id=room).filter(users=request.user).exists():
+        # Your existing room logic
         mes = Message.objects.all()
         for item in mes:
             for fl in item.file.all():
@@ -76,7 +97,51 @@ def room(request, room = 0):
             "all_users": list(all_users.values()),
         })
     else:
-        return redirect('room')
+        # Stay on the same page but with room=0
+        return render(request, 'room.html', {
+            "all_chats": all_chats, 
+            "all_users": all_users,
+            "user": request.user
+        })
+
+def handle_login(request):
+    """Handle login form submission and rendering"""
+    context = {}
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            # Re-render the same page but now authenticated
+            return render_main_app(request, 0)
+        else:
+            context['error'] = 'Invalid credentials'
+    
+    # Render login form
+    return render(request, 'pages/login.html', context)
+
+# Update your existing LoginUser view to work with the new flow
+class LoginUser(DataMixin, LoginView):
+    form_class = AuthenticationForm
+    template_name = 'pages/login.html'
+    
+    def get_success_url(self):
+        # Redirect to home after login
+        return self.request.POST.get('next') or self.request.GET.get('next') or '/'
+    
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Login")
+        return dict(list(context.items()) + list(c_def.items()))
+    
+    def get(self, request, *args, **kwargs):
+        # If user is already authenticated, redirect to home
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super().get(request, *args, **kwargs)
 
 
 @login_required(login_url='login')
@@ -144,16 +209,6 @@ def send(request):
     return HttpResponse('Message sent successfully')
 
 
-# @login_required(login_url='login')
-# def getMessages(request, room):
-#     room_details = Room.objects.get(id=room)
-#     # files_alpha = File.objects.filter(room=room_details.id)
-#     messages = Message.objects.filter(room=room_details.id).order_by('id')
-#     message = (Message.objects.filter(room=room_details.id).order_by('id').values("id", "date", "user", "room", "viewed", "liked", "file__file").last())
-#     message = json.dumps(message, sort_keys=True, default=str)
-#     return JsonResponse({"messages": list(messages.values()), "files": {}})
-
-
 from django.db.models import Max
 from datetime import datetime
 class GetChats(APIView):
@@ -186,31 +241,6 @@ class GetMessages(APIView):
         Response()
 
 
-# class GetLastMessage(APIView):
-#     def get(self, request, room):
-#         message = Room.objects.get(id=room).room.latest("id")
-#         serializer = MessageSerializer(message, many=False)
-#         print(serializer.data)
-#         return Response({"messages": serializer.data})
-#     def post(self, request):
-#         Response()
-
-
-
-
-# @login_required(login_url='login')
-# def home(request):
-#     User = get_user_model()
-#     all_users = User.objects.exclude(id=request.user.id)
-#     username = request.user.rooms
-#     all_chats = username.all()
-#     opponent = ""
-#     for each in all_chats:
-#         opponent = each.users.filter(email=request.user)
-#
-#     return render(request, 'home.html', {"all_users": all_users, "all_chats": all_chats, "opponent": opponent})
-
-
 @login_required(login_url='login')
 def deleteuser(request):
     if request.method == 'POST':
@@ -237,7 +267,6 @@ def pageNotFound500(request):
 
 class RegisterUser(DataMixin, CreateView):
     form_class = CustomUserCreationForm
-    # fields = ('username', 'email', 'password', 'first_name')
     template_name = 'pages/signup.html'
     success_url = reverse_lazy('home')
 
@@ -253,20 +282,28 @@ class RegisterUser(DataMixin, CreateView):
     #     return redirect('home')
 
 
-class LoginUser(DataMixin, LoginView):
-    form_class = AuthenticationForm
-    template_name = 'pages/login.html'
-    success_url = reverse_lazy('home')
+# class LoginUser(DataMixin, LoginView):
+#     form_class = AuthenticationForm
+#     template_name = 'pages/login.html'
+    
+#     def get_success_url(self):
+#         return reverse_lazy('home')  # Redirect to home after login
+    
+#     def get_context_data(self, *, object_list = None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         c_def = self.get_user_context(title="Login")
+#         return dict(list(context.items()) + list(c_def.items()))
 
-    def get_context_data(self, *, object_list = None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Login")
-        return dict(list(context.items()) + list(c_def.items()))
+# views.py
+# from django.views.decorators.http import require_POST
 
-
+# @require_POST
+@login_required
 def logout_user(request):
+    """Logout user and stay on the same page"""
     logout(request)
-    return redirect('login')
+    # Return the home page which will now show login form
+    return home(request, 0)
 
 
 def profile(request):
