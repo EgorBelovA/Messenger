@@ -250,11 +250,11 @@ select {
   transform: translateX(0);
   z-index: 999;
   will-change: transform;
+  /* backface-visibility: hidden; */
   position: relative;
 }
 
 .main_chat_window.swipe {
-  will-change: transform;
   transform: translateX(var(--swipe-margin));
   transition: transform 0s;
 }
@@ -351,7 +351,7 @@ select {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 40px;
+  min-height: 40px;
   /* min-height: 100%; */
   /* background-color: red !important; */
 }
@@ -1137,7 +1137,8 @@ html.is-animating .transition-fade {
   /* width: 600px; */
   background: none !important;
   background-color: none !important;
-
+  will-change: transform;
+  /* backface-visibility: hidden; */
   /* margin-bottom: 200px !important; */
 }
 
@@ -1193,18 +1194,6 @@ html.is-animating .transition-fade {
   min-width: 100%;
 } */
 
-.display_clone {
-  position: absolute;
-  max-width: 100%;
-  bottom: 0px;
-  min-height: var(--send_div_height);
-  max-height: var(--send_div_height);
-  width: 100%;
-  overflow: hidden;
-  /* padding-bottom: 100px; */
-  /* background-color: red; */
-}
-
 .room_div {
   position: absolute;
   max-width: 100%;
@@ -1224,10 +1213,6 @@ html.is-animating .transition-fade {
 .room_div > :first-child {
   margin-top: auto !important;
   /* use !important to prevent breakage from child margin settings */
-}
-.room_div.focus {
-  /* transition: transform 0.4s cubic-bezier(0.075, 0.82, 0.165, 1); */
-  /* transform: translateY(calc(-1 * var(--send_div_height_focus))); */
 }
 
 .room_body {
@@ -1347,11 +1332,11 @@ html.is-animating .transition-fade {
   text-overflow: ellipsis;
   width: 100%;
   font-size: 14px;
-  height: 40px;
+  /* height: 40px; */
   overflow-wrap: break-word;
   overflow: hidden;
+  word-break: break-word; /* Add this for better word breaking */
 }
-
 .users {
   display: flex;
   flex-direction: row;
@@ -1422,7 +1407,7 @@ html.is-animating .transition-fade {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  height: 50px;
+  height: 60px;
 }
 
 .avatar_profile {
@@ -1469,12 +1454,12 @@ html.is-animating .transition-fade {
 }
 
 .user-info-avatar {
-  width: 50px;
-  height: 50px;
-  min-width: 50px;
-  min-height: 50px;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  min-height: 60px;
   font-size: 22px;
-  line-height: 50px;
+  line-height: 60px;
   margin-right: 10px;
   margin-left: 10px;
   text-align: center;
@@ -1837,15 +1822,10 @@ img[data-src] {
   -ms-user-select: none;
   user-select: none;
   opacity: 0;
-  transition: opacity 0.1 ease-in, background 1s, transform 0.1s ease-in;
+  transition: opacity 0.1s ease-in, background 1s, transform 0.1s ease-in;
   transform: scale(0);
   backdrop-filter: blur(2px);
   /* -webkit-backdrop-filter: blur(2px); */
-}
-
-.scroll_down:hover {
-  background: rgba(40, 40, 40);
-  color: rgb(120, 120, 120);
 }
 
 .scroll_down.active {
@@ -1855,6 +1835,10 @@ img[data-src] {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
+
+/* .scroll_down:not(.active) {
+  transition: opacity 2.1s ease-in, background 1s, transform 2.1s ease-in;
+} */
 
 #audio-slider {
   width: 100%;
@@ -2782,7 +2766,7 @@ input[type='range']:focus::-ms-fill-upper {
   }
 
   .choose_list.swipe {
-    will-change: transform;
+    /* will-change: transform; */
     transform: translateX(calc(var(--swipe-margin) / 3 - 33%));
     transition: transform 0s;
   }

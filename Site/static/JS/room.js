@@ -47,10 +47,14 @@ function go_home_page_func() {
   window.history.replaceState(null, null, `#${room}`);
   load_check = 1;
   load_photo_check = 0;
-
+  clearChatTimeOut = 0;
   //   document.querySelector(".search_field").focus();
-
-  $('#display').empty();
+  if (window.innerWidth < 768) {
+    clearChatTimeOut = 350;
+  }
+  setTimeout(() => {
+    $('#display').empty();
+  }, clearChatTimeOut);
   document.querySelector('#post-form').classList.add('hidden');
 
   //        document.querySelector("#select_chat_to_start").style.display = "inline-block";
@@ -363,7 +367,7 @@ window.onload = function () {
   window.history.replaceState(null, null, null);
 
   all_data_rooms = [];
-
+  let choose_list_swiped;
   ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
   room = document.getElementById('room').value;
   play_check = 1;
@@ -423,7 +427,7 @@ window.onload = function () {
   var startX = 0;
   var startY = 0;
   var startTime = 0;
-  var swipeThreshold = window.innerWidth / 2;
+  var swipeThreshold = 0;
   var velocityThreshold = 200;
   var deltaX = 0;
   var deltaY = 0;
@@ -436,6 +440,11 @@ window.onload = function () {
     startY = event.changedTouches[0].clientY;
     startTime = Date.now();
     isSwiping = false;
+    if (choose_list_swiped) {
+      clearTimeout(choose_list_swiped);
+      choose_list_swiped = null;
+    }
+
     document.documentElement.style.setProperty('--swipe-margin', `${0}px`);
     document.documentElement.style.setProperty(
       '--swipe-margin-choose-list',
@@ -453,6 +462,10 @@ window.onload = function () {
     var endTime = Date.now();
     var duration = endTime - startTime;
     var shouldSwipe = false;
+    if (choose_list_swiped) {
+      clearTimeout(choose_list_swiped);
+      choose_list_swiped = null;
+    }
 
     currentX = event.changedTouches[0].clientX;
     currentY = event.changedTouches[0].clientY;
@@ -471,12 +484,22 @@ window.onload = function () {
       }
 
       if (shouldSwipe) {
-        // setTimeout(function () {
-        // document.querySelector('.choose_list').classList.add('swiped');
-        // }, 350);
+        if (choose_list_swiped) {
+          clearTimeout(choose_list_swiped);
+        }
+
         sender_ajax.abort();
         window.history.replaceState(null, null, `#${0}`);
         hashChange();
+      } else {
+        if (choose_list_swiped) {
+          clearTimeout(choose_list_swiped);
+        }
+
+        choose_list_swiped = setTimeout(function () {
+          document.querySelector('.choose_list').classList.add('swiped');
+          choose_list_swiped = null;
+        }, 350);
       }
     }
 
@@ -519,13 +542,13 @@ window.onload = function () {
     }
   }
 
-  document.querySelector('#display').onscroll = throttle(function (event) {
-    // document.querySelector('.display_clone').scrollTop =
-    //   event.target.scrollTop +
-    //   window.innerHeight -
-    //   opponent_title_name_height -
-    //   send_div_height;
-  }, 50); // ~60fps
+  // document.querySelector('#display').onscroll = throttle(function (event) {
+  //   // document.querySelector('.display_clone').scrollTop =
+  //   //   event.target.scrollTop +
+  //   //   window.innerHeight -
+  //   //   opponent_title_name_height -
+  //   //   send_div_height;
+  // }, 50); // ~60fps
 
   // Альтернативный вариант с requestAnimationFrame для максимальной плавности
   //   function rafThrottle(func) {
@@ -1377,7 +1400,7 @@ window.onload = function () {
       let data = JSON.parse(e.data);
       if (data.type == 'chat_message') {
         all_data_rooms[data.room_id].messages.push(data.data);
-
+        message_initialization(all_data_rooms[data.room_id], true);
         room_last_message = txtdecode(data.data.value, '1234');
         if (data.data.value != '')
           room_list[data.room_id].querySelector(
@@ -1398,427 +1421,428 @@ window.onload = function () {
           }
         }
 
-        if (room == data.room_id) {
-          messages = data.data;
+        // if (room == data.room_id) {
+        //   messages = data.data;
 
-          var this_date = new Date();
-          block_date = document.createElement('div');
+        //   var this_date = new Date();
+        //   block_date = document.createElement('div');
 
-          //					if (this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) && (key == 0 || (key > 0 && response.messages[key].date.slice(5, 7) != response.messages[key - 1].date.slice(5, 7)))) {
-          //						new_month_check = 1;
-          //						block_month = document.createElement("div");
-          //						block_month.innerHTML = months[month];
-          //						block_month.setAttribute("id", "block_date");
-          //					} else new_month_check = 0;
-          let temp = document.createElement('div');
-          let all_files = '';
-          var check_transfer = 0;
-          var mes = '';
-          var file_new_name = '';
-          mes = messages.value;
-          mes_value = messages.value;
+        //   //					if (this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) && (key == 0 || (key > 0 && response.messages[key].date.slice(5, 7) != response.messages[key - 1].date.slice(5, 7)))) {
+        //   //						new_month_check = 1;
+        //   //						block_month = document.createElement("div");
+        //   //						block_month.innerHTML = months[month];
+        //   //						block_month.setAttribute("id", "block_date");
+        //   //					} else new_month_check = 0;
+        //   let temp = document.createElement('div');
+        //   let all_files = '';
+        //   var check_transfer = 0;
+        //   var mes = '';
+        //   var file_new_name = '';
+        //   mes = messages.value;
+        //   mes_value = messages.value;
 
-          if (mes != '') mes = txtdecode(mes, '1234');
-          //					mes = urlify(mes);
-          //					mes = "<xmp>" + mes + "</xmp>";
-          counter_img = 0;
-          var user_file = '';
-          var user_file_additional = '';
-          var xhr = new XMLHttpRequest();
+        //   if (mes != '') mes = txtdecode(mes, '1234');
 
-          files_message = messages.file;
-          //                    if(messages.file[0] != undefined) console.log(files_message, files_message.length)
-          for (
-            var files_key = files_message.length - 1;
-            files_key >= 0;
-            --files_key
-          ) {
-            lastIndexOf_ =
-              files_message[files_key].file.lastIndexOf('_') == -1
-                ? files_message[files_key].file.lastIndexOf('.')
-                : files_message[files_key].file.lastIndexOf('_');
-            file_name = files_message[files_key].file.slice(
-              files_message[files_key].file.indexOf('media') + 6,
-              lastIndexOf_
-            );
-            // file_new_name = decodeURIComponent(file_name.replace(/\s+/g, '').replace(/[0-9a-f]{2}/g, '%$&'));
-            file_new_name = '';
-            file_type_from_name = files_message[files_key].file.slice(
-              files_message[files_key].file.lastIndexOf('.')
-            );
+        //   //					mes = urlify(mes);
+        //   //					mes = "<xmp>" + mes + "</xmp>";
+        //   counter_img = 0;
+        //   var user_file = '';
+        //   var user_file_additional = '';
+        //   var xhr = new XMLHttpRequest();
 
-            //                            file_url = "//" + window.location.host + files_message[files_key].file;
-            //                            xhr.open('GET', file_url, true);
-            //                            xhr.responseType = 'blob';
-            //                            xhr.onload = function(e) {
-            //                                var blob = this.response;
-            //                                user_file_additional = window.URL.createObjectURL(blob);
-            ////                                console.log(user_file_additional)
-            //                            }
-            //                            xhr.send();
+        //   files_message = messages.file;
+        //   //                    if(messages.file[0] != undefined) console.log(files_message, files_message.length)
+        //   for (
+        //     var files_key = files_message.length - 1;
+        //     files_key >= 0;
+        //     --files_key
+        //   ) {
+        //     lastIndexOf_ =
+        //       files_message[files_key].file.lastIndexOf('_') == -1
+        //         ? files_message[files_key].file.lastIndexOf('.')
+        //         : files_message[files_key].file.lastIndexOf('_');
+        //     file_name = files_message[files_key].file.slice(
+        //       files_message[files_key].file.indexOf('media') + 6,
+        //       lastIndexOf_
+        //     );
+        //     // file_new_name = decodeURIComponent(file_name.replace(/\s+/g, '').replace(/[0-9a-f]{2}/g, '%$&'));
+        //     file_new_name = '';
+        //     file_type_from_name = files_message[files_key].file.slice(
+        //       files_message[files_key].file.lastIndexOf('.')
+        //     );
 
-            if (files_message[files_key].file != 'False') {
-              user_file =
-                '//' +
-                window.location.host +
-                files_message[files_key].file.slice(6);
-              let attach_file = document.createElement('span');
-              var file_type = files_message[files_key].file
-                .split('.')
-                .pop()
-                .toLowerCase();
-              if (
-                file_type == 'jpg' ||
-                file_type == 'png' ||
-                file_type == 'jpeg' ||
-                file_type == 'jpg'
-              ) {
-                var img = document.createElement('img');
-                img.src = user_file;
-                img.setAttribute('class', 'mes_img lazy');
-                ++counter_img;
+        //     //                            file_url = "//" + window.location.host + files_message[files_key].file;
+        //     //                            xhr.open('GET', file_url, true);
+        //     //                            xhr.responseType = 'blob';
+        //     //                            xhr.onload = function(e) {
+        //     //                                var blob = this.response;
+        //     //                                user_file_additional = window.URL.createObjectURL(blob);
+        //     ////                                console.log(user_file_additional)
+        //     //                            }
+        //     //                            xhr.send();
 
-                var attachment_photo = img;
-                attachment_photo = document.createElement('img');
-                attachment_photo.src = user_file;
+        //     if (files_message[files_key].file != 'False') {
+        //       user_file =
+        //         '//' +
+        //         window.location.host +
+        //         files_message[files_key].file.slice(6);
+        //       let attach_file = document.createElement('span');
+        //       var file_type = files_message[files_key].file
+        //         .split('.')
+        //         .pop()
+        //         .toLowerCase();
+        //       if (
+        //         file_type == 'jpg' ||
+        //         file_type == 'png' ||
+        //         file_type == 'jpeg' ||
+        //         file_type == 'jpg'
+        //       ) {
+        //         var img = document.createElement('img');
+        //         img.src = user_file;
+        //         img.setAttribute('class', 'mes_img lazy');
+        //         ++counter_img;
 
-                user_file_pres =
-                  "<img class='mes_img lazy' loading='lazy' src=\"" +
-                  user_file +
-                  '">';
+        //         var attachment_photo = img;
+        //         attachment_photo = document.createElement('img');
+        //         attachment_photo.src = user_file;
 
-                attachment_photo.setAttribute(
-                  'class',
-                  'mes_img attachment_photo lazy'
-                );
+        //         user_file_pres =
+        //           "<img class='mes_img lazy' loading='lazy' src=\"" +
+        //           user_file +
+        //           '">';
 
-                attach_file.innerHTML =
-                  "<img class='attachment_photo mes_img lazy' src=\"" +
-                  user_file +
-                  '">';
-                $('#attachment_photos').prepend(attachment_photo);
-                all_photos_and_videos.push(user_file);
+        //         attachment_photo.setAttribute(
+        //           'class',
+        //           'mes_img attachment_photo lazy'
+        //         );
 
-                //                                        if (new_month_check) $("#attachment_photos").prepend(block_month);
-              } else if (file_type == 'mp3' || file_type == 'ogg') {
-                user_file_pres = document.createElement('div');
-                user_file_pres.innerHTML = '123123123123';
+        //         attach_file.innerHTML =
+        //           "<img class='attachment_photo mes_img lazy' src=\"" +
+        //           user_file +
+        //           '">';
+        //         $('#attachment_photos').prepend(attachment_photo);
+        //         all_photos_and_videos.push(user_file);
 
-                user_file_pres.setAttribute(
-                  'onclick',
-                  'audio_play("' + user_file + '"'
-                );
-                temp.appendChild(user_file_pres);
+        //         //                                        if (new_month_check) $("#attachment_photos").prepend(block_month);
+        //       } else if (file_type == 'mp3' || file_type == 'ogg') {
+        //         user_file_pres = document.createElement('div');
+        //         user_file_pres.innerHTML = '123123123123';
 
-                //                                        user_file_pres = "<div onclick='audio_play(\"" + user_file + "\" ,\""+ file_new_name + file_type_from_name + "\");'>" + file_new_name + file_type_from_name + "</div><a download=\"" + file_new_name + file_type_from_name + "\" target='_blank' href=\"" + user_file_additional + "\">X</a>";
+        //         user_file_pres.setAttribute(
+        //           'onclick',
+        //           'audio_play("' + user_file + '"'
+        //         );
+        //         temp.appendChild(user_file_pres);
 
-                attach_file.innerHTML =
-                  "<audio loading='eager' controls><source type='audio/mpeg' src=\"" +
-                  user_file +
-                  '"></audio>';
-                attachment_music.prepend(attach_file);
+        //         //                                        user_file_pres = "<div onclick='audio_play(\"" + user_file + "\" ,\""+ file_new_name + file_type_from_name + "\");'>" + file_new_name + file_type_from_name + "</div><a download=\"" + file_new_name + file_type_from_name + "\" target='_blank' href=\"" + user_file_additional + "\">X</a>";
 
-                if (new_month_check) $('#user_file_pres').prepend(block_month);
-              } else if (file_type == 'mp4' || file_type == 'mov') {
-                ++counter_img;
-                user_file_pres =
-                  "<video loading='lazy' class='mes_img' controls><source type='video/mp4' src=\"" +
-                  user_file +
-                  '"></video>';
-                attach_file.innerHTML =
-                  "<video loading='lazy' class='attachment_photo' controls><source type='video/mp4' src=\"" +
-                  user_file +
-                  '"></video>';
+        //         attach_file.innerHTML =
+        //           "<audio loading='eager' controls><source type='audio/mpeg' src=\"" +
+        //           user_file +
+        //           '"></audio>';
+        //         attachment_music.prepend(attach_file);
 
-                var vd = document.createElement('video');
-                vd.src = user_file;
+        //         if (new_month_check) $('#user_file_pres').prepend(block_month);
+        //       } else if (file_type == 'mp4' || file_type == 'mov') {
+        //         ++counter_img;
+        //         user_file_pres =
+        //           "<video loading='lazy' class='mes_img' controls><source type='video/mp4' src=\"" +
+        //           user_file +
+        //           '"></video>';
+        //         attach_file.innerHTML =
+        //           "<video loading='lazy' class='attachment_photo' controls><source type='video/mp4' src=\"" +
+        //           user_file +
+        //           '"></video>';
 
-                //                                        vd.onloadeddata  = function(){
-                //                                            document.querySelector(".room_body").scrollTo({
-                //                                                top: document.querySelector(".room_body").scrollHeight,
-                //                                            });
-                //                                        }
+        //         var vd = document.createElement('video');
+        //         vd.src = user_file;
 
-                attachment_videos.prepend(attach_file);
+        //         //                                        vd.onloadeddata  = function(){
+        //         //                                            document.querySelector(".room_body").scrollTo({
+        //         //                                                top: document.querySelector(".room_body").scrollHeight,
+        //         //                                            });
+        //         //                                        }
 
-                all_photos_and_videos.push(user_file);
+        //         attachment_videos.prepend(attach_file);
 
-                //                                        if (new_month_check) $("#attachment_videos").prepend(block_month);
-              } else {
-                user_file_pres =
-                  "<a id='user_link' download=\"" +
-                  file_new_name +
-                  '" target=\'_blank\' href="' +
-                  user_file +
-                  '">Link to the file</a>';
-                attach_file.innerHTML =
-                  "<a target='_blank' href=\"" +
-                  user_file +
-                  '">Link to the file</a>';
-                attachment_files.prepend(attach_file);
-                if (new_month_check)
-                  $('#attachment_files').prepend(block_month);
-              }
-              temp.innerHTML =
-                '<span>' + user_file_pres + '</span>' + temp.innerHTML;
-              all_files += user_file_pres;
-            }
-          }
+        //         all_photos_and_videos.push(user_file);
 
-          if (messages.user == document.querySelector('#username_id').value)
-            if (messages.viewed == true)
-              viewed =
-                "<img id='viewed_check' src=\"//" +
-                window.location.host +
-                '/static/Images/dialogs_received@3x.png">';
-            else
-              viewed =
-                "<img id='viewed_check' src=\"//" +
-                window.location.host +
-                '/static/Images/dialogs_sent@3x.png">';
-          else viewed = '';
+        //         //                                        if (new_month_check) $("#attachment_videos").prepend(block_month);
+        //       } else {
+        //         user_file_pres =
+        //           "<a id='user_link' download=\"" +
+        //           file_new_name +
+        //           '" target=\'_blank\' href="' +
+        //           user_file +
+        //           '">Link to the file</a>';
+        //         attach_file.innerHTML =
+        //           "<a target='_blank' href=\"" +
+        //           user_file +
+        //           '">Link to the file</a>';
+        //         attachment_files.prepend(attach_file);
+        //         if (new_month_check)
+        //           $('#attachment_files').prepend(block_month);
+        //       }
+        //       temp.innerHTML =
+        //         '<span>' + user_file_pres + '</span>' + temp.innerHTML;
+        //       all_files += user_file_pres;
+        //     }
+        //   }
 
-          liked = document.createElement('image');
-          liked.src = window.location.host + '/static/Images/like_emoji.png';
+        //   if (messages.user == document.querySelector('#username_id').value)
+        //     if (messages.viewed == true)
+        //       viewed =
+        //         "<img id='viewed_check' src=\"//" +
+        //         window.location.host +
+        //         '/static/Images/dialogs_received@3x.png">';
+        //     else
+        //       viewed =
+        //         "<img id='viewed_check' src=\"//" +
+        //         window.location.host +
+        //         '/static/Images/dialogs_sent@3x.png">';
+        //   else viewed = '';
 
-          if (messages.liked == false)
-            liked =
-              "<img id='liked_check'  loading='lazy' src=\"//" +
-              window.location.host +
-              "/static/Images/like_emoji.png\"><img id='stellar_particles' loading='lazy' src=\"//" +
-              window.location.host +
-              '/static/Images/stellar_particles.gif">';
-          if (messages.liked == true)
-            liked =
-              "<img id='liked_check'  loading='lazy' width='30px' style='display: unset' src=\"//" +
-              window.location.host +
-              "/static/Images/like_emoji.png\"><img id='stellar_particles' loading='lazy' src=\"//" +
-              window.location.host +
-              '/static/Images/stellar_particles.gif">';
+        //   liked = document.createElement('image');
+        //   liked.src = window.location.host + '/static/Images/like_emoji.png';
 
-          temp.setAttribute('class', 'message_div');
-          temp.setAttribute('value', messages.id);
-          if (messages.user != document.querySelector('#username_id').value) {
-            temp.innerHTML +=
-              "<div class='message'><span>" +
-              mes +
-              "</span><span id='viewed_span'>" +
-              viewed +
-              "</span><span class='time-left'>" +
-              messages.date.slice(11, 16) +
-              "</span><span id='reaction_span'>" +
-              liked +
-              '</span></div>';
-          } else {
-            temp.innerHTML +=
-              "<div class='message darker'><span>" +
-              mes +
-              "</span><span id='viewed_span'>" +
-              viewed +
-              "</span><span class='time-left'>" +
-              messages.date.slice(11, 16) +
-              "</span><span id='reaction_span'>" +
-              liked +
-              '</span></div>';
-          }
-          if (mes == '' && temp.querySelector('.mes_img') != null) {
-            temp
-              .querySelector('.message')
-              .setAttribute(
-                'style',
-                'position: absolute; padding: 0; bottom: 5px; right: 0px; background: rgba(20,20,20, 0.7); border-radius: 30px; padding: 3px; opacity: 0; transition: opacity 0.2s;'
-              );
-            temp
-              .querySelector('.time-left')
-              .setAttribute(
-                'style',
-                'color: white; font-size: 14px; margin: 0;'
-              );
-            temp
-              .querySelector('#reaction_span')
-              .setAttribute('style', 'margin: 0 5px 0 0;');
-            temp
-              .querySelector('#viewed_span')
-              .setAttribute('style', 'margin: 0 0 0 5px;');
+        //   if (messages.liked == false)
+        //     liked =
+        //       "<img id='liked_check'  loading='lazy' src=\"//" +
+        //       window.location.host +
+        //       "/static/Images/like_emoji.png\"><img id='stellar_particles' loading='lazy' src=\"//" +
+        //       window.location.host +
+        //       '/static/Images/stellar_particles.gif">';
+        //   if (messages.liked == true)
+        //     liked =
+        //       "<img id='liked_check'  loading='lazy' width='30px' style='display: unset' src=\"//" +
+        //       window.location.host +
+        //       "/static/Images/like_emoji.png\"><img id='stellar_particles' loading='lazy' src=\"//" +
+        //       window.location.host +
+        //       '/static/Images/stellar_particles.gif">';
 
-            temp.onmouseover = function () {
-              temp.querySelector('.message').style.opacity = '1';
-            };
-            temp.onmouseout = function () {
-              temp.querySelector('.message').style.opacity = '0';
-            };
-          }
+        //   temp.setAttribute('class', 'message_div');
+        //   temp.setAttribute('value', messages.id);
+        //   if (messages.user != document.querySelector('#username_id').value) {
+        //     temp.innerHTML +=
+        //       "<div class='message'><span>" +
+        //       mes +
+        //       "</span><span id='viewed_span'>" +
+        //       viewed +
+        //       "</span><span class='time-left'>" +
+        //       messages.date.slice(11, 16) +
+        //       "</span><span id='reaction_span'>" +
+        //       liked +
+        //       '</span></div>';
+        //   } else {
+        //     temp.innerHTML +=
+        //       "<div class='message darker'><span>" +
+        //       mes +
+        //       "</span><span id='viewed_span'>" +
+        //       viewed +
+        //       "</span><span class='time-left'>" +
+        //       messages.date.slice(11, 16) +
+        //       "</span><span id='reaction_span'>" +
+        //       liked +
+        //       '</span></div>';
+        //   }
+        //   if (mes == '' && temp.querySelector('.mes_img') != null) {
+        //     temp
+        //       .querySelector('.message')
+        //       .setAttribute(
+        //         'style',
+        //         'position: absolute; padding: 0; bottom: 5px; right: 0px; background: rgba(20,20,20, 0.7); border-radius: 30px; padding: 3px; opacity: 0; transition: opacity 0.2s;'
+        //       );
+        //     temp
+        //       .querySelector('.time-left')
+        //       .setAttribute(
+        //         'style',
+        //         'color: white; font-size: 14px; margin: 0;'
+        //       );
+        //     temp
+        //       .querySelector('#reaction_span')
+        //       .setAttribute('style', 'margin: 0 5px 0 0;');
+        //     temp
+        //       .querySelector('#viewed_span')
+        //       .setAttribute('style', 'margin: 0 0 0 5px;');
 
-          //                            var files_num = -1;
-          //                            for (var files_key in files_message) {
-          //                                    var file_type = files_message[files_key].file.split('.').pop();
-          //                                    if (user_file != "" && (file_type == "jpg" || file_type == "png" || file_type == "jpeg" || file_type == "jpg" || file_type == "mp4" || file_type == "mov")) {
-          //                                        ++files_num;
-          //                                        var modal = document.getElementById('myModal');
-          //                                        img_comment = document.getElementById('img_comment');
-          //                                        var modalImg = document.getElementById("img01");
-          //                                        var captionText = document.getElementById("caption");
-          //                                        temp.getElementsByClassName('mes_img')[files_num].onmousedown = attachment_photo.onclick = function() {
-          //                                            modal.style.display = "block";
-          //                                            modalImg.src = this.src;
-          //                                            document.querySelector("#media_display").style.display = "block";
-          ////                                            console.log(temp.querySelector(".message").getElementsByTagName("span")[0].textContent)
-          //                                            if (temp.querySelector(".message").getElementsByTagName("span")[0].textContent == undefined)
-          //                                                captionText.innerHTML = "";
-          //                                            else
-          //                                                captionText.innerHTML = temp.querySelector(".message").getElementsByTagName("span")[0].textContent;
-          //                                        }
-          //
-          //                                    }
-          //                            }
+        //     temp.onmouseover = function () {
+        //       temp.querySelector('.message').style.opacity = '1';
+        //     };
+        //     temp.onmouseout = function () {
+        //       temp.querySelector('.message').style.opacity = '0';
+        //     };
+        //   }
 
-          temp.querySelector('.message').setAttribute('value', messages.user);
-          setTimeout(function () {
-            temp.querySelector('.message').classList.add('active');
-          }, 0);
+        //   //                            var files_num = -1;
+        //   //                            for (var files_key in files_message) {
+        //   //                                    var file_type = files_message[files_key].file.split('.').pop();
+        //   //                                    if (user_file != "" && (file_type == "jpg" || file_type == "png" || file_type == "jpeg" || file_type == "jpg" || file_type == "mp4" || file_type == "mov")) {
+        //   //                                        ++files_num;
+        //   //                                        var modal = document.getElementById('myModal');
+        //   //                                        img_comment = document.getElementById('img_comment');
+        //   //                                        var modalImg = document.getElementById("img01");
+        //   //                                        var captionText = document.getElementById("caption");
+        //   //                                        temp.getElementsByClassName('mes_img')[files_num].onmousedown = attachment_photo.onclick = function() {
+        //   //                                            modal.style.display = "block";
+        //   //                                            modalImg.src = this.src;
+        //   //                                            document.querySelector("#media_display").style.display = "block";
+        //   ////                                            console.log(temp.querySelector(".message").getElementsByTagName("span")[0].textContent)
+        //   //                                            if (temp.querySelector(".message").getElementsByTagName("span")[0].textContent == undefined)
+        //   //                                                captionText.innerHTML = "";
+        //   //                                            else
+        //   //                                                captionText.innerHTML = temp.querySelector(".message").getElementsByTagName("span")[0].textContent;
+        //   //                                        }
+        //   //
+        //   //                                    }
+        //   //                            }
 
-          temp_full = document.createElement('div');
-          temp_full.setAttribute('class', 'temp_full');
+        //   temp.querySelector('.message').setAttribute('value', messages.user);
+        //   setTimeout(function () {
+        //     temp.querySelector('.message').classList.add('active');
+        //   }, 0);
 
-          let vw = window.innerWidth;
-          if (vw <= 768) {
-            temp.classList.add('right');
-            if (messages.user != document.querySelector('#username_id').value) {
-              temp_full.style.direction = 'ltr';
-            }
-          }
+        //   temp_full = document.createElement('div');
+        //   temp_full.setAttribute('class', 'temp_full');
 
-          temp_full.appendChild(temp);
-          //                            console.log(all_photos_and_videos)
+        //   let vw = window.innerWidth;
+        //   if (vw <= 768) {
+        //     temp.classList.add('right');
+        //     if (messages.user != document.querySelector('#username_id').value) {
+        //       temp_full.style.direction = 'ltr';
+        //     }
+        //   }
 
-          // if(counter_img % 2 != 0 && counter_img > 2)
-          //     temp.querySelector(".mes_img").style.width = "432px";
-          // if(counter_img % 2 != 0 && counter_img > 2 && window.innerWidth <= 768)
-          //     temp.querySelector(".mes_img").style.width = "90vw";
+        //   temp_full.appendChild(temp);
+        //   //                            console.log(all_photos_and_videos)
 
-          if (load_check) $('#display').prepend(temp_full);
-          else $('#display').append(temp_full);
+        //   // if(counter_img % 2 != 0 && counter_img > 2)
+        //   //     temp.querySelector(".mes_img").style.width = "432px";
+        //   // if(counter_img % 2 != 0 && counter_img > 2 && window.innerWidth <= 768)
+        //   //     temp.querySelector(".mes_img").style.width = "90vw";
 
-          all_messages_dives.push(temp_full);
-          //                            console.log(all_messages_dives);
+        //   if (load_check) $('#display').prepend(temp_full);
+        //   else $('#display').append(temp_full);
 
-          temp_full.addEventListener('contextmenu', (e) => {
-            var tooltip = document.getElementById('myTooltip');
-            var selectionText = getSelectionText();
-            if (selectionText.length > 10)
-              selectionText = selectionText.slice(0, 10);
-            tooltip.innerHTML = 'Copied: ' + selectionText + '...';
-            e.preventDefault();
-            let x = e.pageX,
-              y = e.pageY,
-              winWidth = window.innerWidth,
-              winHeight = window.innerHeight,
-              cmWidth = contextMenu.offsetWidth,
-              cmHeight = contextMenu.offsetHeight;
+        //   all_messages_dives.push(temp_full);
+        //   //                            console.log(all_messages_dives);
 
-            contextMenu.style.left = `${x}px`;
-            contextMenu.style.top = `${y}px`;
-            contextMenu.style.display = 'unset';
+        //   temp_full.addEventListener('contextmenu', (e) => {
+        //     var tooltip = document.getElementById('myTooltip');
+        //     var selectionText = getSelectionText();
+        //     if (selectionText.length > 10)
+        //       selectionText = selectionText.slice(0, 10);
+        //     tooltip.innerHTML = 'Copied: ' + selectionText + '...';
+        //     e.preventDefault();
+        //     let x = e.pageX,
+        //       y = e.pageY,
+        //       winWidth = window.innerWidth,
+        //       winHeight = window.innerHeight,
+        //       cmWidth = contextMenu.offsetWidth,
+        //       cmHeight = contextMenu.offsetHeight;
 
-            window.addEventListener('mousemove', (e) => {
-              if (
-                e.clientY - contextMenu.offsetTop - contextMenu.offsetHeight >
-                  50 ||
-                e.clientY - contextMenu.offsetTop < -50 ||
-                e.clientX - contextMenu.offsetLeft - contextMenu.offsetWidth >
-                  50 ||
-                e.clientX - contextMenu.offsetLeft < -50
-              )
-                contextMenu.style.display = 'none';
-            });
-          });
+        //     contextMenu.style.left = `${x}px`;
+        //     contextMenu.style.top = `${y}px`;
+        //     contextMenu.style.display = 'unset';
 
-          function check_viewed() {
-            chatSocket[room].send(
-              JSON.stringify({
-                message_id: [temp.getAttribute('value')],
-                type: 'message_viewed',
-                room_id: room,
-                contacts_id: document.querySelector('#username_id').value,
-              })
-            );
+        //     window.addEventListener('mousemove', (e) => {
+        //       if (
+        //         e.clientY - contextMenu.offsetTop - contextMenu.offsetHeight >
+        //           50 ||
+        //         e.clientY - contextMenu.offsetTop < -50 ||
+        //         e.clientX - contextMenu.offsetLeft - contextMenu.offsetWidth >
+        //           50 ||
+        //         e.clientX - contextMenu.offsetLeft < -50
+        //       )
+        //         contextMenu.style.display = 'none';
+        //     });
+        //   });
 
-            temp_full.removeEventListener('mouseover', check_viewed);
-          }
+        //   function check_viewed() {
+        //     chatSocket[room].send(
+        //       JSON.stringify({
+        //         message_id: [temp.getAttribute('value')],
+        //         type: 'message_viewed',
+        //         room_id: room,
+        //         contacts_id: document.querySelector('#username_id').value,
+        //       })
+        //     );
 
-          if (messages.user != document.querySelector('#username_id').value) {
-            if (
-              !messages.viewed.includes(
-                parseInt(document.querySelector('#username_id').value)
-              )
-            ) {
-              unread_messages.add(temp_full);
-              temp_full.addEventListener('mouseover', check_viewed);
-            }
-          }
+        //     temp_full.removeEventListener('mouseover', check_viewed);
+        //   }
 
-          /*                            temp_full.onmousedown = function(){
-                                all_messages_dives[20].scrollIntoView({
-                                    behavior: "smooth",
-                                    block: "end",
-                                    inline: "nearest",
-                                })
-                                all_messages_dives[20].classList.add("active");
-                                setTimeout(function(){all_messages_dives[20].classList.remove("active");},500);
-                            }*/
+        //   if (messages.user != document.querySelector('#username_id').value) {
+        //     if (
+        //       !messages.viewed.includes(
+        //         parseInt(document.querySelector('#username_id').value)
+        //       )
+        //     ) {
+        //       unread_messages.add(temp_full);
+        //       temp_full.addEventListener('mouseover', check_viewed);
+        //     }
+        //   }
 
-          if (counter_img % 2 != 0)
-            temp.querySelector('.mes_img').style.width = '432px';
-          if (counter_img % 2 != 0 && window.innerWidth <= 768)
-            temp.querySelector('.mes_img').style.width = '100vw';
+        //   /*                            temp_full.onmousedown = function(){
+        //                         all_messages_dives[20].scrollIntoView({
+        //                             behavior: "smooth",
+        //                             block: "end",
+        //                             inline: "nearest",
+        //                         })
+        //                         all_messages_dives[20].classList.add("active");
+        //                         setTimeout(function(){all_messages_dives[20].classList.remove("active");},500);
+        //                     }*/
 
-          all_messages[temp.getAttribute('value')] = temp_full;
+        //   if (counter_img % 2 != 0)
+        //     temp.querySelector('.mes_img').style.width = '432px';
+        //   if (counter_img % 2 != 0 && window.innerWidth <= 768)
+        //     temp.querySelector('.mes_img').style.width = '100vw';
 
-          enableDoubleTap(temp, function () {
-            chatSocket[room].send(
-              JSON.stringify({
-                message_id: this.getAttribute('value'),
-                type: 'message_reaction',
-                room_id: room,
-                contacts_id: document.querySelector('#username_id').value,
-              })
-            );
-          });
+        //   all_messages[temp.getAttribute('value')] = temp_full;
 
-          temp.setAttribute('id', 'last_message');
+        //   enableDoubleTap(temp, function () {
+        //     chatSocket[room].send(
+        //       JSON.stringify({
+        //         message_id: this.getAttribute('value'),
+        //         type: 'message_reaction',
+        //         room_id: room,
+        //         contacts_id: document.querySelector('#username_id').value,
+        //       })
+        //     );
+        //   });
 
-          //                            if (key == 0 || (key > 0 && messages.date.slice(0, 10) != response.messages.date.slice(0, 10))) {
-          //                                month = response.messages[key].date.slice(5, 7) - 1;
-          //                                block_date.setAttribute("id", "block_date");
-          //                                block_date.innerHTML = (months[month] + ' ' + (response.messages[key].date.slice(8, 10) - 0));
-          //                                $("#display").prepend(block_date);
-          //                                block_date_dict.push(block_date);
-          //                            }
+        //   temp.setAttribute('id', 'last_message');
 
-          if (document.querySelector('#block_date') != null)
-            document.querySelector('#block_date').onclick = function () {
-              document.querySelector('.calendar_div').style.display = 'block';
-              document.querySelector('#myModal').style.display = 'block';
-            };
+        //   //                            if (key == 0 || (key > 0 && messages.date.slice(0, 10) != response.messages.date.slice(0, 10))) {
+        //   //                                month = response.messages[key].date.slice(5, 7) - 1;
+        //   //                                block_date.setAttribute("id", "block_date");
+        //   //                                block_date.innerHTML = (months[month] + ' ' + (response.messages[key].date.slice(8, 10) - 0));
+        //   //                                $("#display").prepend(block_date);
+        //   //                                block_date_dict.push(block_date);
+        //   //                            }
 
-          if (auto_scroll) {
-            document.querySelector('#display').scrollTo({
-              top: document.querySelector('.room_body').scrollHeight,
-              behavior: 'smooth',
-            });
-          }
+        //   if (document.querySelector('#block_date') != null)
+        //     document.querySelector('#block_date').onclick = function () {
+        //       document.querySelector('.calendar_div').style.display = 'block';
+        //       document.querySelector('#myModal').style.display = 'block';
+        //     };
 
-          document
-            .querySelector('.scroll_down')
-            .addEventListener('click', function (event) {
-              event.preventDefault();
-              auto_scroll = true;
-              document.querySelector('#display').scrollTo({
-                behavior: 'smooth',
-                top: document.querySelector('.room_body').scrollHeight,
-              });
-            });
-        }
+        //   if (auto_scroll) {
+        //     document.querySelector('#display').scrollTo({
+        //       top: document.querySelector('.room_body').scrollHeight,
+        //       behavior: 'smooth',
+        //     });
+        //   }
+
+        //   document
+        //     .querySelector('.scroll_down')
+        //     .addEventListener('click', function (event) {
+        //       event.preventDefault();
+        //       auto_scroll = true;
+        //       document.querySelector('#display').scrollTo({
+        //         behavior: 'smooth',
+        //         top: document.querySelector('.room_body').scrollHeight,
+        //       });
+        //     });
+        // }
       }
       if (data.type == 'message_reaction') {
         mes_reaction(data.message_id);
@@ -2215,8 +2239,13 @@ window.onload = function () {
           '--swipe-margin-choose-list',
           `-33%`
         );
-        setTimeout(function () {
+        if (choose_list_swiped) {
+          clearTimeout(choose_list_swiped);
+        }
+
+        choose_list_swiped = setTimeout(function () {
           document.querySelector('.choose_list').classList.add('swiped');
+          choose_list_swiped = null; // Сбрасываем после выполнения
         }, 350);
         if (room != this.getElementsByTagName('input')[1].value) {
           block_date_dict = [];
@@ -2440,7 +2469,7 @@ window.onload = function () {
   messages_response = null;
   scroll_more = 0;
 
-  function message_initialization(response) {
+  function message_initialization(response, new_message = false) {
     check_last_message_bar = false;
     document.querySelector('#opponent_title_name').style.display = 'flex';
     document.querySelector('.send_div').style.display = 'flex';
@@ -2460,12 +2489,19 @@ window.onload = function () {
       check_mes_update = -50;
     }
     // console.log(check_mes_update, mes_amount);
+    if (new_message) {
+      // console.log('EBW');
+      check_mes_update = messages.length;
+      mes_amount = messages.length + 49;
+    }
 
     for (var key = check_mes_update - 1; key >= mes_amount - 50; --key) {
+      // console.log(key);
+
       // for (var key = messages.length - 1; key >= 0; --key) {
+      if (!response.messages[key]) continue;
       block_date = document.createElement('div');
       //   console.log(key);
-
       if (
         this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) &&
         (key == 0 ||
@@ -2485,10 +2521,8 @@ window.onload = function () {
       var mes = '';
       var file_new_name = '';
       mes = response.messages[key].value;
-      mes_value = response.messages[key].value;
       if (mes != '') mes = txtdecode(mes, '1234');
       mes = urlify(mes);
-      //   mes = '<xmp>' + mes + '</xmp>';
       counter_img = 0;
       var user_file = '';
       var user_file_additional = '';
@@ -2732,6 +2766,7 @@ window.onload = function () {
       message_div_temp.classList.add('message');
 
       mes_span = document.createElement('span');
+      mes_span.style.whiteSpace = 'pre-line';
       mes_span.textContent = mes;
 
       viewed_span = document.createElement('span');
@@ -2909,7 +2944,13 @@ window.onload = function () {
       if (counter_img % 2 != 0 && window.innerWidth <= 768)
         temp.querySelector('.mes_img').style.width = '90vw';
 
-      $('#display').prepend(temp_full);
+      if (new_message) {
+        $('#display').append(temp_full);
+        document.querySelector('#display').scrollTo({
+          top: document.querySelector('#display').scrollHeight,
+          behavior: 'smooth',
+        });
+      } else $('#display').prepend(temp_full);
 
       all_messages_dives.push(temp_full);
       temp_full.addEventListener('contextmenu', (e) => {
@@ -3198,20 +3239,23 @@ window.onload = function () {
     .querySelector('#display')
     .addEventListener('scroll', function (event) {
       if (document.querySelector('#display').scrollTop < 300) {
-        scroll_more += 20;
+        // scroll_more += 20;
         // console.log(scroll_more);
-        message_initialization(messages_response);
+        // message_initialization(messages_response);
       }
-      scroll_appear = true;
+      scroll_appear = false;
+      // if (
+      //   document.querySelector('#display').clientHeight +
+      //     document.querySelector('#display').scrollTop ==
+      //   document.querySelector('#display').scrollHeight
+      // )
+      //   scroll_appear = false;
+
       if (
-        document.querySelector('#display').clientHeight +
-          document.querySelector('#display').scrollTop ==
-        document.querySelector('#display').scrollHeight
-      )
-        scroll_appear = false;
-      if (
-        document.querySelector('#display').scrollHeight >
-        document.querySelector('#display').clientHeight - 50
+        !scroll_appear &&
+        document.querySelector('#display').scrollTop +
+          document.querySelector('#display').clientHeight <
+          document.querySelector('#display').scrollHeight - 100
       ) {
         if (
           !document.querySelector('.scroll_down').classList.contains('active')
@@ -3219,20 +3263,12 @@ window.onload = function () {
           document.querySelector('.scroll_down').classList.add('active');
           scroll_more += 25;
           auto_scroll = false;
-          // if(check_mes_update - scroll_more > 0)
-          // message_initialization(messages_response);
         }
       } else if (
         document.querySelector('.scroll_down').classList.contains('active')
       ) {
         document.querySelector('.scroll_down').classList.remove('active');
       }
-      /*                                if(document.querySelector(".room_body").scrollTop < document.querySelector(".room_body").scrollHeight*0.1){
-                                    load_check = 0;
-                                    check_mes_update += 25;
-                                    mes_amount += 25;
-                                    sender();
-                                }*/
     });
 
   function select_messages(event, click_check = true) {
@@ -3595,7 +3631,6 @@ window.onload = function () {
   $(document).on('submit', '#post-form', function (e) {
     e.preventDefault();
     let message = txtencode(e.target.message.value, '1234');
-
     // loading_sign = document.createElement('div');
     // loading_sign_image = document.createElement('img');
     // loading_sign_image.classList.add('loading_sign_image');
@@ -4251,7 +4286,7 @@ window.onload = function () {
   document
     .querySelector('#opponent_title_name')
     .addEventListener('click', (e) => {
-      if (e.target != document.querySelector('.go_home_page')) {
+      if (e.target != document.querySelector('.arrow-left')) {
         document.querySelector('.attachments').classList.add('active');
         document
           .querySelector('.close-menu')
