@@ -234,6 +234,7 @@ select {
 
 :root {
   --swipe-margin-inactive: 100%;
+  --swipe-margin-choose-list: 0%;
 }
 
 .main_chat_window {
@@ -259,7 +260,7 @@ select {
 }
 
 .main_chat_window:not(.swipe) {
-  transition: transform 0.15s ease-out;
+  transition: transform 0.35s ease !important;
 }
 
 /* #main_window_clone {
@@ -309,8 +310,8 @@ select {
     rgba(10, 10, 10, 0.9) 0%,
     rgba(10, 10, 10, 1) 100%
   ) !important;
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  /* -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px); */
   border-radius: 20px 20px 0 0;
   padding: 5px 5px 5px 5px;
   /* height: 80px; */
@@ -471,8 +472,8 @@ select {
   z-index: 99;
   position: fixed;
   top: 0;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  /* -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px); */
 }
 
 #opponent_title_name.active {
@@ -1136,6 +1137,7 @@ html.is-animating .transition-fade {
   /* width: 600px; */
   background: none !important;
   background-color: none !important;
+
   /* margin-bottom: 200px !important; */
 }
 
@@ -1486,13 +1488,13 @@ html.is-animating .transition-fade {
   -ms-user-select: none;
   user-select: none;
   position: relative;
-  filter: brightness(1.2);
+  /* filter: brightness(1.2); */
   z-index: 1;
   isolation: isolate;
   /* background: white !important; */
 }
 
-.user-info-avatar::before {
+/* .user-info-avatar::before {
   z-index: -1;
   content: '';
   width: 50px;
@@ -1509,7 +1511,7 @@ html.is-animating .transition-fade {
   backdrop-filter: blur(5px) saturate(1);
   -webkit-badrop-filter: blur(5px) saturate(1);
   opacity: 0.3;
-}
+} */
 
 #user-info-avatar_settings_menu {
   width: 50px;
@@ -1637,7 +1639,6 @@ img[data-src] {
   display: inline-block;
   margin: 3px 10px;
   z-index: 0;
-  /* margin-left: 10px; */
   border-radius: 1rem;
   max-width: 432px;
   overflow: hidden;
@@ -1646,7 +1647,6 @@ img[data-src] {
   -moz-box-shadow: 0px 7px 10px -10px rgba(0, 0, 0, 0.3);
   box-shadow: 0px 7px 10px -10px rgba(0, 0, 0, 0.3);
   transition: margin-left 0.4s, width 0.4s;
-  /* transition: all 1s !important; */
 }
 
 .message_div.selected_prepare {
@@ -1930,6 +1930,8 @@ img[data-src] {
   height: 100%;
   width: 40px;
   stroke-width: 1px;
+  /* fill: #f1f1f1;
+  stroke: #f1f1f1; */
   filter: brightness(0) saturate(100%) invert(100%) sepia(1%) saturate(7497%)
     hue-rotate(250deg) brightness(100%) contrast(102%);
 }
@@ -2518,12 +2520,13 @@ input[type='range']:focus::-ms-fill-upper {
   }
   html,
   body {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     margin: 0 auto;
     overflow: hidden;
     position: fixed;
-  }
-  body {
-    position: relative;
   }
 
   .users_full_form:hover {
@@ -2594,7 +2597,7 @@ input[type='range']:focus::-ms-fill-upper {
   }
 
   .main_chat_window {
-    transform: translateX(var(--swipe-margin-inactive));
+    transform: translateX(calc(var(--swipe-margin-inactive)));
     position: fixed;
   }
 
@@ -2623,8 +2626,8 @@ input[type='range']:focus::-ms-fill-upper {
     z-index: 0;
     inset: 0;
 
-    backdrop-filter: blur(3px);
-    filter: url(#glass-distortion);
+    /* backdrop-filter: blur(3px); */
+    /* filter: url(#glass-distortion); */
     overflow: hidden;
   }
 
@@ -2771,8 +2774,24 @@ input[type='range']:focus::-ms-fill-upper {
 }
 
 @media screen and (max-width: 768px) {
+  .choose_list {
+    transform: translateX(var(--swipe-margin-choose-list));
+  }
+  .choose_list:not(.swipe) {
+    transition: transform 0.35s ease !important;
+  }
+
+  .choose_list.swipe {
+    will-change: transform;
+    transform: translateX(calc(var(--swipe-margin) / 3 - 33%));
+    transition: transform 0s;
+  }
   .message_div.right {
     margin-left: auto;
+  }
+
+  .choose_list.swiped {
+    display: none !important;
   }
   /* .main_chat_window {
     transform: translateX(0);
@@ -2831,6 +2850,7 @@ input[type='range']:focus::-ms-fill-upper {
     weight: 20%;
   }
   .choose_list {
+    /* position: fixed; */
     width: 100vw;
     min-width: 100vw;
     max-width: 100vw;

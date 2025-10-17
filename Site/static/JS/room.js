@@ -36,6 +36,11 @@ function close_audio_div_func() {
 function go_home_page_func() {
   room = 0;
   document.documentElement.style.setProperty('--swipe-margin-inactive', `100%`);
+  document.documentElement.style.setProperty(
+    '--swipe-margin-choose-list',
+    `0%`
+  );
+  document.querySelector('.choose_list').classList.remove('swiped');
   document.querySelector('#room_id').value = room;
   document.querySelector('#name').value = '';
   //   window.location.hash = room;
@@ -146,7 +151,7 @@ function enableDoubleTap(element, callback) {
 
 window.addEventListener('beforeunload', (event) => {
   if (window.location.hash) {
-    event.preventDefault();
+    // event.preventDefault();
     event.returnValue = '';
     return '';
   }
@@ -432,10 +437,16 @@ window.onload = function () {
     startTime = Date.now();
     isSwiping = false;
     document.documentElement.style.setProperty('--swipe-margin', `${0}px`);
+    document.documentElement.style.setProperty(
+      '--swipe-margin-choose-list',
+      `-33%`
+    );
+    document.querySelector('.choose_list').classList.remove('swiped');
+    document.querySelector('.choose_list').classList.add('swipe');
     document.querySelector('.main_chat_window').classList.add('swipe');
     document
       .querySelector('#display')
-      .addEventListener('touchmove', throttle(handleSwipeDirection, 10));
+      .addEventListener('touchmove', throttle(handleSwipeDirection, 8));
   };
 
   document.querySelector('#display').ontouchend = function (event) {
@@ -448,8 +459,9 @@ window.onload = function () {
     deltaX = currentX - startX;
     deltaY = currentY - startY;
 
-    document.querySelector('#display').classList.remove('swipe');
     document.querySelector('.main_chat_window').classList.remove('swipe');
+    document.querySelector('.choose_list').classList.remove('swipe');
+
     // console.log(duration);
     if (isSwiping && deltaX > 0) {
       if (duration <= velocityThreshold) {
@@ -459,6 +471,9 @@ window.onload = function () {
       }
 
       if (shouldSwipe) {
+        // setTimeout(function () {
+        // document.querySelector('.choose_list').classList.add('swiped');
+        // }, 350);
         sender_ajax.abort();
         window.history.replaceState(null, null, `#${0}`);
         hashChange();
@@ -2196,6 +2211,13 @@ window.onload = function () {
           '--swipe-margin-inactive',
           `0%`
         );
+        document.documentElement.style.setProperty(
+          '--swipe-margin-choose-list',
+          `-33%`
+        );
+        setTimeout(function () {
+          document.querySelector('.choose_list').classList.add('swiped');
+        }, 350);
         if (room != this.getElementsByTagName('input')[1].value) {
           block_date_dict = [];
           sender_ajax.abort();
@@ -2437,7 +2459,7 @@ window.onload = function () {
     if (mes_amount - scroll_more <= 0) {
       check_mes_update = -50;
     }
-    console.log(check_mes_update, mes_amount);
+    // console.log(check_mes_update, mes_amount);
 
     for (var key = check_mes_update - 1; key >= mes_amount - 50; --key) {
       // for (var key = messages.length - 1; key >= 0; --key) {
@@ -2866,15 +2888,19 @@ window.onload = function () {
         }
       });
 
-      temp.addEventListener('touchmove', function (e) {
-        if (touchTimer) {
-          clearTimeout(touchTimer);
-          clearTimeout(modalTimer);
-          touchTimer = null;
-          modalTimer = null;
-          temp.classList.remove('select');
-        }
-      });
+      temp.addEventListener(
+        'touchmove',
+        function (e) {
+          if (touchTimer) {
+            clearTimeout(touchTimer);
+            clearTimeout(modalTimer);
+            touchTimer = null;
+            modalTimer = null;
+            temp.classList.remove('select');
+          }
+        },
+        { passive: false }
+      );
 
       temp_full.appendChild(temp);
 
@@ -3173,7 +3199,7 @@ window.onload = function () {
     .addEventListener('scroll', function (event) {
       if (document.querySelector('#display').scrollTop < 300) {
         scroll_more += 20;
-        console.log(scroll_more);
+        // console.log(scroll_more);
         message_initialization(messages_response);
       }
       scroll_appear = true;
@@ -3184,10 +3210,8 @@ window.onload = function () {
       )
         scroll_appear = false;
       if (
-        !scroll_appear &&
-        document.querySelector('#display').scrollHeight -
-          document.querySelector('#display').scrollTop >
-          document.querySelector('#display').clientHeight + 50
+        document.querySelector('#display').scrollHeight >
+        document.querySelector('#display').clientHeight - 50
       ) {
         if (
           !document.querySelector('.scroll_down').classList.contains('active')

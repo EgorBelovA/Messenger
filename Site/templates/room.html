@@ -270,7 +270,11 @@
       <div id="opponent_title_name">
         {% csrf_token %}
         <div class="go_home_page" onclick="go_home_page_func()">
-          <img class="arrow-left" src='{% static "SVG/arrow.svg" %}' \ />
+          <img
+            class="arrow-left"
+            type="image/svg+xml"
+            src='{% static "SVG/arrow.svg" %}'
+          />
         </div>
         <!-- <input type="reset" id="name" value="{{users}}" /> -->
         <div id="name"></div>
