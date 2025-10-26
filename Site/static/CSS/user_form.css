@@ -47,7 +47,7 @@ body {
   overflow: overlay;
   background-size: cover;
   background-attachment: fixed;
-  background-color: rgb(30, 30, 30);
+  background-color: rgb(10, 10, 10);
   min-height: 100vh;
   color: white;
   display: flex;
@@ -153,29 +153,24 @@ input {
   width: 100%;
   outline: none;
   padding: 7px;
-  box-shadow: 0 0 0 20px rgb(30, 30, 30) inset !important;
   color: #fff;
   caret-color: #fff;
   font-size: 16px !important;
 
-  /* Remove all default appearances */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 
-  /* Remove borders and radius */
-  border: none;
+  border: none !important;
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
 
-  /* Remove background and box shadows */
   background: none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
-  box-shadow: 0 0 0 20px rgb(30, 30, 30) inset !important;
+  box-shadow: none !important;
 
-  /* Remove user selection */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -183,26 +178,51 @@ input {
   -webkit-touch-callout: none;
 }
 
-/* Handle autofill styles */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-appearance: none;
+  -webkit-appearance: none !important;
   -webkit-text-fill-color: #fff !important;
   -webkit-box-shadow: 0 0 0 30px rgb(30, 30, 30) inset !important;
   background: none !important;
   border: none !important;
   outline: none !important;
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
-/* Remove focus outlines while maintaining accessibility */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+
+  border: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  box-shadow: none !important;
+
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:autofill {
+  box-shadow: 0 0 0 30px rgb(30, 30, 30) inset !important;
+  border: none !important;
+  outline: none !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
 input:focus {
-  outline: none;
-  border: none;
+  outline: none !important;
+  border: none !important;
+  -webkit-background-clip: text !important;
 }
 
-/* Remove spinner from number inputs */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -213,13 +233,11 @@ input[type='number'] {
   -moz-appearance: textfield;
 }
 
-/* Remove clear button from search inputs */
 input[type='search']::-webkit-search-cancel-button,
 input[type='search']::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
-/* Remove datalist dropdown arrow */
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
