@@ -4781,7 +4781,7 @@ document.addEventListener('DOMContentLoaded', function () {
     startX = touch.clientX - currentPosition;
     this.classList.add('active');
     leftMenuFooterPadding.classList.add('active');
-    this.style.transform = `translateX(${currentPosition}px) scale(1.1)`;
+    this.style.transform = `translateX(${currentPosition}px) scale(1.2)`;
   });
 
   function tabMove(e) {
@@ -4792,7 +4792,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const maxTranslate = calcMaxTranslate();
 
     currentPosition = Math.max(0, Math.min(newPosition, maxTranslate));
-    this.style.transform = `translateX(${currentPosition}px) scale(1.1)`;
+    this.style.transform = `translateX(${currentPosition}px) scale(1.2)`;
   }
 
   indicator.addEventListener('touchmove', throttle(tabMove, 16));
