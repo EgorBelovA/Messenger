@@ -4737,17 +4737,21 @@ document.addEventListener('DOMContentLoaded', function () {
   function switchTab(activeTab) {
     chatsTab.classList.remove('active');
     settingsTab.classList.remove('active');
-    leftMenuFooter.classList.remove('active-settings');
 
     if (activeTab === 'chats') {
       chatsTab.classList.add('active');
+
+      indicator.classList.remove('toggle');
+      indicator.classList.add('toggle2');
       currentPosition = 0;
       updateIndicatorPosition();
       if (chatsMenu) chatsMenu.classList.add('active');
       if (settingsMenu) settingsMenu.classList.remove('active');
     } else {
       settingsTab.classList.add('active');
-      leftMenuFooter.classList.add('active-settings');
+      indicator.classList.remove('toggle2');
+      indicator.classList.add('toggle');
+
       currentPosition = calcMaxTranslate();
       updateIndicatorPosition();
       if (chatsMenu) chatsMenu.classList.remove('active');
@@ -4758,11 +4762,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function calcMaxTranslate() {
     const containerWidth = leftMenuFooter.offsetWidth;
     const indicatorWidth = indicator.offsetWidth;
-    return containerWidth - indicatorWidth - 4;
+    return containerWidth - indicatorWidth - 10;
   }
 
   function updateIndicatorPosition() {
-    indicator.style.transform = `translateX(${currentPosition}px)`;
+    indicator.style.translate = `${currentPosition}px 0`;
   }
 
   function getActiveTabFromPosition() {
@@ -4781,7 +4785,8 @@ document.addEventListener('DOMContentLoaded', function () {
     startX = touch.clientX - currentPosition;
     this.classList.add('active');
     leftMenuFooterPadding.classList.add('active');
-    this.style.transform = `translateX(${currentPosition}px) scale(1.2)`;
+    this.style.translate = `${currentPosition}px 0`;
+    this.style.transform = `scale(1.2)`;
   });
 
   function tabMove(e) {
@@ -4792,19 +4797,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const maxTranslate = calcMaxTranslate();
 
     currentPosition = Math.max(0, Math.min(newPosition, maxTranslate));
-    this.style.transform = `translateX(${currentPosition}px) scale(1.2)`;
+    updateIndicatorPosition();
+    this.style.translate = `${currentPosition}px 0`;
+    this.style.transform = `scale(1.2)`;
   }
 
   indicator.addEventListener('touchmove', throttle(tabMove, 16));
-
-  indicator.addEventListener('touchend', function () {
-    this.style.transition = 'transform 0.3s ease';
-    this.style.transform = `translateX(${currentPosition}px) scale(1)`;
+  function tabEnd() {
+    // this.style.transition = 'transform 0.3s ease';
+    this.style.translate = `${currentPosition}px 0`;
+    this.style.transform = `scale(1)`;
     this.classList.remove('active');
     leftMenuFooterPadding.classList.remove('active');
     const activeTab = getActiveTabFromPosition();
     switchTab(activeTab);
-  });
+  }
+
+  indicator.addEventListener('touchend', tabEnd);
+  indicator.addEventListener('touchcancel', tabEnd);
 
   switchTab('chats');
 });
