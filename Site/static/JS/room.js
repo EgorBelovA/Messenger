@@ -4762,7 +4762,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function calcMaxTranslate() {
     const containerWidth = leftMenuFooter.offsetWidth;
     const indicatorWidth = indicator.offsetWidth;
-    return containerWidth - indicatorWidth - 10;
+    return containerWidth * 1.05 - (indicatorWidth - 10) * 1.2;
   }
 
   function updateIndicatorPosition() {
@@ -4789,19 +4789,106 @@ document.addEventListener('DOMContentLoaded', function () {
     this.style.transform = `scale(1.2)`;
   });
 
+  let lastPosition = 0;
+  let lastTime = 0;
+  let velocity = 0;
+  let lastVelocity = 0;
+  let returnTimer = null;
+  let currentBubbleHeight = 1.2;
+  const NORMAL_BUBBLE_HEIGHT = 1.3;
+  const MIN_BUBBLE_HEIGHT = 1;
+  const VELOCITY_THRESHOLD = 0.15;
+  const VELOCITY_CHANGE_THRESHOLD = 0.95; // порог изменения скорости (30% от предыдущей скорости)
+  const RETURN_DELAY = 100;
+
   function tabMove(e) {
     e.preventDefault();
     if (!e.touches[0]) return;
+    // createDisplacement();
+
     const touch = e.touches[0];
     const newPosition = touch.clientX - startX;
     const maxTranslate = calcMaxTranslate();
 
     currentPosition = Math.max(0, Math.min(newPosition, maxTranslate));
     updateIndicatorPosition();
+
+    // Расчет скорости движения
+    const currentTime = Date.now();
+    if (lastTime > 0) {
+      const deltaTime = currentTime - lastTime;
+      const deltaPosition = Math.abs(newPosition - lastPosition);
+      velocity = deltaPosition / deltaTime;
+    }
+    if (velocity === Infinity) return;
+
+    lastPosition = newPosition;
+    lastTime = currentTime;
+
+    // Очистка предыдущего таймера
+    if (returnTimer) {
+      clearTimeout(returnTimer);
+      returnTimer = null;
+    }
+
+    // Проверка на значительное изменение скорости
+    let shouldUpdateHeight = false;
+
+    if (lastVelocity === 0) {
+      // Первое измерение - всегда обновляем
+      shouldUpdateHeight = true;
+    } else {
+      // Проверяем, изменилась ли скорость значительно
+      const velocityChange = Math.abs(velocity - lastVelocity);
+      const relativeChange = velocityChange / lastVelocity;
+      // console.log(relativeChange > VELOCITY_CHANGE_THRESHOLD);
+      if (relativeChange > VELOCITY_CHANGE_THRESHOLD) {
+        shouldUpdateHeight = true;
+      }
+      // Также обновляем если пересекаем порог скорости в любую сторону
+      else if (
+        (lastVelocity <= VELOCITY_THRESHOLD && velocity > VELOCITY_THRESHOLD) ||
+        (lastVelocity > VELOCITY_THRESHOLD && velocity <= VELOCITY_THRESHOLD)
+      ) {
+        shouldUpdateHeight = true;
+      }
+    }
+
+    // Расчет высоты пузыря только если скорость значительно изменилась
+    if (shouldUpdateHeight) {
+      let targetBubbleHeight = NORMAL_BUBBLE_HEIGHT;
+
+      if (velocity > VELOCITY_THRESHOLD) {
+        const speedFactor = Math.min(
+          1,
+          (velocity - VELOCITY_THRESHOLD) / VELOCITY_THRESHOLD
+        );
+        // console.log(speedFactor);
+        targetBubbleHeight =
+          NORMAL_BUBBLE_HEIGHT -
+          (NORMAL_BUBBLE_HEIGHT - MIN_BUBBLE_HEIGHT) * speedFactor;
+      }
+      currentBubbleHeight = targetBubbleHeight;
+      lastVelocity = velocity; // Сохраняем текущую скорость как эталон
+    }
+    // console.log(currentBubbleHeight);
     this.style.translate = `${currentPosition}px 0`;
-    this.style.transform = `scale(1.2)`;
+    this.style.transform = `scale(1.2, ${currentBubbleHeight})`;
+
+    // returnTimer = setTimeout(() => {
+    //   returnToNormalHeight();
+    // }, RETURN_DELAY);
   }
 
+  function returnToNormalHeight() {
+    indicator.style.transform = `scale(1.2, ${NORMAL_BUBBLE_HEIGHT})`;
+    currentBubbleHeight = NORMAL_BUBBLE_HEIGHT;
+    velocity = 0;
+    lastVelocity = 0;
+    lastTime = 0;
+  }
+
+  // indicator.addEventListener('touchmove', throttle(tabMove, 16));
   indicator.addEventListener('touchmove', throttle(tabMove, 16));
   function tabEnd() {
     // this.style.transition = 'transform 0.3s ease';
@@ -4816,5 +4903,21 @@ document.addEventListener('DOMContentLoaded', function () {
   indicator.addEventListener('touchend', tabEnd);
   indicator.addEventListener('touchcancel', tabEnd);
 
-  switchTab('chats');
+  // switchTab('chats');
 });
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function createDisplacement() {
+  console.log(123);
+  const imageData = ctx.createImageData(canvas.width, canvas.height);
+  ctx.putImageData(imageData, 0, 0);
+
+  // Get data URL from the canvas, not the ImageData object
+  const dataUrl = canvas.toDataURL();
+  console.log(dataUrl);
+}
