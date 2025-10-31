@@ -2930,8 +2930,8 @@ window.onload = function () {
               console.log('touchstart');
               document.querySelector('#myModal').style.display = 'block';
               temp.classList.add('contextMenu');
-              themeMeta.content = '#0e0e0e';
-              document.querySelector('body').style.backgroundColor = '#0e0e0e';
+              // themeMeta.content = '#0e0e0e';
+              // document.querySelector('body').style.backgroundColor = '#0e0e0e';
             }, 250);
           }, 100);
         },
@@ -3653,19 +3653,16 @@ window.onload = function () {
     return false;
   }
   const modalContainer = document.querySelector('#myModal');
-  modalContainer.mousedown =
-    modalContainer.ontouchstart =
-    modalContainer.onmousedown =
-      function (e) {
-        console.log(all_messages_dives);
-        all_messages_dives.forEach((element) => {
-          element.querySelector('.message_div').classList.remove('select');
-          element.querySelector('.message_div').classList.remove('contextMenu');
-        });
-        document.querySelector('body').style.backgroundColor = '#1e1e1e';
-        themeMeta.content = '#0a0a0a';
-        this.style.display = 'none';
-      };
+  modalContainer.ontouchstart = modalContainer.onmousedown = function (e) {
+    // console.log(all_messages_dives);
+    all_messages_dives.forEach((element) => {
+      element.querySelector('.message_div').classList.remove('select');
+      element.querySelector('.message_div').classList.remove('contextMenu');
+    });
+    // document.querySelector('body').style.backgroundColor = '#1e1e1e';
+    // themeMeta.content = '#000000';
+    this.style.display = 'none';
+  };
 
   document.querySelector('#media_display').onmousedown = function (e) {
     this.style.display = 'none';
@@ -4270,13 +4267,13 @@ window.onload = function () {
         '--attachment_tabs_font',
         `${main_color}`
       );
-      themeMeta.content = '#0a0a0a';
+      themeMeta.content = '#000000';
       document
         .querySelector('.settings')
         .setAttribute('style', 'background: #222;');
       document
         .querySelector('body')
-        .setAttribute('style', 'background-color: #0a0a0a;');
+        .setAttribute('style', 'background-color: #000000;');
       //   document
       //     .querySelector('#opponent_title_name')
       //     .setAttribute('style', 'background-color: #1E1E1EE6;');
@@ -4286,19 +4283,19 @@ window.onload = function () {
       //     .setAttribute('style', 'background-color: #1E1E1EE6;');
       document
         .querySelector('.users_search')
-        .setAttribute('style', 'background-color: #0a0a0a;');
-      document
-        .querySelector('.search_div')
-        .setAttribute('style', 'background-color: #0a0a0a99;');
+        .setAttribute('style', 'background-color: #000000;');
+      // document
+      //   .querySelector('.search_div')
+      //   .setAttribute('style', 'background-color: #00000099;');
       //   document
       //     .querySelector('.search_field')
       //     .setAttribute('style', 'background-color: rgba(41,49,51);');
       document
         .querySelector('.attachments')
-        .setAttribute('style', 'background-color: #0a0a0a;');
+        .setAttribute('style', 'background-color: #000000;');
       document
         .querySelector('.settings_menu')
-        .setAttribute('style', 'background-color: #0a0a0a;');
+        .setAttribute('style', 'background-color: #000000;');
       document
         .querySelector('.scroll_down')
         .setAttribute('style', 'background: rgb(25,25,25, 0.8);');
@@ -4762,7 +4759,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function calcMaxTranslate() {
     const containerWidth = leftMenuFooter.offsetWidth;
     const indicatorWidth = indicator.offsetWidth;
-    return containerWidth * 1.05 - (indicatorWidth - 10) * 1.2;
+    return containerWidth * 1.05 - (indicatorWidth - 5) * 1.2;
   }
 
   function updateIndicatorPosition() {
@@ -4776,8 +4773,10 @@ document.addEventListener('DOMContentLoaded', function () {
     return currentPos < threshold ? 'chats' : 'settings';
   }
 
-  chatsTab.addEventListener('click', () => switchTab('chats'));
-  settingsTab.addEventListener('click', () => switchTab('settings'));
+  chatsTab.addEventListener('touchstart', () => switchTab('chats'));
+  chatsTab.addEventListener('mousedown', () => switchTab('chats'));
+  settingsTab.addEventListener('touchstart', () => switchTab('settings'));
+  settingsTab.addEventListener('mousedown', () => switchTab('settings'));
 
   indicator.addEventListener('touchstart', function (e) {
     e.preventDefault();
@@ -4811,7 +4810,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const maxTranslate = calcMaxTranslate();
 
     currentPosition = Math.max(0, Math.min(newPosition, maxTranslate));
-    updateIndicatorPosition();
+    setTimeout(() => {
+      updateIndicatorPosition();
+    }, 100);
 
     // Расчет скорости движения
     const currentTime = Date.now();
@@ -4872,7 +4873,6 @@ document.addEventListener('DOMContentLoaded', function () {
       lastVelocity = velocity; // Сохраняем текущую скорость как эталон
     }
     // console.log(currentBubbleHeight);
-    this.style.translate = `${currentPosition}px 0`;
     this.style.transform = `scale(1.2, ${currentBubbleHeight})`;
 
     // returnTimer = setTimeout(() => {

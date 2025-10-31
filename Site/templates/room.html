@@ -9,6 +9,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="description" content="Messenger App" />
     <meta content="true" name="HandheldFriendly" />
     <meta content="width" name="MobileOptimized" />
     <meta content="yes" name="apple-mobile-web-app-capable" />
@@ -80,6 +81,19 @@
 
     <div class="choose_list">
       {% csrf_token %}
+      <svg width="500" height="300" id="squircles">
+        <path
+          fill="#ED2F5B"
+          stroke="none"
+          d="
+      M 0,150
+      Q 0,0 250,0
+      T 500,150
+        250,300
+        0,150
+    "
+        ></path>
+      </svg>
       <div class="search_div" id="search">
         <div class="liquidGlass-effect"></div>
         <div class="liquidGlass-tint"></div>
@@ -89,6 +103,8 @@
             <object
               id="search_icon"
               data="{% static 'SVG/search.svg' %}"
+              type="image/svg+xml"
+              aria-label="Search"
             ></object>
           </div>
           <input class="search_field" name="term" placeholder="Search" />
@@ -109,24 +125,43 @@
             <div id="user_avatar_settings_menu_image"></div>
             <div id="username_settings_menu"></div>
           </div>
-          <hr
-            style="background: rgba(0, 0, 0, 0.2); height: 1px; border: none"
-          />
-
-          <div id="create_new_group" class="settings_menu_div">New Group</div>
-          <!--                        <div id="create_new_channel" class="settings_menu_div">New Channel</div>-->
-
-          <div id="settings" class="settings_menu_div">Settings</div>
-
-          <div id="dark_mode" class="settings_menu_div">
-            Dark Mode
-            <label class="switch">
-              <input type="checkbox" id="dark_mode_check" />
-              <span class="slider round"></span>
-            </label>
+          <div class="settings_menu_options">
+            <!-- <svg>
+              <path
+                fill="#ED2F5B"
+                stroke="none"
+                d="
+      M 0,150
+      C 0,0 0,0 250,0
+      S 500,0 500,150
+        500,300 250,300
+        0,300 0,150
+    "
+              ></path>
+            </svg> -->
+            <div class="system_settings">
+              <div id="create_new_group" class="settings_menu_div">
+                New Group
+              </div>
+            </div>
+            <!--                        <div id="create_new_channel" class="settings_menu_div">New Channel</div>-->
+            <div class="system_settings">
+              <div id="settings" class="settings_menu_div">Settings</div>
+            </div>
+            <div class="system_settings">
+              <div id="dark_mode" class="settings_menu_div">
+                Dark Mode
+                <label class="switch" for="dark_mode_check">
+                  <input type="checkbox" id="dark_mode_check" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div id="logout" class="settings_menu_div">Log Out</div>
+              <div class="reloadLocationButton settings_menu_div">
+                Clear Cache
+              </div>
+            </div>
           </div>
-          <div id="logout" class="settings_menu_div">Log Out</div>
-          <div class="reloadLocationButton settings_menu_div">Clear Cache</div>
         </div>
         <div
           id="users_search active"
@@ -420,7 +455,7 @@
     </div>
 
     <div id="media_display">
-      <img class="modal-content" id="img01" />
+      <img class="modal-content" id="img01" alt="" />
       <div id="caption"></div>
     </div>
 

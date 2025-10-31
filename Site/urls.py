@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .models import *
 from django.views.decorators.cache import cache_page
+from django.views.generic.base import TemplateView
 
 from django.views.static import serve as mediaserve
 
@@ -30,6 +31,10 @@ urlpatterns = [
     re_path('checkview_users', views.checkview_users, name='checkview_users'),
     re_path('checkview', views.checkview, name='checkview'),
     path('send', views.send, name='send'),
+        path(
+        "robots.txt",
+        TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
+    ),
     # path('getMessages/<str:room>/', views.getMessages, name='getMessages'),
     # path('getLastMessage/<str:room>/', views.getLastMessage, name='getLastMessage'),
 ]
