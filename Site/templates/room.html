@@ -126,39 +126,58 @@
             <div id="username_settings_menu"></div>
           </div>
           <div class="settings_menu_options">
-            <!-- <svg>
-              <path
-                fill="#ED2F5B"
-                stroke="none"
-                d="
-      M 0,150
-      C 0,0 0,0 250,0
-      S 500,0 500,150
-        500,300 250,300
-        0,300 0,150
-    "
-              ></path>
-            </svg> -->
+            <!-- <div class="system_settings">
+              <div id="settings" class="settings_menu_div">
+                <span>Account</span>
+                <svg class="arrow-right">
+                  <use href="#arrow"></use>
+                </svg>
+              </div>
+            </div> -->
             <div class="system_settings">
               <div id="create_new_group" class="settings_menu_div">
-                New Group
+                <div class="settings_menu_div_padding">
+                  <span>New Group</span>
+                  <svg class="arrow-right">
+                    <use href="#arrow"></use>
+                  </svg>
+                </div>
               </div>
             </div>
             <!--                        <div id="create_new_channel" class="settings_menu_div">New Channel</div>-->
             <div class="system_settings">
-              <div id="settings" class="settings_menu_div">Settings</div>
+              <div id="settings" class="settings_menu_div">
+                <div class="settings_menu_div_padding">
+                  <span>Appearance</span>
+                  <svg class="arrow-right">
+                    <use href="#arrow"></use>
+                  </svg>
+                </div>
+              </div>
             </div>
             <div class="system_settings">
-              <div id="dark_mode" class="settings_menu_div">
-                Dark Mode
-                <label class="switch" for="dark_mode_check">
-                  <input type="checkbox" id="dark_mode_check" />
-                  <span class="slider round"></span>
-                </label>
+              <div
+                id="logout"
+                class="settings_menu_div"
+                class="logout-btn"
+                data-logout-url="{% url 'logout' %}"
+                data-csrf-token="{{ csrf_token }}"
+                onclick="logoutUser(this)"
+              >
+                <div class="settings_menu_div_padding">
+                  <span id="logout-span">Logout</span>
+                  <svg class="arrow-right">
+                    <use href="#arrow"></use>
+                  </svg>
+                </div>
               </div>
-              <div id="logout" class="settings_menu_div">Log Out</div>
               <div class="reloadLocationButton settings_menu_div">
-                Clear Cache
+                <div class="settings_menu_div_padding">
+                  <span>Reload App</span>
+                  <svg class="arrow-right">
+                    <use href="#arrow"></use>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -168,6 +187,73 @@
           class="users_search active"
           method="POST"
         ></div>
+        <div class="settings">
+          <div id="user_settings_div_main" style="display: none !important">
+            <div id="user_settings_image_div"></div>
+            <div id="user_settings_div_email_username">
+              <div id="user_settings_div"></div>
+              <div id="user_settings_email_div"></div>
+            </div>
+          </div>
+
+          <!-- <hr
+            style="background: rgba(0, 0, 0, 0.2); height: 1px; border: none"
+          /> -->
+
+          <div class="appearance-header">
+            <svg class="arrow-left" id="appearance_exit">
+              <use href="#arrow"></use>
+            </svg>
+          </div>
+          <div class="appearance_options">
+            <div id="appearance_option">
+              <div id="chat_background_color">Background Color</div>
+
+              <div id="color_chat_change_div">
+                <input
+                  type="color"
+                  id="color_chat_change"
+                  name="color_chat_change"
+                />
+              </div>
+            </div>
+            <div class="appearance_option">
+              <div id="shadow_degree">Background Shadow Degree</div>
+              <div>
+                <input
+                  id="shadow_degree_chat"
+                  type="range"
+                  min="0"
+                  max="360"
+                  step="1"
+                  value="0"
+                />
+              </div>
+            </div>
+
+            <!--                        <div><input id="chat_background_image" type="file" accept="image/png, image/gif, image/jpeg"></div>-->
+
+            <div id="avatar_profile_set" style="display: none !important">
+              <input
+                type="file"
+                id="input_user_avatar"
+                accept="image/png, image/gif, image/jpeg"
+              />
+              <div id="avatar_profile_set_save">Save</div>
+            </div>
+            <div class="appearance_option">
+              <div id="dark_mode">
+                Dark Theme
+                <div class="switch_div">
+                  <label class="switch" for="dark_mode_check">
+                    <input type="checkbox" id="dark_mode_check" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="left-menu-footer-padding">
         <fieldset class="left-menu-footer">
@@ -182,87 +268,57 @@
           </div>
         </fieldset>
       </div>
-    </div>
+      <div id="create_new_group_room">
+        <div class="creation_group_first_page active">
+          <div id="creation_group_GIVE_A_NAME">
+            <div id="creation_group_NEXT_CANCEL_div_GROUPNAME">
+              <div id="creation_group_NEXT_CANCEL_div">
+                <div id="creation_group_CANCEL_GROUPNAME">Cancel</div>
+                <div id="creation_group_NEXT_GROUPNAME">Next</div>
+              </div>
+            </div>
+            <input
+              placeholder="Group Name"
+              id="creation_group_GIVE_A_NAME_input"
+            />
+          </div>
+          <div id="creation_group_AVATAR">
+            <input
+              type="file"
+              id="input_room_avatar"
+              accept="image/png, image/gif, image/jpeg"
+            />
+            <label for="input_room_avatar">Group Photo</label>
+          </div>
+        </div>
 
-    <div id="create_new_group_room">
-      <div id="creation_group_GIVE_A_NAME">
-        <input id="creation_group_GIVE_A_NAME_input" />
-      </div>
-
-      <div id="creation_group_NEXT_CANCEL_div_GROUPNAME">
-        <input
-          type="file"
-          id="input_room_avatar"
-          accept="image/png, image/gif, image/jpeg"
-        />
-        <span id="creation_group_CANCEL_GROUPNAME">Cancel</span>
-        <span id="creation_group_NEXT_GROUPNAME">Next</span>
-      </div>
-
-      <div id="creation_group_CREATE_CANCEL_div">
-        <span id="creation_group_CANCEL">Cancel</span>
-        <span id="creation_group_CREATE">Create</span>
-      </div>
-    </div>
-
-    <div class="all_my_contacts" method="POST"></div>
-
-    <div id="create_new_channel_room">
-      <div id="creation_channel_GIVE_A_NAME">
-        <input id="creation_channel_GIVE_A_NAME_input" />
-      </div>
-
-      <div id="creation_channel_CREATE_CANCEL_div">
-        <span id="creation_channel_CANCEL">Cancel</span>
-        <span id="creation_channel_CREATE">Create</span>
-      </div>
-
-      <div id="creation_channel_NEXT_CANCEL_div_GROUPNAME">
-        <input
-          type="file"
-          id="input_channel_avatar"
-          accept="image/png, image/gif, image/jpeg"
-        />
-        <span id="creation_channel_CANCEL_GROUPNAME">Cancel</span>
-        <span id="creation_channel_NEXT_GROUPNAME">Next</span>
-      </div>
-    </div>
-
-    <div class="settings">
-      <div id="settings_title">Settings</div>
-      <div id="user_settings_div_main">
-        <div id="user_settings_image_div"></div>
-        <div id="user_settings_div_email_username">
-          <div id="user_settings_div"></div>
-          <div id="user_settings_email_div"></div>
+        <div class="creation_group_second_page">
+          <div id="creation_group_CREATE_CANCEL_div">
+            <div id="creation_group_CANCEL">Cancel</div>
+            <div id="creation_group_CREATE">Create</div>
+          </div>
+          <div class="all_my_contacts" method="POST"></div>
         </div>
       </div>
+      <div id="create_new_channel_room" style="display: none !important">
+        <div id="creation_channel_GIVE_A_NAME">
+          <input id="creation_channel_GIVE_A_NAME_input" />
+        </div>
 
-      <hr style="background: rgba(0, 0, 0, 0.2); height: 1px; border: none" />
-      <div>
-        <input
-          id="shadow_degree_chat"
-          type="range"
-          min="0"
-          max="360"
-          step="1"
-          value="0"
-        />
-      </div>
+        <div id="creation_channel_CREATE_CANCEL_div">
+          <span id="creation_channel_CANCEL">Cancel</span>
+          <span id="creation_channel_CREATE">Create</span>
+        </div>
 
-      <!--                        <div><input id="chat_background_image" type="file" accept="image/png, image/gif, image/jpeg"></div>-->
-
-      <div id="avatar_profile_set">
-        <input
-          type="file"
-          id="input_user_avatar"
-          accept="image/png, image/gif, image/jpeg"
-        />
-        <div id="avatar_profile_set_save">Save</div>
-      </div>
-
-      <div id="color_chat_change_div">
-        <input type="color" id="color_chat_change" name="color_chat_change" />
+        <div id="creation_channel_NEXT_CANCEL_div_GROUPNAME">
+          <input
+            type="file"
+            id="input_channel_avatar"
+            accept="image/png, image/gif, image/jpeg"
+          />
+          <span id="creation_channel_CANCEL_GROUPNAME">Cancel</span>
+          <span id="creation_channel_NEXT_GROUPNAME">Next</span>
+        </div>
       </div>
     </div>
 
@@ -329,11 +385,9 @@
       <div id="opponent_title_name">
         {% csrf_token %}
         <div class="go_home_page" onclick="go_home_page_func()">
-          <img
-            class="arrow-left"
-            type="image/svg+xml"
-            src='{% static "SVG/arrow.svg" %}'
-          />
+          <svg class="arrow-left">
+            <use href="#arrow"></use>
+          </svg>
         </div>
         <!-- <input type="reset" id="name" value="{{users}}" /> -->
         <div id="name"></div>
@@ -363,12 +417,14 @@
 
       <audio class="hidden_audio"><source type="audio/mpeg" /></audio>
 
-      <!-- <div class="overflow-visible-scroll">
-        <div class="overflow-display"></div>
-      </div> -->
-      <div class="offset room_div room_body" id="display"></div>
-      <div class="scroll_down">
-        <div id="arrow_down_scroll" class="fa fa-angle-down"></div>
+      <div class="room_wrapper">
+        <div class="offset room_div room_body" id="display"></div>
+        <div class="scroll_down">
+          <div class="liquidGlass-effect-scroll"></div>
+          <svg class="arrow-down">
+            <use href="#arrow"></use>
+          </svg>
+        </div>
       </div>
       <form
         id="post-form"
@@ -438,10 +494,13 @@
           ></object>
         </div>
         <div class="input_submit">
-          <object
+          <!-- <object
             class="send_svg"
             data="{% static 'SVG/send_phone.svg' %}"
-          ></object>
+          ></object> -->
+          <svg class="send_svg">
+            <use href="#send-phone"></use>
+          </svg>
         </div>
         <!--                        <img src="{% static 'Images/stellar_particles.gif' %}"/>-->
       </form>
@@ -607,6 +666,39 @@
   <symbol id="chats-icon" viewBox="0 0 256 256">
     <path
       d="M227.79 186.39a76 76 0 0 0-61-110.07a76 76 0 1 0-138.58 62.07L20.5 164.6a12 12 0 0 0 14.9 14.9l26.21-7.71a75.93 75.93 0 0 0 27.6 7.9a76 76 0 0 0 105.18 40.1l26.21 7.71a12 12 0 0 0 14.9-14.9ZM60.9 163.66l-27.76 8.17a4 4 0 0 1-5-5l8.17-27.76a4.07 4.07 0 0 0-.31-3A68 68 0 1 1 63.92 164a4.06 4.06 0 0 0-3.02-.34m165.92 55.16a4 4 0 0 1-4 1l-27.76-8.17a4.07 4.07 0 0 0-3 .31A68 68 0 0 1 98 180a76 76 0 0 0 71.5-95.28a68 68 0 0 1 50.5 99.36a4.07 4.07 0 0 0-.31 3l8.17 27.76a4 4 0 0 1-1.04 3.98"
+    />
+  </symbol>
+</svg>
+
+<svg width="0" height="0">
+  <defs>
+    <linearGradient id="strokeGradient">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#999" />
+    </linearGradient>
+  </defs>
+</svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+  <symbol id="arrow" viewBox="0 0 24 24">
+    <path
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+      d="m10 17l5-5l-5-5"
+    />
+  </symbol>
+</svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" display="none">
+  <symbol id="send-phone" viewBox="0 0 24 24">
+    <path
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+      d="m6.998 10.247l.435.76c.277.485.415.727.415.993s-.138.508-.415.992l-.435.761c-1.238 2.167-1.857 3.25-1.375 3.788c.483.537 1.627.037 3.913-.963l6.276-2.746c1.795-.785 2.693-1.178 2.693-1.832c0-.654-.898-1.047-2.693-1.832L9.536 7.422c-2.286-1-3.43-1.5-3.913-.963c-.482.537.137 1.62 1.375 3.788Z"
     />
   </symbol>
 </svg>

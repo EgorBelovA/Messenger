@@ -358,10 +358,6 @@ function txtencode(Incode, passCode) {
   return rexcode;
 }
 
-document.querySelector('#logout').onclick = function () {
-  window.location.href = '/logout';
-};
-
 function throttle(func, delay) {
   let timeoutId;
   let lastExecTime = 0;
@@ -699,29 +695,29 @@ window.onload = function () {
     }, 1000);
   };
 
-  textareaElement.ontouchend = function () {
-    textareaElement.focus();
-  };
+  // textareaElement.ontouchend = function () {
+  //   textareaElement.focus();
+  // };
 
-  textareaElement.addEventListener('focus', async (e) => {
-    console.log(send_div_height_focus_var);
+  // textareaElement.addEventListener('focus', async (e) => {
+  //   console.log(send_div_height_focus_var);
 
-    if (textareaLongPress) {
-      const textArea = this;
-      try {
-        const clipboardText = await navigator.clipboard.readText();
-        textArea.value = clipboardText;
-      } catch (err) {
-        console.error('Failed to read clipboard:', err);
-      }
-      clearTimeout(textareaLongPressTimeout);
-      textareaLongPress = false;
-    }
-    document.querySelector('.room_div').classList.add('focus');
-  });
+  //   if (textareaLongPress) {
+  //     const textArea = this;
+  //     try {
+  //       const clipboardText = await navigator.clipboard.readText();
+  //       textArea.value = clipboardText;
+  //     } catch (err) {
+  //       console.error('Failed to read clipboard:', err);
+  //     }
+  //     clearTimeout(textareaLongPressTimeout);
+  //     textareaLongPress = false;
+  //   }
+  //   document.querySelector('.room_div').classList.add('focus');
+  // });
 
   textareaElement.onblur = function (event) {
-    document.querySelector('.room_div').style.bottom = '0px';
+    document.querySelector('.room_div').style.paddingBottom = '70px';
   };
 
   textareaElement.addEventListener('blur', (e) => {
@@ -2789,7 +2785,6 @@ window.onload = function () {
         '//' + window.location.host + '/static/Images/stellar_particles.gif';
 
       if (response.messages[key].liked == true) liked.style.display = 'unset';
-
       temp.setAttribute('class', 'message_div');
       temp.setAttribute('value', response.messages[key].id);
 
@@ -2827,7 +2822,7 @@ window.onload = function () {
         document.querySelector('#username_id').value
       ) {
       } else {
-        message_div_temp.classList.add('darker');
+        temp.classList.add('darker');
       }
       if (mes == '' && temp.querySelector('.mes_img') != null) {
         temp
@@ -3001,12 +2996,44 @@ window.onload = function () {
       if (counter_img % 2 != 0 && window.innerWidth <= 768)
         temp.querySelector('.mes_img').style.width = '90vw';
 
+      function smoothScrollToBottom(duration = 1000) {
+        const element = document.querySelector('#display');
+        const start = element.scrollTop;
+        const end = element.scrollHeight - element.clientHeight;
+        const change = end - start;
+        const startTime = performance.now();
+
+        function easeOutCubic(t) {
+          return 1 - Math.pow(1 - t, 3);
+        }
+
+        function animateScroll(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = easeOutCubic(progress);
+
+          element.scrollTop = start + change * eased;
+
+          if (progress < 1) {
+            requestAnimationFrame(animateScroll);
+          }
+        }
+
+        requestAnimationFrame(animateScroll);
+      }
+
       if (new_message) {
+        if (temp.classList.contains('right'))
+          temp_full.classList.add('new_message');
         $('#display').append(temp_full);
+        // setTimeout(function () {
         document.querySelector('#display').scrollTo({
           top: document.querySelector('#display').scrollHeight,
           behavior: 'smooth',
         });
+        // }, 1000);
+
+        // smoothScrollToBottom(10000);
       } else $('#display').prepend(temp_full);
 
       all_messages_dives.push(temp_full);
@@ -3076,7 +3103,7 @@ window.onload = function () {
           temp_full.addEventListener('mouseover', check_viewed);
         } else if (!check_last_message_bar && last_read != null) {
           const unread_message_bar = document.createElement('div');
-          unread_message_bar.textContent = 'Unread messages';
+          unread_message_bar.textContent = 'Unread Messages';
           unread_message_bar.setAttribute('class', 'unread_message_bar');
           $('#display').prepend(unread_message_bar);
           check_last_message_bar = true;
@@ -3291,6 +3318,63 @@ window.onload = function () {
     first_message_div_selected = '';
   };
 
+  let lastScrollTop = 0;
+  function scrollShakeMessages(e) {
+    const display = document.querySelector('#display');
+    const tempFullElements = document.querySelectorAll('#display .temp_full');
+    const scrollTop = display.scrollTop;
+
+    const scroll_direction = scrollTop > lastScrollTop ? 1 : -1;
+    // console.log(scroll_direction);
+
+    lastScrollTop = scrollTop;
+    // Получаем текущую позицию скролла
+
+    tempFullElements.forEach((element) => {
+      // Получаем позицию элемента относительно контейнера
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = display.getBoundingClientRect();
+
+      // Проверяем, виден ли элемент в контейнере
+
+      const isVisible =
+        elementRect.top < containerRect.bottom &&
+        elementRect.bottom > containerRect.top;
+      // console.log(element, elementRect.top, elementRect.bottom);
+      // console.log(
+      //   elementRect.top < containerRect.bottom,
+      //   elementRect.bottom > containerRect.top
+      // );
+      // console.log(isVisible);
+      if (isVisible) {
+        // Вычисляем, насколько элемент находится в зоне видимости
+        const visibilityRatio = Math.min(
+          1,
+          Math.max(
+            0,
+            (containerRect.bottom - elementRect.top) / elementRect.height
+          )
+        );
+
+        // Создаем эффект запаздывания - чем меньше visibilityRatio, тем больше запаздывание
+        const delayFactor = 0.3; // Коэффициент запаздывания (0-1)
+        const translateY = scroll_direction * 30; // Максимальное смещение 50px
+        // console.log(translateY);
+        // Применяем трансформацию с плавным переходом
+        element.style.transition = 'transform 0.4s ease-in-out';
+        element.style.transform = `translateY(${translateY}px)`;
+      } else {
+        // Сбрасываем трансформацию для невидимых элементов
+        element.style.transition = 'transform 0.4s ease-in-out';
+        element.style.transform = 'translateY(0px)';
+      }
+    });
+  }
+
+  // document
+  //   .querySelector('#display')
+  //   .addEventListener('scroll', scrollShakeMessages);
+
   prev_scroll_height = 0;
   document
     .querySelector('#display')
@@ -3475,26 +3559,106 @@ window.onload = function () {
   //        }
   //	}
 
-  create_new_group_list_contacts = [];
-  document.querySelector('#creation_group_NEXT_GROUPNAME').onclick = function (
-    event
-  ) {
-    document.querySelector('.all_my_contacts').style.display = 'unset';
-    document
-      .querySelector('#create_new_group_room')
-      .prepend(document.querySelector('.all_my_contacts'));
-    document.querySelector('#create_new_group_room').style.height = '500px';
-    document.querySelector('#creation_group_CREATE_CANCEL_div').style.display =
-      'flex';
-    document.querySelector('#creation_group_GIVE_A_NAME').style.display =
-      'none';
-    document.querySelector(
-      '#creation_group_NEXT_CANCEL_div_GROUPNAME'
-    ).style.display = 'none';
+  const create_new_group_room = document.querySelector(
+    '#create_new_group_room'
+  );
+  let create_new_group_room_touch_start_pos = 0;
+
+  create_new_group_room.ontouchstart = function (event) {
+    create_new_group_room_touch_start_pos = event.touches[0].clientY;
+    create_new_group_room.style.transition = 'translate 0s';
   };
 
+  create_new_group_room.ontouchmove = function (event) {
+    event.preventDefault();
+    const currentY = event.touches[0].clientY;
+    const deltaY = currentY - create_new_group_room_touch_start_pos;
+
+    if (deltaY > 0) {
+      create_new_group_room.style.translate = `0 ${deltaY}px`;
+    }
+  };
+
+  create_new_group_room.ontouchend = function (event) {
+    const endY = event.changedTouches[0].clientY;
+    const deltaY = endY - create_new_group_room_touch_start_pos;
+    create_new_group_room.style.transition = 'translate 0.3s';
+    if (deltaY > 50) {
+      $('#creation_group_GIVE_A_NAME_input').blur();
+      document
+        .querySelector('.creation_group_second_page')
+        .classList.remove('active');
+      document
+        .querySelector('.creation_group_first_page')
+        .classList.add('active');
+      create_new_group_room.classList.remove('active');
+    } else {
+      create_new_group_room.style.translate = '0 0';
+    }
+    create_new_group_room.style = '';
+  };
+
+  create_new_group_list_contacts = [];
+
+  document.querySelector('#creation_group_CANCEL').onclick =
+    document.querySelector('#creation_group_CANCEL_GROUPNAME').onclick =
+      function (event) {
+        document
+          .querySelector('.creation_group_second_page')
+          .classList.remove('active');
+        document
+          .querySelector('.creation_group_first_page')
+          .classList.add('active');
+        document
+          .querySelector('#create_new_group_room')
+          .classList.remove('active');
+        document.querySelector('#creation_group_GIVE_A_NAME_input').value = '';
+      };
+
+  const nextButton = document.querySelector('#creation_group_NEXT_GROUPNAME');
+
+  function shakeButton(button) {
+    button.style.animation = 'none';
+
+    void button.offsetWidth;
+
+    button.style.animation = 'shakeError 0.5s ease-in-out';
+
+    setTimeout(() => {
+      button.style.animation = '';
+    }, 500);
+  }
+
+  document.querySelector('#creation_group_NEXT_GROUPNAME').mousedown =
+    document.querySelector('#creation_group_NEXT_GROUPNAME').ontouchstart =
+      function (e) {
+        e.preventDefault();
+        if ($('#creation_group_GIVE_A_NAME_input').is(':focus'))
+          $('#creation_group_GIVE_A_NAME_input').focus();
+
+        if (
+          document.querySelector('#creation_group_GIVE_A_NAME_input').value
+            .length < 1
+        ) {
+          shakeButton(this);
+          return;
+        }
+        document
+          .querySelector('.creation_group_second_page')
+          .classList.add('active');
+        document
+          .querySelector('.creation_group_first_page')
+          .classList.remove('active');
+      };
+
   document.querySelector('#creation_group_CREATE').onclick = function (event) {
-    document.querySelector('#create_new_group_room').style.height = '200px';
+    document
+      .querySelector('.creation_group_second_page')
+      .classList.remove('active');
+    document
+      .querySelector('.creation_group_first_page')
+      .classList.add('active');
+    document.querySelector('#create_new_group_room').classList.remove('active');
     create_new_group_list_contacts = [];
     document
       .querySelector('.all_my_contacts')
@@ -3564,8 +3728,6 @@ window.onload = function () {
       },
     });
   };
-
-  document.querySelector('#create_new_group').onmousedown = function (event) {};
 
   /*//    document.querySelector(".room_div").style.cssText += "filter: blur(1px)";*/
 
@@ -4394,23 +4556,22 @@ window.onload = function () {
     //   document.querySelector('.settings_menu').classList.remove('active');
     // }
 
-    if (!$(e.target).closest('.settings').length) {
-      document.querySelector('.settings').classList.remove('active');
-      document.querySelector('.settings').style.display = 'none';
-    }
-
     if (!$(e.target).closest('#create_new_group_room').length) {
       document
         .querySelector('#create_new_group_room')
         .classList.remove('active');
-      document.querySelector('#create_new_group_room').style.display = 'none';
+      document
+        .querySelector('#create_new_group_room')
+        .classList.remove('active');
     }
 
     if (!$(e.target).closest('#create_new_channel_room').length) {
       document
         .querySelector('#create_new_channel_room')
         .classList.remove('active');
-      document.querySelector('#create_new_channel_room').style.display = 'none';
+      document
+        .querySelector('#create_new_channel_room')
+        .classList.remove('active');
     }
 
     if (!$(e.target).closest('.calendar_div').length) {
@@ -4424,20 +4585,28 @@ window.onload = function () {
     e.stopPropagation();
   });
 
+  document.querySelector('#appearance_exit').onclick = function () {
+    document.querySelector('.settings').classList.remove('active');
+  };
+
   $('#settings').click(function () {
-    // document.querySelector('.settings_menu').classList.remove('active');
-    document.querySelector('#img01').removeAttribute('src');
-    document.querySelector('#myModal').style.display = 'block';
+    console.log('AAA');
     document.querySelector('.settings').classList.add('active');
-    document.querySelector('.settings').style.display = 'block';
+    // document.querySelector('.settings_menu').classList.remove('active');
+    // document.querySelector('#img01').removeAttribute('src');
+    // document.querySelector('#myModal').style.display = 'block';
+    // document.querySelector('.settings').classList.add('active');
+    // document.querySelector('.settings').style.display = 'block';
   });
 
   $('#create_new_group').click(function () {
+    document.querySelector('#creation_group_GIVE_A_NAME_input').focus({
+      preventScroll: true,
+    });
     // document.querySelector('.settings_menu').classList.remove('active');
     document.querySelector('#img01').removeAttribute('src');
     document.querySelector('#myModal').style.display = 'block';
     document.querySelector('#create_new_group_room').classList.add('active');
-    document.querySelector('#create_new_group_room').style.display = 'block';
   });
 
   $('#create_new_channel').click(function () {
@@ -4445,7 +4614,6 @@ window.onload = function () {
     document.querySelector('#img01').removeAttribute('src');
     document.querySelector('#myModal').style.display = 'block';
     document.querySelector('#create_new_channel_room').classList.add('active');
-    document.querySelector('#create_new_channel_room').style.display = 'block';
   });
 
   const daysTag = document.querySelector('.days'),
@@ -4920,4 +5088,28 @@ function createDisplacement() {
   // Get data URL from the canvas, not the ImageData object
   const dataUrl = canvas.toDataURL();
   console.log(dataUrl);
+}
+
+function logoutUser(button) {
+  const logoutUrl = button.getAttribute('data-logout-url');
+  const csrfToken = button.getAttribute('data-csrf-token');
+  const originalText = button.textContent;
+
+  document.getElementById('logout-span').textContent = 'Logging out...';
+  button.disabled = true;
+
+  fetch(logoutUrl, {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRFToken': csrfToken,
+    },
+  })
+    .then((response) => {
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error('Logout error:', error);
+      window.location.reload();
+    });
 }
