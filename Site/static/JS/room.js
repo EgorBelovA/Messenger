@@ -111,7 +111,7 @@ function enableDoubleTap(element, callback) {
   );
 
   element.addEventListener('touchend', function (event) {
-    event.preventDefault();
+    // event.preventDefault();
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
 
@@ -2454,11 +2454,13 @@ window.onload = function () {
 
   function mes_reaction(mes_react_id) {
     if (
-      all_messages[mes_react_id].querySelector('#liked_check').style.display ==
-      ''
+      !all_messages[mes_react_id]
+        .querySelector('#reaction_span')
+        .classList.contains('active')
     ) {
-      all_messages[mes_react_id].querySelector('#liked_check').style.display =
-        'unset';
+      all_messages[mes_react_id]
+        .querySelector('#reaction_span')
+        .classList.add('active');
       all_messages[mes_react_id].querySelector(
         '#stellar_particles'
       ).style.display = 'unset';
@@ -2468,11 +2470,12 @@ window.onload = function () {
         ).style.display = 'none';
       }, 1500);
     } else {
-      all_messages[mes_react_id].querySelector('#liked_check').style.display =
-        '';
+      all_messages[mes_react_id]
+        .querySelector('#reaction_span')
+        .classList.remove('active');
       all_messages[mes_react_id].querySelector(
         '#stellar_particles'
-      ).style.display = '';
+      ).style.display = 'none';
     }
   }
 
@@ -2545,6 +2548,8 @@ window.onload = function () {
         block_month.setAttribute('id', 'block_date');
       } else new_month_check = 0;
       let temp = document.createElement('div');
+      let message_div_temp = document.createElement('div');
+      reaction_span = document.createElement('span');
       let all_files = '';
       var len = response.messages[key].value.length;
       var check_transfer = 0;
@@ -2640,7 +2645,7 @@ window.onload = function () {
                 img_comment = document.getElementById('img_comment');
                 var modalImg = document.getElementById('img01');
                 var captionText = document.getElementById('caption');
-                document
+                const attachment_photo = document
                   .querySelector('#attachment_photos')
                   .querySelectorAll('.attachment_photo')[
                   document
@@ -2648,7 +2653,8 @@ window.onload = function () {
                     .querySelectorAll('.attachment_photo').length -
                     files_cnt -
                     1
-                ].onmousedown = document
+                ];
+                const mes_image = document
                   .querySelector('#display')
                   .querySelectorAll('.mes_img')[
                   document
@@ -2656,21 +2662,27 @@ window.onload = function () {
                     .querySelectorAll('.mes_img').length -
                     files_cnt -
                     1
-                ].onmousedown = function () {
+                ];
+
+                img.addEventListener('click', function () {
+                  console.log('click');
+                });
+
+                img.onclick = attachment_photo.onclick = function () {
                   modal.style.display = 'block';
                   modalImg.src = this.src;
                   document.querySelector('#media_display').style.display =
-                    'block';
+                    'flex';
                   if (
                     temp
                       .querySelector('.message')
-                      .getElementsByTagName('span')[0].textContent == undefined
+                      .getElementsByTagName('span')[1].textContent == undefined
                   )
                     captionText.innerHTML = '';
                   else
                     captionText.innerHTML = temp
                       .querySelector('.message')
-                      .getElementsByTagName('span')[0].textContent;
+                      .getElementsByTagName('span')[1].textContent;
                 };
               }
             })();
@@ -2751,8 +2763,12 @@ window.onload = function () {
           }
 
           user_file_pres_span = document.createElement('span');
+          user_file_pres_span.classList.add('user_file_pres');
           user_file_pres_span.appendChild(user_file_pres);
-          temp.insertAdjacentElement('afterbegin', user_file_pres_span);
+          message_div_temp.insertAdjacentElement(
+            'afterbegin',
+            user_file_pres_span
+          );
           all_files += user_file_pres;
         }
       }
@@ -2784,18 +2800,22 @@ window.onload = function () {
       stellar_particles.src =
         '//' + window.location.host + '/static/Images/stellar_particles.gif';
 
-      if (response.messages[key].liked == true) liked.style.display = 'unset';
+      if (response.messages[key].liked == true) {
+        liked.style.display = 'unset';
+        reaction_span.classList.add('active');
+      }
+
       temp.setAttribute('class', 'message_div');
       temp.setAttribute('value', response.messages[key].id);
 
       liked_div.appendChild(liked);
       liked_div.appendChild(stellar_particles);
 
-      message_div_temp = document.createElement('div');
+      // message_div_temp = document.createElement('div');
       message_div_temp.classList.add('message');
 
       mes_span = document.createElement('span');
-      mes_span.style.whiteSpace = 'pre-line';
+      mes_span.classList.add('message_span');
       mes_span.textContent = mes;
 
       viewed_span = document.createElement('span');
@@ -2806,14 +2826,48 @@ window.onload = function () {
       time_left.classList.add('time-left');
       time_left.textContent = response.messages[key].date.slice(11, 16);
 
-      reaction_span = document.createElement('span');
       reaction_span.setAttribute('id', 'reaction_span');
       reaction_span.appendChild(liked_div);
 
-      message_div_temp.appendChild(mes_span);
-      message_div_temp.appendChild(viewed_span);
-      message_div_temp.appendChild(time_left);
-      message_div_temp.appendChild(reaction_span);
+      const elements = document.querySelectorAll('.message');
+
+      const ro = new ResizeObserver((entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target;
+
+          const rect = el.getBoundingClientRect();
+          // console.log(rect.width, rect.height);
+          const parent = el.parentElement;
+
+          parent.style.width = rect.width + 'px';
+          parent.style.height = rect.height + 'px';
+          // parent.style.marginTop = `-${rect.height + 400}px`;
+        });
+      });
+
+      elements.forEach((el) => ro.observe(el));
+
+      message_div_temp_separator = document.createElement('div');
+      message_div_temp_separator.classList.add('message_div_temp_separator');
+
+      message_div_subdata = document.createElement('div');
+      message_div_subdata.classList.add('message_div_subdata');
+
+      message_div_temp_time_view = document.createElement('div');
+      message_div_temp_time_view.classList.add('message_div_temp_time_view');
+      message_div_temp_time_view.appendChild(time_left);
+      message_div_temp_time_view.appendChild(viewed_span);
+      message_div_subdata.appendChild(message_div_temp_time_view);
+
+      message_and_reaction = document.createElement('div');
+      message_and_reaction.classList.add('message_and_reaction');
+      message_and_reaction.appendChild(mes_span);
+      message_and_reaction.appendChild(reaction_span);
+
+      message_div_temp_separator.appendChild(message_and_reaction);
+      message_div_temp_separator.appendChild(message_div_subdata);
+
+      message_div_temp.appendChild(message_div_temp_separator);
 
       temp.appendChild(message_div_temp);
 
@@ -2824,30 +2878,30 @@ window.onload = function () {
       } else {
         temp.classList.add('darker');
       }
-      if (mes == '' && temp.querySelector('.mes_img') != null) {
-        temp
-          .querySelector('.message')
-          .setAttribute(
-            'style',
-            'position: absolute; padding: 0; bottom: 5px; right: 0px; background: rgba(20,20,20, 0.7); border-radius: 30px; padding: 3px; opacity: 0; transition: opacity 0.2s;'
-          );
-        temp
-          .querySelector('.time-left')
-          .setAttribute('style', 'color: white; font-size: 14px; margin: 0;');
-        temp
-          .querySelector('#reaction_span')
-          .setAttribute('style', 'margin: 0 5px 0 0;');
-        temp
-          .querySelector('#viewed_span')
-          .setAttribute('style', 'margin: 0 0 0 5px;');
+      // if (mes == '' && temp.querySelector('.mes_img') != null) {
+      //   temp
+      //     .querySelector('.message')
+      //     .setAttribute(
+      //       'style',
+      //       'position: absolute; padding: 0; bottom: 5px; right: 0px; background: rgba(20,20,20, 0.7); border-radius: 30px; padding: 3px; opacity: 0; transition: opacity 0.2s;'
+      //     );
+      //   temp
+      //     .querySelector('.time-left')
+      //     .setAttribute('style', 'color: white; font-size: 14px; margin: 0;');
+      //   temp
+      //     .querySelector('#reaction_span')
+      //     .setAttribute('style', 'margin: 0 5px 0 0;');
+      //   temp
+      //     .querySelector('#viewed_span')
+      //     .setAttribute('style', 'margin: 0 0 0 5px;');
 
-        temp.onmouseover = function () {
-          temp.querySelector('.message').style.opacity = '1';
-        };
-        temp.onmouseout = function () {
-          temp.querySelector('.message').style.opacity = '0';
-        };
-      }
+      //   temp.onmouseover = function () {
+      //     temp.querySelector('.message').style.opacity = '1';
+      //   };
+      //   temp.onmouseout = function () {
+      //     temp.querySelector('.message').style.opacity = '0';
+      //   };
+      // }
 
       var files_num = -1;
       for (var files_key in files_message) {
@@ -2874,8 +2928,7 @@ window.onload = function () {
               attachment_photo.onmousedown = function () {
                 modal.style.display = 'block';
                 modalImg.src = this.src;
-                document.querySelector('#media_display').style.display =
-                  'block';
+                document.querySelector('#media_display').style.display = 'flex';
                 //                                            console.log(temp.querySelector(".message").getElementsByTagName("span")[0].textContent)
                 if (
                   temp.querySelector('.message').getElementsByTagName('span')[0]
@@ -2992,9 +3045,9 @@ window.onload = function () {
       temp_full.appendChild(temp);
 
       if (counter_img % 2 != 0)
-        temp.querySelector('.mes_img').style.width = '432px';
+        message_div_temp.querySelector('.user_file_pres').style.width = '432px';
       if (counter_img % 2 != 0 && window.innerWidth <= 768)
-        temp.querySelector('.mes_img').style.width = '90vw';
+        message_div_temp.querySelector('.user_file_pres').style.width = '80vw';
 
       function smoothScrollToBottom(duration = 1000) {
         const element = document.querySelector('#display');
@@ -3025,7 +3078,7 @@ window.onload = function () {
       if (new_message) {
         if (temp.classList.contains('right'))
           temp_full.classList.add('new_message');
-        $('#display').append(temp_full);
+        $('#display').prepend(temp_full);
         // setTimeout(function () {
         document.querySelector('#display').scrollTo({
           top: document.querySelector('#display').scrollHeight,
@@ -3034,7 +3087,7 @@ window.onload = function () {
         // }, 1000);
 
         // smoothScrollToBottom(10000);
-      } else $('#display').prepend(temp_full);
+      } else $('#display').append(temp_full);
 
       all_messages_dives.push(temp_full);
       temp_full.addEventListener('contextmenu', (e) => {
@@ -3105,7 +3158,7 @@ window.onload = function () {
           const unread_message_bar = document.createElement('div');
           unread_message_bar.textContent = 'Unread Messages';
           unread_message_bar.setAttribute('class', 'unread_message_bar');
-          $('#display').prepend(unread_message_bar);
+          $('#display').append(unread_message_bar);
           check_last_message_bar = true;
         }
       }
@@ -3148,7 +3201,7 @@ window.onload = function () {
         block_date.setAttribute('id', 'block_date');
         block_date.innerHTML =
           months[month] + ' ' + (response.messages[key].date.slice(8, 10) - 0);
-        $('#display').prepend(block_date);
+        $('#display').append(block_date);
         block_date_dict[response.messages[key].date.slice(0, 10)] = temp_full;
       }
 
@@ -4400,9 +4453,9 @@ window.onload = function () {
         .setAttribute('style', 'background: #EEE;');
       document.querySelector('#dark_mode_check').checked = false;
     } else if (getCookie('theme_mode') == 'D') {
-      message_color = 'rgba(41,49,51)';
+      message_color = 'rgba(28,28, 28)';
       main_color = '#FFF';
-      darker_ = '#404155ff';
+      darker_ = '#7469a6ff';
       attachment_tabs = '##1E1E1E';
       document.documentElement.style.setProperty(
         '--message_color',
@@ -4467,7 +4520,7 @@ window.onload = function () {
 
   shadow_degree = getCookie('room_BG_shadow');
   if (getCookie('room_BG_color_hex') == undefined) {
-    setCookie('room_BG_color_hex', '#FFFFFF', 7);
+    setCookie('room_BG_color_hex', '#6c47ffff', 7);
   }
   document.querySelector('#color_chat_change').value = room_BG_color_hex =
     getCookie('room_BG_color_hex');
@@ -4498,11 +4551,11 @@ window.onload = function () {
     .setAttribute(
       'style',
       '--myColor1: ' +
-        pSBC(-0.8, room_BG_color_hex) +
+        pSBC(-0.6, room_BG_color_hex) +
         '; --myColor2: ' +
-        pSBC(-0.4, room_BG_color_hex) +
+        pSBC(0, room_BG_color_hex) +
         '; --myColor3: ' +
-        pSBC(-1.4, room_BG_color_hex) +
+        pSBC(-0.8, room_BG_color_hex) +
         ';'
     );
   //   document
