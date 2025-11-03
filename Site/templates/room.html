@@ -425,51 +425,50 @@
             <use href="#arrow"></use>
           </svg>
         </div>
-      </div>
-      <form
-        id="post-form"
-        class="send_div send_div_class"
-        enctype="multipart/form-data"
-        action="send"
-      >
-        {% csrf_token %}
+        <form
+          id="post-form"
+          class="send_div send_div_class"
+          enctype="multipart/form-data"
+          action="send"
+        >
+          {% csrf_token %}
 
-        <div id="file_div">
-          <input type="file" multiple name="file" id="file" download />
-          <object
-            id="input_attach"
-            data='{% static "SVG/attach.svg" %}'
-          ></object>
-        </div>
+          <div id="file_div">
+            <input type="file" multiple name="file" id="file" download />
+            <object
+              id="input_attach"
+              data='{% static "SVG/attach.svg" %}'
+            ></object>
+          </div>
 
-        <input
-          type="hidden"
-          name="username"
-          id="username"
-          value="{{username.id}}"
-        />
-        <input
-          type="hidden"
-          name="room_id"
-          id="room_id"
-          value="{{room_details.id}}"
-        />
-        <input
-          type="hidden"
-          name="room"
-          id="room"
-          value="{{room_details.name}}"
-        />
-        <div class="textarea_container">
-          <textarea
-            type="text"
-            placeholder="Message"
-            name="message"
-            class="textarea"
-          ></textarea>
-        </div>
+          <input
+            type="hidden"
+            name="username"
+            id="username"
+            value="{{username.id}}"
+          />
+          <input
+            type="hidden"
+            name="room_id"
+            id="room_id"
+            value="{{room_details.id}}"
+          />
+          <input
+            type="hidden"
+            name="room"
+            id="room"
+            value="{{room_details.name}}"
+          />
+          <div class="textarea_container">
+            <textarea
+              type="text"
+              placeholder="Message"
+              name="message"
+              class="textarea"
+            ></textarea>
+          </div>
 
-        <!-- <div>
+          <!-- <div>
           <svg
             id="sticker_menu_icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -480,31 +479,31 @@
             />
           </svg>
         </div> -->
-        <div id="selfie">
-          <input
-            type="file"
-            id="picture"
-            name="file"
-            accept="image/*"
-            capture="environment"
-          />
-          <object
-            class="camera_svg"
-            data="{% static 'SVG/focus.svg' %}"
-          ></object>
-        </div>
-        <div class="input_submit">
-          <!-- <object
+          <div id="selfie">
+            <input
+              type="file"
+              id="picture"
+              name="file"
+              accept="image/*"
+              capture="environment"
+            />
+            <object
+              class="camera_svg"
+              data="{% static 'SVG/focus.svg' %}"
+            ></object>
+          </div>
+          <div class="input_submit">
+            <!-- <object
             class="send_svg"
             data="{% static 'SVG/send_phone.svg' %}"
           ></object> -->
-          <svg class="send_svg">
-            <use href="#send-phone"></use>
-          </svg>
-        </div>
-        <!--                        <img src="{% static 'Images/stellar_particles.gif' %}"/>-->
-      </form>
-
+            <svg class="send_svg">
+              <use href="#send-phone"></use>
+            </svg>
+          </div>
+          <!--                        <img src="{% static 'Images/stellar_particles.gif' %}"/>-->
+        </form>
+      </div>
       <!--              <progress id="progressBar" value="0" max="100" style="width:300px;"></progress>-->
       <!--              <h3 id="status"></h3>-->
       <!--              <p id="loaded_n_total"></p>-->

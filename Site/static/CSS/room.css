@@ -52,11 +52,106 @@ body {
   max-height: calc(env(safe-area-inset-top) + 100%);
 }
 
+* {
+  font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica',
+    'Arial', sans-serif;
+}
+
 /* html {
   height: 110dvh;
 } */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,100..1000&display=swap');
 
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 300;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProText-Light.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProText-Regular.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 500;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProText-Medium.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 600;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProText-SemiBold.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 700;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProText-Bold.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 900;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProText-Heavy.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 100;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Ultralight.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 200;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Thin.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 300;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Light.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Regular.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 500;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Medium.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 600;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-SemiBold.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 700;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Bold.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 800;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Black.ttf');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 900;
+  src: url('https://raw.githubusercontent.com/blaisck/sfwin/master/SFPro/TrueType/SFProDisplay-Heavy.ttf');
+}
 body {
   display: flex;
   justify-content: center;
@@ -67,13 +162,12 @@ body {
   /* font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial,
     sans-serif; */
   /* font-size: 20px; */
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 106.25%;
+  /* font-family: -apple-system, BlinkMacSystemFont, sans-serif; */
+  /* font-family: -apple-system; */
+  /* font-family: BlinkMacSystemFont; */
 
-  /* font-family: 'DM Sans', sans-serif; */
-  /* font-optical-sizing: auto; */
-  /* font-size: 106.25%; */
-  /* font-weight: 400; */
+  font-size: 106.25%;
+  font-weight: 400;
   background-size: cover;
   background-attachment: fixed;
   background-color: rgb(15, 15, 15);
@@ -244,7 +338,7 @@ select {
   border-radius: 20px 20px 0 0;
   padding: 5px 5px 5px 5px;
   /* height: 80px; */
-  position: fixed;
+  position: absolute;
   bottom: 0;
   transition: background 1s, width 1s;
   box-shadow: 0px -5px 10px -10px rgba(0, 0, 0, 1);
@@ -253,14 +347,15 @@ select {
 }
 
 .send_div_class {
-  width: min(700px, 100%);
+  max-width: 100%;
+  width: 100%;
   transition: width 0.2s ease-in, background 1s, height 0.2s;
 }
 
-.send_div_class.active {
+/* .send_div_class.active {
   width: calc(100% - 400px);
   transition: width 0.2s ease-in, background 1s;
-}
+} */
 
 .send_div.hidden {
   display: none !important;
@@ -416,6 +511,7 @@ select {
     rgba(10, 10, 10, 0.9) 0%,
     rgba(10, 10, 10, 0.9) 100%
   ); */
+  align-self: start;
   background-color: rgba(10, 10, 10, 0.9);
   display: flex;
   flex-direction: row;
@@ -884,8 +980,8 @@ select {
   height: 100%;
   overflow: auto;
   background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.95);
+  /* backdrop-filter: blur(10px); */
   animation: 0.3s 1 fadeIn;
 }
 
@@ -983,7 +1079,7 @@ select {
 }
 
 .tab {
-  background: rgb(45, 45, 45);
+  background: #000;
   display: flex;
   overflow-x: scroll;
 }
@@ -993,7 +1089,7 @@ select {
 }
 
 .tab button {
-  font-size: large;
+  font-weight: 500;
   float: left;
   border: none;
   outline: none;
@@ -1002,8 +1098,9 @@ select {
   transition: 0.3s;
   font-size: 16px;
   color: var(--attachment_tabs_font);
-  background: var(--attachment_tabs);
-  border-color: rgba(0, 0, 0, 0);
+  /* background: var(--attachment_tabs); */
+  background: transparent;
+  /* border-color: rgba(0, 0, 0, 0); */
   transition: background 1s, color 1s;
 }
 
@@ -1223,10 +1320,10 @@ html.is-animating .transition-fade {
   height: 100%;
 }
 
-.room_body.active {
+/* .room_body.active {
   width: calc(100% - 400px);
   transition: width 0.6s;
-}
+} */
 
 .room_wrapper {
   position: absolute;
@@ -1646,7 +1743,7 @@ html.is-animating .transition-fade {
   color: #fff;
   transition: background 1s, width 0.2s ease-in-out;
   text-overflow: ellipsis;
-  width: 51px;
+  width: calc(6ch);
 }
 
 .search_field::placeholder {
