@@ -4709,14 +4709,16 @@ window.onload = function () {
       document.querySelector('#dark_mode_check').checked = true;
     }
   }
-
-  shadow_degree = getCookie('room_BG_shadow');
+  if (getCookie('room_BG_shadow') == undefined) {
+    setCookie('room_BG_shadow', '45', 7);
+  }
   if (getCookie('room_BG_color_hex') == undefined) {
     setCookie('room_BG_color_hex', '#6c47ffff', 7);
   }
   document.querySelector('#color_chat_change').value = room_BG_color_hex =
     getCookie('room_BG_color_hex');
-  document.querySelector('#shadow_degree_chat').value = shadow_degree;
+  document.querySelector('#shadow_degree_chat').value = shadow_degree =
+    getCookie('room_BG_shadow');
   // setTimeout(function () {
   //   document
   //     .querySelector('.chat-background-image')
