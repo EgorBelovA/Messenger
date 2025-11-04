@@ -1292,15 +1292,28 @@ html.is-animating .transition-fade {
   transition: margin-top 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
+:root {
+  --display-after-height: 0;
+
+  --sat: env(safe-area-inset-top);
+  --sar: env(safe-area-inset-right);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+}
+
 .room_div::after {
   content: '';
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  min-height: calc(env(safe-area-inset-top) + 50px);
-  max-height: calc(env(safe-area-inset-top) + 50px);
+  /* flex: 1; */
+  /* flex-shrink: 0; */
+  flex: 1;
   width: 100%;
+  min-height: calc(
+    env(safe-area-inset-top) + 50px + var(--display-after-height)
+  );
+  /* min-height: calc(
+    env(safe-area-inset-top) + 50px + var(--display-after-height)
+  ); */
+  /* max-height: calc(env(safe-area-inset-top) + 50px); */
 }
 
 .room_body {
@@ -4418,4 +4431,39 @@ input[type='range']:focus::-ms-fill-upper {
     order: 2;
     width: 100vw;
   }
+}
+
+.background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+#gradient-canvas,
+#pattern-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#gradient-canvas {
+  /* Градиентный слой */
+  opacity: 1;
+  transition: opacity 0.35s;
+}
+
+#pattern-canvas {
+  /* Паттерн с SVG */
+  opacity: 0.4;
+  mix-blend-mode: overlay; /* Можно экспериментировать с blend-mode */
+  transition: opacity 0.35s;
+}
+
+#pattern-canvas {
+  mix-blend-mode: overlay; /* overlay, screen, multiply, soft-light */
 }

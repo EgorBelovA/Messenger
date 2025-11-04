@@ -58,7 +58,6 @@ function go_home_page_func() {
     document.querySelector('#post-form').classList.add('hidden');
     document.querySelector('#opponent_title_name').classList.add('hidden');
   }, clearChatTimeOutTime);
-  console.log(clearChatTimeOut);
 
   //        document.querySelector("#select_chat_to_start").style.display = "inline-block";
 
@@ -533,7 +532,7 @@ window.onload = function () {
     }
 
     if (isSwiping && deltaX > 0) {
-      event.preventDefault();
+      if (event.cancelable) event.preventDefault();
       document.querySelector('.choose_list').classList.remove('swiped');
       var velocity = Math.abs(deltaX) / Math.max(duration, 1);
       var extraMargin = velocity * 10;
@@ -3067,25 +3066,64 @@ window.onload = function () {
         requestAnimationFrame(animateScroll);
       }
 
+      function getFlexContainerExpandedHeight(container) {
+        // Если контейнер имеет фиксированную высоту
+        const computedStyle = getComputedStyle(container);
+        const flexDirection = computedStyle.flexDirection;
+
+        if (flexDirection === 'column' || flexDirection === 'column-reverse') {
+          // Для вертикального flex - scrollHeight показывает полную высоту
+          return container.scrollHeight;
+        }
+
+        return container.offsetHeight;
+      }
+
       if (new_message) {
         if (temp.classList.contains('right'))
           temp_full.classList.add('new_message_own');
         else temp_full.classList.add('new_message_not_own');
         const display = document.querySelector('#display');
+        const displayAfter = window.getComputedStyle(display, '::after');
+        const heightString = displayAfter.height;
+        const heightValue = parseInt(heightString) || 0;
+        console.log(heightValue);
         const old_scrollTop = display.scrollTop;
-        // console.log(display.scrollTop, temp_full.offsetHeight);
         $('#display').prepend(temp_full);
+
+        document.documentElement.style.setProperty(
+          '--display-after-height',
+          `${heightValue}px`
+        );
+
         display.scrollTop = old_scrollTop - temp_full.offsetHeight;
-        console.log(display.scrollTop, temp_full.offsetHeight);
 
-        setTimeout(function () {
-          display.scrollTo({
-            top: 0,
-            behavior: 'smooth',
+        function smoothScrollToTop(element) {
+          return new Promise((resolve) => {
+            element.scrollTo({
+              top: 0,
+              behavior: 'smooth',
+            });
+
+            const onTransitionEnd = () => {
+              element.removeEventListener('transitionend', onTransitionEnd);
+              resolve();
+            };
+
+            element.addEventListener('transitionend', onTransitionEnd);
+
+            setTimeout(resolve, 500);
           });
-        }, 10);
+        }
 
-        // console.log(temp_full.offsetHeight);
+        setTimeout(async function () {
+          await smoothScrollToTop(display);
+
+          document.documentElement.style.setProperty(
+            '--display-after-height',
+            `${heightValue - temp_full.offsetHeight}px`
+          );
+        }, 10);
       } else $('#display').append(temp_full);
 
       all_messages_dives.push(temp_full);
@@ -3212,6 +3250,29 @@ window.onload = function () {
     }
 
     if (load_check) {
+      document.documentElement.style.setProperty(
+        '--display-after-height',
+        `${0}px`
+      );
+      const styles = window.getComputedStyle(document.documentElement);
+
+      const safeAreaBottom = parseFloat(
+        styles.getPropertyValue('--sab') || '0px'
+      );
+      const safeAreaTop = parseFloat(styles.getPropertyValue('--sat') || '0px');
+
+      const display = document.querySelector('#display');
+      const displayAfter = window.getComputedStyle(display, '::after');
+      const heightString = displayAfter.height;
+      console.log(parseFloat(heightString));
+      const heightValue = parseInt(heightString) || 0;
+      document.documentElement.style.setProperty(
+        '--display-after-height',
+        `${parseFloat(heightValue) + 2 - 50 - safeAreaTop}px`
+      );
+
+      // console.log(heightValue + 1);
+
       // document.querySelector('#display').scrollTo({
       //   top: document.querySelector('#display').scrollHeight,
       // });
@@ -3377,10 +3438,8 @@ window.onload = function () {
     const scrollTop = display.scrollTop;
 
     const scroll_direction = scrollTop > lastScrollTop ? 1 : -1;
-    // console.log(scroll_direction);
 
     lastScrollTop = scrollTop;
-    // Получаем текущую позицию скролла
 
     tempFullElements.forEach((element) => {
       // Получаем позицию элемента относительно контейнера
@@ -3392,12 +3451,10 @@ window.onload = function () {
       const isVisible =
         elementRect.top < containerRect.bottom &&
         elementRect.bottom > containerRect.top;
-      // console.log(element, elementRect.top, elementRect.bottom);
       // console.log(
       //   elementRect.top < containerRect.bottom,
       //   elementRect.bottom > containerRect.top
       // );
-      // console.log(isVisible);
       if (isVisible) {
         // Вычисляем, насколько элемент находится в зоне видимости
         const visibilityRatio = Math.min(
@@ -3411,7 +3468,6 @@ window.onload = function () {
         // Создаем эффект запаздывания - чем меньше visibilityRatio, тем больше запаздывание
         const delayFactor = 0.3; // Коэффициент запаздывания (0-1)
         const translateY = scroll_direction * 30; // Максимальное смещение 50px
-        // console.log(translateY);
         // Применяем трансформацию с плавным переходом
         element.style.transition = 'transform 0.4s ease-in-out';
         element.style.transform = `translateY(${translateY}px)`;
@@ -3501,7 +3557,6 @@ window.onload = function () {
     .addEventListener('scroll', function (event) {
       if (document.querySelector('#display').scrollTop < 300) {
         // scroll_more += 20;
-        // console.log(scroll_more);
         // message_initialization(messages_response);
       }
       scroll_appear = false;
@@ -3654,9 +3709,10 @@ window.onload = function () {
 
   document.querySelector('#shadow_degree_chat').oninput = function (e) {
     shadow_degree = document.querySelector('#shadow_degree_chat').value;
-    document
-      .querySelector('.chat-background-image')
-      .style.setProperty('--shadow_degree', `${shadow_degree}deg`);
+    document.documentElement.style.setProperty(
+      '--shadow_degree',
+      `${shadow_degree}deg`
+    );
   };
 
   document.querySelector('#shadow_degree_chat').onchange = function (e) {
@@ -4399,7 +4455,6 @@ window.onload = function () {
 
   const search_cross = document.querySelector('.search_cross_div');
   search_cross.onmouseup = search_cross.ontouchstart = function () {
-    // console.log('search_cross');
     document.querySelector('.search_field').value = '';
     // document.documentElement.style.setProperty('--rooms_display', `flex`);
   };
@@ -4662,11 +4717,15 @@ window.onload = function () {
   document.querySelector('#color_chat_change').value = room_BG_color_hex =
     getCookie('room_BG_color_hex');
   document.querySelector('#shadow_degree_chat').value = shadow_degree;
-  setTimeout(function () {
-    document
-      .querySelector('.chat-background-image')
-      .style.setProperty('--shadow_degree', `${shadow_degree}deg`);
-  }, 0);
+  // setTimeout(function () {
+  //   document
+  //     .querySelector('.chat-background-image')
+  //     .style.setProperty('--shadow_degree', `${shadow_degree}deg`);
+  // }, 0);
+  document.documentElement.style.setProperty(
+    '--shadow_degree',
+    `${shadow_degree}deg`
+  );
   document.documentElement.style.setProperty(
     '--slider_shadow_degree',
     `${room_BG_color_hex}`
@@ -5210,7 +5269,6 @@ document.addEventListener('DOMContentLoaded', function () {
       // Проверяем, изменилась ли скорость значительно
       const velocityChange = Math.abs(velocity - lastVelocity);
       const relativeChange = velocityChange / lastVelocity;
-      // console.log(relativeChange > VELOCITY_CHANGE_THRESHOLD);
       if (relativeChange > VELOCITY_CHANGE_THRESHOLD) {
         shouldUpdateHeight = true;
       }
@@ -5232,7 +5290,6 @@ document.addEventListener('DOMContentLoaded', function () {
           1,
           (velocity - VELOCITY_THRESHOLD) / VELOCITY_THRESHOLD
         );
-        // console.log(speedFactor);
         targetBubbleHeight =
           NORMAL_BUBBLE_HEIGHT -
           (NORMAL_BUBBLE_HEIGHT - MIN_BUBBLE_HEIGHT) * speedFactor;
@@ -5240,7 +5297,6 @@ document.addEventListener('DOMContentLoaded', function () {
       currentBubbleHeight = targetBubbleHeight;
       lastVelocity = velocity; // Сохраняем текущую скорость как эталон
     }
-    // console.log(currentBubbleHeight);
     this.style.transform = `scale(1.2, ${currentBubbleHeight})`;
 
     // returnTimer = setTimeout(() => {
@@ -5276,21 +5332,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // switchTab('chats');
 });
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-function createDisplacement() {
-  const imageData = ctx.createImageData(canvas.width, canvas.height);
-  ctx.putImageData(imageData, 0, 0);
-
-  // Get data URL from the canvas, not the ImageData object
-  const dataUrl = canvas.toDataURL();
-  console.log(dataUrl);
-}
-
 function logoutUser(button) {
   const logoutUrl = button.getAttribute('data-logout-url');
   const csrfToken = button.getAttribute('data-csrf-token');
@@ -5314,3 +5355,120 @@ function logoutUser(button) {
       window.location.reload();
     });
 }
+
+class AnimatedBackground {
+  constructor() {
+    this.gradientCanvas = document.getElementById('gradient-canvas');
+    this.patternCanvas = document.getElementById('pattern-canvas');
+
+    this.gradientCtx = this.gradientCanvas.getContext('2d');
+    this.patternCtx = this.patternCanvas.getContext('2d');
+
+    this.patternImage = new Image();
+    this.originalWidth = 0;
+    this.originalHeight = 0;
+
+    this.init();
+  }
+
+  async init() {
+    this.patternImage.src = 'static/SVG/PATTERNS/pattern-34.svg';
+
+    await new Promise((resolve) => {
+      this.patternImage.onload = () => {
+        // Используем натуральные размеры SVG
+        this.originalWidth = 300;
+        this.originalHeight = (300 * 16) / 9;
+        console.log('Original SVG size:', {
+          width: this.originalWidth,
+          height: this.originalHeight,
+        });
+        resolve();
+      };
+    });
+
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    [this.gradientCanvas, this.patternCanvas].forEach((canvas) => {
+      canvas.width = width;
+      canvas.height = height;
+    });
+
+    this.drawGradient();
+    this.drawPatternMask();
+  }
+
+  drawGradient() {
+    const gradient = this.gradientCtx.createLinearGradient(
+      0,
+      0,
+      this.gradientCanvas.width,
+      this.gradientCanvas.height
+    );
+
+    gradient.addColorStop(0, 'hsl(200, 70%, 50%)');
+    gradient.addColorStop(0.5, 'hsl(260, 80%, 60%)');
+    gradient.addColorStop(1, 'hsl(320, 70%, 50%)');
+
+    this.gradientCtx.fillStyle = gradient;
+    this.gradientCtx.fillRect(
+      0,
+      0,
+      this.gradientCanvas.width,
+      this.gradientCanvas.height
+    );
+  }
+
+  drawPatternMask() {
+    this.patternCtx.clearRect(
+      0,
+      0,
+      this.patternCanvas.width,
+      this.patternCanvas.height
+    );
+
+    this.patternCtx.globalCompositeOperation = 'source-over';
+
+    // Используем оригинальные размеры или умножаем на коэффициент качества
+    const qualityScale = 2; // Увеличиваем в 2 раза для лучшего качества
+    const patternWidth = this.originalWidth * qualityScale;
+    const patternHeight = this.originalHeight * qualityScale;
+
+    const cols = Math.ceil(this.patternCanvas.width / patternWidth) + 2;
+    const rows = Math.ceil(this.patternCanvas.height / patternHeight) + 2;
+
+    for (let x = -1; x < cols; x++) {
+      for (let y = -1; y < rows; y++) {
+        const posX = x * patternWidth;
+        const posY = y * patternHeight;
+
+        this.patternCtx.globalAlpha = 0.8;
+
+        // Рисуем с оригинальными размерами, увеличенными для качества
+        this.patternCtx.drawImage(
+          this.patternImage,
+          posX,
+          posY,
+          patternWidth,
+          patternHeight
+        );
+      }
+    }
+
+    this.applyMask();
+  }
+
+  applyMask() {
+    this.gradientCtx.globalCompositeOperation = 'destination-in';
+    this.gradientCtx.drawImage(this.patternCanvas, 0, 0);
+    this.gradientCtx.globalCompositeOperation = 'source-over';
+  }
+}
+
+// const animatedBackground = new AnimatedBackground();
