@@ -18,6 +18,11 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/'
 LOGOUT_URL = reverse_lazy('logout')
 
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 5
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 
 # Application definition
 

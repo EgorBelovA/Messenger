@@ -47,16 +47,18 @@ function go_home_page_func() {
   window.history.replaceState(null, null, `#${room}`);
   load_check = 1;
   load_photo_check = 0;
-  clearChatTimeOut = 0;
+  clearChatTimeOutTime = 0;
   //   document.querySelector(".search_field").focus();
   if (window.innerWidth < 768) {
-    clearChatTimeOut = 350;
+    clearChatTimeOutTime = 350;
   }
-  setTimeout(() => {
+
+  clearChatTimeOut = setTimeout(() => {
     $('#display').empty();
     document.querySelector('#post-form').classList.add('hidden');
     document.querySelector('#opponent_title_name').classList.add('hidden');
-  }, clearChatTimeOut);
+  }, clearChatTimeOutTime);
+  console.log(clearChatTimeOut);
 
   //        document.querySelector("#select_chat_to_start").style.display = "inline-block";
 
@@ -378,6 +380,8 @@ function throttle(func, delay) {
   };
 }
 
+let clearChatTimeOut;
+
 window.onload = function () {
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   const signal = controller.signal;
@@ -506,6 +510,10 @@ window.onload = function () {
   };
 
   function handleSwipeDirection(event) {
+    if (
+      !document.querySelector('.main_chat_window').classList.contains('swipe')
+    )
+      return;
     var currentTime = Date.now();
     var duration = currentTime - startTime;
 
@@ -517,7 +525,6 @@ window.onload = function () {
     if (!isSwiping) {
       if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
         isSwiping = true;
-        textareaElement.blur();
         document.querySelector('#display').classList.add('swipe');
       } else if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
         document.querySelector('.main_chat_window').classList.remove('swipe');
@@ -528,11 +535,9 @@ window.onload = function () {
     if (isSwiping && deltaX > 0) {
       event.preventDefault();
       document.querySelector('.choose_list').classList.remove('swiped');
-
-      // Добавляем инерцию на основе скорости
       var velocity = Math.abs(deltaX) / Math.max(duration, 1);
-      var extraMargin = velocity * 10; // дополнительное смещение для быстрых свайпов
-
+      var extraMargin = velocity * 10;
+      textareaElement.blur();
       document.documentElement.style.setProperty(
         '--swipe-margin',
         `${deltaX + extraMargin}px`
@@ -548,7 +553,6 @@ window.onload = function () {
   //   //   send_div_height;
   // }, 50); // ~60fps
 
-  // Альтернативный вариант с requestAnimationFrame для максимальной плавности
   //   function rafThrottle(func) {
   //     let isRunning = false;
 
@@ -563,7 +567,6 @@ window.onload = function () {
   //     };
   //   }
 
-  //   // Использование с requestAnimationFrame
   //   document.querySelector('#display').onscroll = rafThrottle(function (event) {
   //     document.querySelector('.display_clone').scrollTop =
   //       event.target.scrollTop + window.innerHeight - 170;
@@ -696,9 +699,9 @@ window.onload = function () {
     }, 1000);
   };
 
-  document.addEventListener('focusin', function () {
-    console.log('Focus changed to:', document.activeElement);
-  });
+  // document.addEventListener('focusin', function () {
+  //   console.log('Focus changed to:', document.activeElement);
+  // });
 
   textareaElement.addEventListener('focus', async (e) => {
     // if (textareaLongPress) {
@@ -1424,10 +1427,10 @@ window.onload = function () {
     chatSocket[number_of_room].onmessage = function (e) {
       let data = JSON.parse(e.data);
       if (data.type == 'chat_message') {
-        if (data.data.id != all_data_rooms[data.room_id].messages.at(-1).id) {
-          all_data_rooms[data.room_id].messages.push(data.data);
-          message_initialization(all_data_rooms[data.room_id], true);
-        }
+        // if (data.data.id != all_data_rooms[data.room_id].messages.at(-1).id) {
+        all_data_rooms[data.room_id].messages.push(data.data);
+        message_initialization(all_data_rooms[data.room_id], true);
+        // }
         room_last_message = txtdecode(data.data.value, '1234');
         if (data.data.value != '')
           room_list[data.room_id].querySelector(
@@ -2097,7 +2100,7 @@ window.onload = function () {
       type: 'GET',
       url: '/getChats/',
       success: function (response) {
-        console.log(response);
+        // console.log(response);
         $('.users_search').empty();
         var chat_counter = 0;
         chat = response.all_chats;
@@ -2109,7 +2112,7 @@ window.onload = function () {
 
         Promise.all(promises)
           .then(() => {
-            console.log('All sender calls completed, creating UI...');
+            // console.log('All sender calls completed, creating UI...');
             createChatUI(chat, response, chat_counter);
           })
           .catch((error) => {
@@ -2266,13 +2269,17 @@ window.onload = function () {
           '--swipe-margin-choose-list',
           `-33%`
         );
+
         if (choose_list_swiped) {
           clearTimeout(choose_list_swiped);
+        }
+        if (clearChatTimeOut) {
+          clearTimeout(clearChatTimeOut);
         }
 
         choose_list_swiped = setTimeout(function () {
           document.querySelector('.choose_list').classList.add('swiped');
-          choose_list_swiped = null; // Сбрасываем после выполнения
+          choose_list_swiped = null;
         }, 350);
         if (room != this.getElementsByTagName('input')[1].value) {
           block_date_dict = [];
@@ -2399,7 +2406,7 @@ window.onload = function () {
       window.location.hash.slice(1) != '0' &&
       window.location.hash.slice(1) != ''
     ) {
-      $(room_list[window.location.hash.slice(1)]).mousedown();
+      // $(room_list[window.location.hash.slice(1)]).mousedown();
     } else {
       go_home_page_func();
     }
@@ -2561,7 +2568,7 @@ window.onload = function () {
       var xhr = new XMLHttpRequest();
 
       files_message = messages[key].file;
-      console.log(mes, files_message);
+      // console.log(mes, files_message);
       //                    if(messages[key].file[0] != undefined) console.log(files_message, files_message.length)
       for (
         var files_key = files_message.length - 1;
@@ -2582,7 +2589,6 @@ window.onload = function () {
         file_type_from_name = files_message[files_key].file.slice(
           files_message[files_key].file.lastIndexOf('.')
         );
-
         if (files_message[files_key].file != 'False') {
           user_file =
             '//' +
@@ -2629,11 +2635,7 @@ window.onload = function () {
                 ] != undefined
               ) {
                 document.querySelector('#display').querySelectorAll('.mes_img')[
-                  document
-                    .querySelector('#display')
-                    .querySelectorAll('.mes_img').length -
-                    files_cnt -
-                    1
+                  files_cnt
                 ].src = url;
                 document
                   .querySelector('#attachment_photos')
@@ -2663,7 +2665,7 @@ window.onload = function () {
                 ];
 
                 img.addEventListener('click', function () {
-                  console.log('click');
+                  // console.log('click');
                 });
 
                 img.onclick = attachment_photo.onclick = function () {
@@ -2966,7 +2968,6 @@ window.onload = function () {
           touchTimer = setTimeout(function () {
             temp.classList.add('select');
             modalTimer = setTimeout(function () {
-              console.log('touchstart');
               document.querySelector('#myModal').style.display = 'block';
               temp.classList.add('contextMenu');
               // themeMeta.content = '#0e0e0e';
@@ -3071,16 +3072,18 @@ window.onload = function () {
           temp_full.classList.add('new_message_own');
         else temp_full.classList.add('new_message_not_own');
         const display = document.querySelector('#display');
-
+        const old_scrollTop = display.scrollTop;
+        // console.log(display.scrollTop, temp_full.offsetHeight);
         $('#display').prepend(temp_full);
-        display.scrollBy(0, -temp_full.offsetHeight / 2);
+        display.scrollTop = old_scrollTop - temp_full.offsetHeight;
+        console.log(display.scrollTop, temp_full.offsetHeight);
 
         setTimeout(function () {
           display.scrollTo({
             top: 0,
             behavior: 'smooth',
           });
-        }, 0);
+        }, 10);
 
         // console.log(temp_full.offsetHeight);
       } else $('#display').append(temp_full);
@@ -3423,6 +3426,74 @@ window.onload = function () {
   // document
   //   .querySelector('#display')
   //   .addEventListener('scroll', scrollShakeMessages);
+
+  let touchStartTime = 0;
+  let touchStartY = 0;
+
+  document
+    .querySelector('#display')
+    .addEventListener('touchstart', function (event) {
+      if (event.touches && event.touches.length > 0) {
+        touchStartTime = Date.now();
+        touchStartY = event.touches[0].screenY;
+      }
+    });
+
+  document
+    .querySelector('#display')
+    .addEventListener('touchmove', function (event) {
+      const touch = event.touches[0];
+
+      document
+        .querySelector('.send_div')
+        .setAttribute('style', 'transition: padding-bottom 0s !important');
+      document
+        .querySelector('#display')
+        .setAttribute('style', 'transition: padding-bottom 0s !important');
+
+      const screenY = touch.screenY;
+      if (screenY > send_div_height_focus_var) {
+        document.documentElement.style.setProperty(
+          '--send_div_height_focus',
+          `${Math.max(window.innerHeight - screenY - 45, 35)}px`
+        );
+      }
+    });
+
+  document
+    .querySelector('#display')
+    .addEventListener('touchend', function (event) {
+      const touchEndTime = Date.now();
+      const timeDiff = touchEndTime - touchStartTime;
+
+      document.querySelector('.send_div').setAttribute('style', '');
+      document.querySelector('#display').setAttribute('style', '');
+
+      if (event.changedTouches && event.changedTouches.length > 0) {
+        const touch = event.changedTouches[0];
+        const touchEndY = touch.screenY;
+        if (touchEndY <= send_div_height_focus_var) return;
+
+        const distance = Math.abs(touchEndY - touchStartY);
+        const velocity = timeDiff > 0 ? distance / timeDiff : 0;
+
+        const isFastSwipe = velocity > 0.3;
+        const isInBottomArea = touch.screenY > window.innerHeight - 100;
+
+        if (isFastSwipe) {
+          send_div_height_focus_var = 0;
+          textareaElement.blur();
+        } else if (isInBottomArea) {
+          send_div_height_focus_var = 0;
+          textareaElement.blur();
+        }
+      }
+
+      document.documentElement.style.setProperty(
+        '--send_div_height_focus',
+        `${send_div_height_focus_var}px`
+      );
+    });
 
   prev_scroll_height = 0;
   document
@@ -3896,9 +3967,18 @@ window.onload = function () {
     document.querySelector('#myModal').style.display = 'none';
   };
 
+  function playOverlappingSound(src, volume = 1.0) {
+    const message_sent = new Audio(src);
+    message_sent.volume = volume;
+    message_sent.play().catch((error) => console.log('Play failed:', error));
+    return message_sent;
+  }
+
   const button = document.querySelector('.input_submit');
   button.ontouchstart = button.onclick = function (e) {
-    e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     const currentButton = this;
 
     // Блокируем кнопку на время анимации
@@ -3943,42 +4023,60 @@ window.onload = function () {
     const formData = new FormData(this);
     formData.append('message', message);
 
-    //        user_files = document.createElement("file");
-    /*        user_files.setAttribute("multiple");*/
-
-    /*        for(file in document.querySelector('#file').files)
-            user_files.files += (renameFile(document.querySelector('#file').files[file], "YES"));
-//            document.querySelector('#file').files[file] = "YES";
-
-        console.log("BAL", user_files);
-//        formData.set('file', )*/
-    //        console.log(document.querySelector('#file').files);
-    // console.log(all_data_rooms[room].messages);
-
     const jsonObject = {};
 
-    // Convert FormData to plain object
     for (const [key, value] of formData.entries()) {
       jsonObject[key] = value;
     }
     jsonObject.date = getFormattedLocalTime();
 
-    // Convert to JSON string
-    // console.log(jsonObject);
-    all_data_rooms[room].messages.push({
-      allowed_users: new Array(),
-      id: all_data_rooms[room].messages.at(-1).id + 1,
-      file: formData.get('file'),
+    // Функция для конвертации файлов
+    function convertFileFormat(fileList) {
+      if (!fileList || fileList.length === 0) return [];
+
+      return Array.from(fileList).map((file, index) => {
+        // Конвертируем имя файла в hex (как в вашем примере)
+        const encoder = new TextEncoder();
+        const encoded = encoder.encode(file.name);
+        const hexString = Array.from(encoded)
+          .map((byte) => byte.toString(16).padStart(2, '0'))
+          .join('');
+
+        // Сохраняем оригинальное расширение файла
+        const fileExtension = file.name.slice(file.name.lastIndexOf('.'));
+
+        return {
+          file: `/media/media/${hexString}${fileExtension}_PEVmkad.png`,
+          id: 30 + index,
+        };
+      });
+    }
+    // Получаем последний ID сообщения (с обработкой случая, когда массив пуст)
+    const lastMessage = all_data_rooms[room].messages.at(-1);
+    const newMessageId = lastMessage ? lastMessage.id + 1 : 1;
+
+    // Создаем новое сообщение
+    const newMessage = {
+      allowed_users: [],
+      id: newMessageId,
+      file: convertFileFormat(document.querySelector('#file').files),
       forwarded: null,
       value: jsonObject.message,
       date: jsonObject.date,
       liked: 0,
       room: parseInt(room),
       user: parseInt(jsonObject.username),
-      viewed: new Array(),
-    });
+      viewed: [],
+    };
+
+    // Добавляем сообщение
+    all_data_rooms[room].messages.push(newMessage);
     // console.log(all_data_rooms[room].messages);
-    message_initialization(all_data_rooms[room], true);
+
+    playOverlappingSound('static/Sounds/message-sent3.mp3', 1);
+
+    // console.log(all_data_rooms[room].messages);
+    // message_initialization(all_data_rooms[room], true);
     $.ajax({
       type: 'POST',
       url: '/send',
@@ -4301,7 +4399,7 @@ window.onload = function () {
 
   const search_cross = document.querySelector('.search_cross_div');
   search_cross.onmouseup = search_cross.ontouchstart = function () {
-    console.log('search_cross');
+    // console.log('search_cross');
     document.querySelector('.search_field').value = '';
     // document.documentElement.style.setProperty('--rooms_display', `flex`);
   };
@@ -4347,18 +4445,20 @@ window.onload = function () {
         '--slider_shadow_degree_bubble',
         `${pSBC(0.5, room_BG_color_hex)}`
       );
-      document
-        .querySelector('.chat-background-image')
-        .setAttribute(
-          'style',
-          '--myColor1: ' +
-            pSBC(-0.6, room_BG_color_hex) +
-            '; --myColor2: ' +
-            pSBC(-0.4, room_BG_color_hex) +
-            '; --myColor3: ' +
-            pSBC(-0.9, room_BG_color_hex) +
-            ';'
-        );
+
+      document.documentElement.style.setProperty(
+        '--myColor1',
+        pSBC(-0.6, room_BG_color_hex)
+      );
+      document.documentElement.style.setProperty(
+        '--myColor2',
+        pSBC(0, room_BG_color_hex)
+      );
+      document.documentElement.style.setProperty(
+        '--myColor3',
+        pSBC(-0.8, room_BG_color_hex)
+      );
+
       document.documentElement.style.setProperty(
         '--selected_chat_color',
         `${pSBC(-0.8, room_BG_color_hex)}`
@@ -4583,18 +4683,19 @@ window.onload = function () {
     '--dark_mode_color',
     `${room_BG_color_hex}`
   );
-  document
-    .querySelector('.chat-background-image')
-    .setAttribute(
-      'style',
-      '--myColor1: ' +
-        pSBC(-0.6, room_BG_color_hex) +
-        '; --myColor2: ' +
-        pSBC(0, room_BG_color_hex) +
-        '; --myColor3: ' +
-        pSBC(-0.8, room_BG_color_hex) +
-        ';'
-    );
+
+  document.documentElement.style.setProperty(
+    '--myColor1',
+    pSBC(-0.6, room_BG_color_hex)
+  );
+  document.documentElement.style.setProperty(
+    '--myColor2',
+    pSBC(0, room_BG_color_hex)
+  );
+  document.documentElement.style.setProperty(
+    '--myColor3',
+    pSBC(-0.8, room_BG_color_hex)
+  );
   //   document
   //     .querySelector('.chat-background-image')
   //     .setAttribute(
@@ -4680,7 +4781,6 @@ window.onload = function () {
   };
 
   $('#settings').click(function () {
-    console.log('AAA');
     document.querySelector('.settings').classList.add('active');
     // document.querySelector('.settings_menu').classList.remove('active');
     // document.querySelector('#img01').removeAttribute('src');
@@ -5031,20 +5131,30 @@ document.addEventListener('DOMContentLoaded', function () {
     return currentPos < threshold ? 'chats' : 'settings';
   }
 
-  chatsTab.addEventListener('touchstart', () => switchTab('chats'));
+  chatsTab.addEventListener('touchstart', () => switchTab('chats'), {
+    passive: true,
+  });
   chatsTab.addEventListener('mousedown', () => switchTab('chats'));
-  settingsTab.addEventListener('touchstart', () => switchTab('settings'));
+  settingsTab.addEventListener('touchstart', () => switchTab('settings'), {
+    passive: true,
+  });
   settingsTab.addEventListener('mousedown', () => switchTab('settings'));
 
-  indicator.addEventListener('touchstart', function (e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    startX = touch.clientX - currentPosition;
-    this.classList.add('active');
-    leftMenuFooterPadding.classList.add('active');
-    this.style.translate = `${currentPosition}px 0`;
-    this.style.transform = `scale(1.2)`;
-  });
+  indicator.addEventListener(
+    'touchstart',
+    function (e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      startX = touch.clientX - currentPosition;
+      this.classList.add('active');
+      leftMenuFooterPadding.classList.add('active');
+      this.style.translate = `${currentPosition}px 0`;
+      this.style.transform = `scale(1.2)`;
+    },
+    {
+      passive: true,
+    }
+  );
 
   let lastPosition = 0;
   let lastTime = 0;
@@ -5147,7 +5257,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // indicator.addEventListener('touchmove', throttle(tabMove, 16));
-  indicator.addEventListener('touchmove', throttle(tabMove, 16));
+  indicator.addEventListener('touchmove', throttle(tabMove, 16), {
+    passive: true,
+  });
   function tabEnd() {
     // this.style.transition = 'transform 0.3s ease';
     this.style.translate = `${currentPosition}px 0`;
@@ -5171,7 +5283,6 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 function createDisplacement() {
-  console.log(123);
   const imageData = ctx.createImageData(canvas.width, canvas.height);
   ctx.putImageData(imageData, 0, 0);
 

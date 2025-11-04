@@ -7,30 +7,7 @@
   -webkit-tap-highlight-color: transparent;
   tap-highlight-color: transparent;
   outline: none;
-}
-
-@property --myColor1 {
-  syntax: '<color>';
-  initial-value: rgba(20, 20, 20, 1);
-  inherits: false;
-}
-
-@property --myColor2 {
-  syntax: '<color>';
-  initial-value: rgba(20, 20, 20, 1);
-  inherits: false;
-}
-
-@property --myColor3 {
-  syntax: '<color>';
-  initial-value: rgba(20, 20, 20, 1);
-  inherits: false;
-}
-
-@property --shadow_degree {
-  syntax: '<angle>';
-  initial-value: 90deg;
-  inherits: false;
+  touch-action: manipulation;
 }
 
 html,
@@ -1705,12 +1682,12 @@ html.is-animating .transition-fade {
   min-height: 100px;
   max-width: 100%;
   position: absolute;
-  /* background: linear-gradient(
+  background: linear-gradient(
     var(--shadow_degree, 45deg),
     var(--myColor1, #000000) 0%,
     var(--myColor2, #333333) 35%,
     var(--myColor3, #000000) 100%
-  ); */
+  );
 
   /* SVG как маска */
   -webkit-mask-image: url('../SVG/PATTERNS/pattern-34.svg');
@@ -1724,8 +1701,6 @@ html.is-animating .transition-fade {
   mask-size: 200px 200px; */
   -webkit-mask-position: center center;
   mask-position: center center;
-
-  background-color: rgb(105, 32, 188);
 
   transition: --myColor1 2s, --myColor2 2s, --myColor3 2s, --shadow_degree 0s,
     background 0.2s ease-in, transform 0.35s;
@@ -1840,12 +1815,18 @@ img[data-src] {
 
 #liked_check {
   width: 18px;
+  height: auto;
   float: right;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+#liked_check img {
+  width: 100%;
+  height: 100%;
 }
 
 #viewed_span {
@@ -1947,7 +1928,7 @@ img[data-src] {
 
 .message_div_temp_separator {
   margin: 0;
-  padding: 7px;
+  padding: 6px;
   text-align: left;
   position: relative;
   display: flex;
@@ -2146,21 +2127,9 @@ img[data-src] {
   background: rgb(from var(--darker_) r g b / 95%);
 }
 
-.temp_full.new_message_own > .message_div {
-  animation: message_div_recieve 0.3s ease-out;
-}
-
-.temp_full.new_message_own .viewed_span,
-.temp_full.new_message_own .time-left {
-  animation: message_details_opacity 0.3s ease-out;
-}
-
-.temp_full.new_message_not_own {
-  animation: temp_full_new_message_not_own 0.3s ease-out;
-}
-
+.temp_full.new_message_not_own,
 .temp_full.new_message_own {
-  animation: temp_full_new_message 0.3s ease-out;
+  animation: temp_full_new_message_not_own 0.85s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 @keyframes message_div_recieve {
@@ -3920,6 +3889,18 @@ input[type='range']:focus::-ms-fill-upper {
 
 /* @media (pointer: none), (pointer: coarse)  */
 @media screen and (max-width: 768px) {
+  .temp_full.new_message_own > .message_div {
+    animation: message_div_recieve 0.85s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .temp_full.new_message_own .viewed_span,
+  .temp_full.new_message_own .time-left {
+    animation: message_details_opacity 0.85s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .temp_full.new_message_own {
+    animation: temp_full_new_message 0.85s cubic-bezier(0.19, 1, 0.22, 1);
+  }
   @keyframes message_div_selected_animation {
     0% {
       transform: scale(1);
@@ -3990,20 +3971,16 @@ input[type='range']:focus::-ms-fill-upper {
     /* bottom: 600px; */
     min-width: 100%;
     padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 5px);
-    transition: padding-bottom 300ms cubic-bezier(0.075, 0.82, 0.165, 1) !important;
+    transition: padding-bottom 300ms cubic-bezier(0.075, 0.82, 0.165, 1);
   }
   .send_div:focus-within {
     /* background-color: red !important; */
     /* bottom: var(--send_div_height_focus); */
     /* border-radius: 30px; */
-    padding-bottom: var(--send_div_height_focus);
+    padding-bottom: calc(var(--send_div_height_focus) + 5px) !important;
   }
   .textarea:focus {
     animation: blink_input_opacity_to_prevent_scrolling_when_focus 0.5s;
-  }
-
-  .send_div:not(:focus-within) {
-    transition: bottom 400ms cubic-bezier(0.075, 0.82, 0.165, 1);
   }
 
   .search_field:focus {
