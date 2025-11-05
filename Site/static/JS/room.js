@@ -1,5 +1,105 @@
 const controller = new AbortController();
 
+const pSBC = (p, c0, c1, l) => {
+  let r,
+    g,
+    b,
+    P,
+    f,
+    t,
+    h,
+    i = parseInt,
+    m = Math.round,
+    a = typeof c1 == 'string';
+  if (
+    typeof p != 'number' ||
+    p < -1 ||
+    p > 1 ||
+    typeof c0 != 'string' ||
+    (c0[0] != 'r' && c0[0] != '#') ||
+    (c1 && !a)
+  )
+    return null;
+  if (!this.pSBCr)
+    this.pSBCr = (d) => {
+      let n = d.length,
+        x = {};
+      if (n > 9) {
+        ([r, g, b, a] = d = d.split(',')), (n = d.length);
+        if (n < 3 || n > 4) return null;
+        (x.r = i(r[3] == 'a' ? r.slice(5) : r.slice(4))),
+          (x.g = i(g)),
+          (x.b = i(b)),
+          (x.a = a ? parseFloat(a) : -1);
+      } else {
+        if (n == 8 || n == 6 || n < 4) return null;
+        if (n < 6)
+          d =
+            '#' +
+            d[1] +
+            d[1] +
+            d[2] +
+            d[2] +
+            d[3] +
+            d[3] +
+            (n > 4 ? d[4] + d[4] : '');
+        d = i(d.slice(1), 16);
+        if (n == 9 || n == 5)
+          (x.r = (d >> 24) & 255),
+            (x.g = (d >> 16) & 255),
+            (x.b = (d >> 8) & 255),
+            (x.a = m((d & 255) / 0.255) / 1000);
+        else
+          (x.r = d >> 16), (x.g = (d >> 8) & 255), (x.b = d & 255), (x.a = -1);
+      }
+      return x;
+    };
+  (h = c0.length > 9),
+    (h = a ? (c1.length > 9 ? true : c1 == 'c' ? !h : false) : h),
+    (f = this.pSBCr(c0)),
+    (P = p < 0),
+    (t =
+      c1 && c1 != 'c'
+        ? this.pSBCr(c1)
+        : P
+        ? { r: 0, g: 0, b: 0, a: -1 }
+        : { r: 255, g: 255, b: 255, a: -1 }),
+    (p = P ? p * -1 : p),
+    (P = 1 - p);
+  if (!f || !t) return null;
+  if (l)
+    (r = m(P * f.r + p * t.r)),
+      (g = m(P * f.g + p * t.g)),
+      (b = m(P * f.b + p * t.b));
+  else
+    (r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5)),
+      (g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5)),
+      (b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5));
+  (a = f.a),
+    (t = t.a),
+    (f = a >= 0 || t >= 0),
+    (a = f ? (a < 0 ? t : t < 0 ? a : a * P + t * p) : 0);
+  if (h)
+    return (
+      'rgb' +
+      (f ? 'a(' : '(') +
+      r +
+      ',' +
+      g +
+      ',' +
+      b +
+      (f ? ',' + m(a * 1000) / 1000 : '') +
+      ')'
+    );
+  else
+    return (
+      '#' +
+      (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0))
+        .toString(16)
+        .slice(1, f ? undefined : -2)
+    );
+};
+
 const isSupported = () =>
   'Notification' in window &&
   'serviceWorker' in navigator &&
@@ -201,7 +301,6 @@ function audio_play(index) {
       play_check = 0;
 
       audio_interval = setInterval(function slider_move() {
-        //    console.log(document.querySelector("#audio-slider").value)
         document.querySelector('#audio-slider').value =
           (document.querySelector('.hidden_audio').currentTime /
             document.querySelector('.hidden_audio').duration) *
@@ -247,7 +346,6 @@ timer_touch_contextMenu = setTimeout('', 0);
 
 // $(document).on('touchstart', function(e) {
 //     document.querySelector("body").classList.add("selection");
-//     // console.log("STARTED")
 //     var x = e.originalEvent.touches[0].pageX;
 //     var y = e.originalEvent.touches[0].pageY;
 
@@ -263,7 +361,6 @@ timer_touch_contextMenu = setTimeout('', 0);
 document.addEventListener('touchend', (e) => {
   clearTimeout(timer_touch_contextMenu);
   document.querySelector('body').classList.remove('selection');
-  // console.log("ENDED")
   document.querySelector('body').oncontextmenu = function (e) {
     e.preventDefault();
   };
@@ -309,6 +406,29 @@ var saveText = function () {
     })
   );
 };
+
+function getCookie(cname) {
+  let name = cname + '=';
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return '';
+}
+
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+  let expires = 'expires=' + d.toUTCString();
+  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
+}
 
 function txtdecode(Incode, passCode) {
   var b52 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -474,7 +594,6 @@ window.onload = function () {
     document.querySelector('.main_chat_window').classList.remove('swipe');
     document.querySelector('.choose_list').classList.remove('swipe');
 
-    // console.log(duration);
     if (isSwiping && deltaX > 0) {
       if (duration <= velocityThreshold) {
         shouldSwipe = true;
@@ -577,10 +696,8 @@ window.onload = function () {
   //     document.querySelector('.overflow-display').style.minHeight = `${
   //       document.querySelector('#display').scrollHeight + 100
   //     }px`;
-  //     // console.log(document.querySelector('#display').scrollHeight);
   //     document.querySelector('#display').scrollTop = event.target.scrollTop;
 
-  //     // console.log(event.target.scrollTop);
   //   };
 
   document.querySelector('.choose_list').onscroll = function (event) {
@@ -597,14 +714,11 @@ window.onload = function () {
   //       document.documentElement.scrollTop = 0;
   //     }
   //   });
-  //   console.log(document.offsetHeight);
   //   let send_div_height_focus_var = 0;
   //   document.querySelector('.search_div').addEventListener('touchstart', (e) => {
-  //     console.log('touchstart');
   //     this.focus();
   //   });
   function scrollWindowToZero() {
-    // console.log('scrollWindowToZero');
     // window.scrollTo(0, 0);
   }
 
@@ -628,15 +742,10 @@ window.onload = function () {
         (isAndroid && isChrome ? 90 : 0)
       : 0;
 
-    // console.log('send_div_height_focus_var', search_div_height_focus_var);
-
-    // Remove existing scroll listener to avoid duplicates
     document.removeEventListener('scroll', scrollWindowToZero);
 
-    // Add scroll listener with proper options
     document.addEventListener('scroll', scrollWindowToZero);
 
-    // Safely update styles only if elements exist
     const searchDiv = document.querySelector('.search_div');
     if (searchDiv) {
       searchDiv.style.setProperty(
@@ -697,10 +806,6 @@ window.onload = function () {
       textareaLongPress = true;
     }, 1000);
   };
-
-  // document.addEventListener('focusin', function () {
-  //   console.log('Focus changed to:', document.activeElement);
-  // });
 
   textareaElement.addEventListener('focus', async (e) => {
     // if (textareaLongPress) {
@@ -1394,29 +1499,6 @@ window.onload = function () {
 
   //document.querySelector("#select_chat_to_start").style.opacity = 1;
 
-  function getCookie(cname) {
-    let name = cname + '=';
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return '';
-  }
-
-  function setCookie(cname, cvalue, exdays) {
-    const d = new Date();
-    d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-    let expires = 'expires=' + d.toUTCString();
-    document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
-  }
-
   function connect_socket(number_of_room = 0) {
     let url = `${ws_protocol}${window.location.host}/socket-server/${number_of_room}/`;
     chatSocket[number_of_room] = new WebSocket(url);
@@ -1449,429 +1531,6 @@ window.onload = function () {
             );
           }
         }
-
-        // if (room == data.room_id) {
-        //   messages = data.data;
-
-        //   var this_date = new Date();
-        //   block_date = document.createElement('div');
-
-        //   //					if (this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) && (key == 0 || (key > 0 && response.messages[key].date.slice(5, 7) != response.messages[key - 1].date.slice(5, 7)))) {
-        //   //						new_month_check = 1;
-        //   //						block_month = document.createElement("div");
-        //   //						block_month.innerHTML = months[month];
-        //   //						block_month.setAttribute("id", "block_date");
-        //   //					} else new_month_check = 0;
-        //   let temp = document.createElement('div');
-        //   let all_files = '';
-        //   var check_transfer = 0;
-        //   var mes = '';
-        //   var file_new_name = '';
-        //   mes = messages.value;
-        //   mes_value = messages.value;
-
-        //   if (mes != '') mes = txtdecode(mes, '1234');
-
-        //   //					mes = urlify(mes);
-        //   //					mes = "<xmp>" + mes + "</xmp>";
-        //   counter_img = 0;
-        //   var user_file = '';
-        //   var user_file_additional = '';
-        //   var xhr = new XMLHttpRequest();
-
-        //   files_message = messages.file;
-        //   //                    if(messages.file[0] != undefined) console.log(files_message, files_message.length)
-        //   for (
-        //     var files_key = files_message.length - 1;
-        //     files_key >= 0;
-        //     --files_key
-        //   ) {
-        //     lastIndexOf_ =
-        //       files_message[files_key].file.lastIndexOf('_') == -1
-        //         ? files_message[files_key].file.lastIndexOf('.')
-        //         : files_message[files_key].file.lastIndexOf('_');
-        //     file_name = files_message[files_key].file.slice(
-        //       files_message[files_key].file.indexOf('media') + 6,
-        //       lastIndexOf_
-        //     );
-        //     // file_new_name = decodeURIComponent(file_name.replace(/\s+/g, '').replace(/[0-9a-f]{2}/g, '%$&'));
-        //     file_new_name = '';
-        //     file_type_from_name = files_message[files_key].file.slice(
-        //       files_message[files_key].file.lastIndexOf('.')
-        //     );
-
-        //     //                            file_url = "//" + window.location.host + files_message[files_key].file;
-        //     //                            xhr.open('GET', file_url, true);
-        //     //                            xhr.responseType = 'blob';
-        //     //                            xhr.onload = function(e) {
-        //     //                                var blob = this.response;
-        //     //                                user_file_additional = window.URL.createObjectURL(blob);
-        //     ////                                console.log(user_file_additional)
-        //     //                            }
-        //     //                            xhr.send();
-
-        //     if (files_message[files_key].file != 'False') {
-        //       user_file =
-        //         '//' +
-        //         window.location.host +
-        //         files_message[files_key].file.slice(6);
-        //       let attach_file = document.createElement('span');
-        //       var file_type = files_message[files_key].file
-        //         .split('.')
-        //         .pop()
-        //         .toLowerCase();
-        //       if (
-        //         file_type == 'jpg' ||
-        //         file_type == 'png' ||
-        //         file_type == 'jpeg' ||
-        //         file_type == 'jpg'
-        //       ) {
-        //         var img = document.createElement('img');
-        //         img.src = user_file;
-        //         img.setAttribute('class', 'mes_img lazy');
-        //         ++counter_img;
-
-        //         var attachment_photo = img;
-        //         attachment_photo = document.createElement('img');
-        //         attachment_photo.src = user_file;
-
-        //         user_file_pres =
-        //           "<img class='mes_img lazy' loading='lazy' src=\"" +
-        //           user_file +
-        //           '">';
-
-        //         attachment_photo.setAttribute(
-        //           'class',
-        //           'mes_img attachment_photo lazy'
-        //         );
-
-        //         attach_file.innerHTML =
-        //           "<img class='attachment_photo mes_img lazy' src=\"" +
-        //           user_file +
-        //           '">';
-        //         $('#attachment_photos').prepend(attachment_photo);
-        //         all_photos_and_videos.push(user_file);
-
-        //         //                                        if (new_month_check) $("#attachment_photos").prepend(block_month);
-        //       } else if (file_type == 'mp3' || file_type == 'ogg') {
-        //         user_file_pres = document.createElement('div');
-        //         user_file_pres.innerHTML = '123123123123';
-
-        //         user_file_pres.setAttribute(
-        //           'onclick',
-        //           'audio_play("' + user_file + '"'
-        //         );
-        //         temp.appendChild(user_file_pres);
-
-        //         //                                        user_file_pres = "<div onclick='audio_play(\"" + user_file + "\" ,\""+ file_new_name + file_type_from_name + "\");'>" + file_new_name + file_type_from_name + "</div><a download=\"" + file_new_name + file_type_from_name + "\" target='_blank' href=\"" + user_file_additional + "\">X</a>";
-
-        //         attach_file.innerHTML =
-        //           "<audio loading='eager' controls><source type='audio/mpeg' src=\"" +
-        //           user_file +
-        //           '"></audio>';
-        //         attachment_music.prepend(attach_file);
-
-        //         if (new_month_check) $('#user_file_pres').prepend(block_month);
-        //       } else if (file_type == 'mp4' || file_type == 'mov') {
-        //         ++counter_img;
-        //         user_file_pres =
-        //           "<video loading='lazy' class='mes_img' controls><source type='video/mp4' src=\"" +
-        //           user_file +
-        //           '"></video>';
-        //         attach_file.innerHTML =
-        //           "<video loading='lazy' class='attachment_photo' controls><source type='video/mp4' src=\"" +
-        //           user_file +
-        //           '"></video>';
-
-        //         var vd = document.createElement('video');
-        //         vd.src = user_file;
-
-        //         //                                        vd.onloadeddata  = function(){
-        //         //                                            document.querySelector(".room_body").scrollTo({
-        //         //                                                top: document.querySelector(".room_body").scrollHeight,
-        //         //                                            });
-        //         //                                        }
-
-        //         attachment_videos.prepend(attach_file);
-
-        //         all_photos_and_videos.push(user_file);
-
-        //         //                                        if (new_month_check) $("#attachment_videos").prepend(block_month);
-        //       } else {
-        //         user_file_pres =
-        //           "<a id='user_link' download=\"" +
-        //           file_new_name +
-        //           '" target=\'_blank\' href="' +
-        //           user_file +
-        //           '">Link to the file</a>';
-        //         attach_file.innerHTML =
-        //           "<a target='_blank' href=\"" +
-        //           user_file +
-        //           '">Link to the file</a>';
-        //         attachment_files.prepend(attach_file);
-        //         if (new_month_check)
-        //           $('#attachment_files').prepend(block_month);
-        //       }
-        //       temp.innerHTML =
-        //         '<span>' + user_file_pres + '</span>' + temp.innerHTML;
-        //       all_files += user_file_pres;
-        //     }
-        //   }
-
-        //   if (messages.user == document.querySelector('#username_id').value)
-        //     if (messages.viewed == true)
-        //       viewed =
-        //         "<img id='viewed_check' src=\"//" +
-        //         window.location.host +
-        //         '/static/Images/dialogs_received@3x.png">';
-        //     else
-        //       viewed =
-        //         "<img id='viewed_check' src=\"//" +
-        //         window.location.host +
-        //         '/static/Images/dialogs_sent@3x.png">';
-        //   else viewed = '';
-
-        //   liked = document.createElement('image');
-        //   liked.src = window.location.host + '/static/Images/like_emoji.png';
-
-        //   if (messages.liked == false)
-        //     liked =
-        //       "<img id='liked_check'  loading='lazy' src=\"//" +
-        //       window.location.host +
-        //       "/static/Images/like_emoji.png\"><img id='stellar_particles' loading='lazy' src=\"//" +
-        //       window.location.host +
-        //       '/static/Images/stellar_particles.gif">';
-        //   if (messages.liked == true)
-        //     liked =
-        //       "<img id='liked_check'  loading='lazy' width='30px' style='display: unset' src=\"//" +
-        //       window.location.host +
-        //       "/static/Images/like_emoji.png\"><img id='stellar_particles' loading='lazy' src=\"//" +
-        //       window.location.host +
-        //       '/static/Images/stellar_particles.gif">';
-
-        //   temp.setAttribute('class', 'message_div');
-        //   temp.setAttribute('value', messages.id);
-        //   if (messages.user != document.querySelector('#username_id').value) {
-        //     temp.innerHTML +=
-        //       "<div class='message'><span>" +
-        //       mes +
-        //       "</span><span id='viewed_span'>" +
-        //       viewed +
-        //       "</span><span class='time-left'>" +
-        //       messages.date.slice(11, 16) +
-        //       "</span><span id='reaction_span'>" +
-        //       liked +
-        //       '</span></div>';
-        //   } else {
-        //     temp.innerHTML +=
-        //       "<div class='message darker'><span>" +
-        //       mes +
-        //       "</span><span id='viewed_span'>" +
-        //       viewed +
-        //       "</span><span class='time-left'>" +
-        //       messages.date.slice(11, 16) +
-        //       "</span><span id='reaction_span'>" +
-        //       liked +
-        //       '</span></div>';
-        //   }
-        //   if (mes == '' && temp.querySelector('.mes_img') != null) {
-        //     temp
-        //       .querySelector('.message')
-        //       .setAttribute(
-        //         'style',
-        //         'position: absolute; padding: 0; bottom: 5px; right: 0px; background: rgba(20,20,20, 0.7); border-radius: 30px; padding: 3px; opacity: 0; transition: opacity 0.2s;'
-        //       );
-        //     temp
-        //       .querySelector('.time-left')
-        //       .setAttribute(
-        //         'style',
-        //         'color: white; font-size: 14px; margin: 0;'
-        //       );
-        //     temp
-        //       .querySelector('#reaction_span')
-        //       .setAttribute('style', 'margin: 0 5px 0 0;');
-        //     temp
-        //       .querySelector('#viewed_span')
-        //       .setAttribute('style', 'margin: 0 0 0 5px;');
-
-        //     temp.onmouseover = function () {
-        //       temp.querySelector('.message').style.opacity = '1';
-        //     };
-        //     temp.onmouseout = function () {
-        //       temp.querySelector('.message').style.opacity = '0';
-        //     };
-        //   }
-
-        //   //                            var files_num = -1;
-        //   //                            for (var files_key in files_message) {
-        //   //                                    var file_type = files_message[files_key].file.split('.').pop();
-        //   //                                    if (user_file != "" && (file_type == "jpg" || file_type == "png" || file_type == "jpeg" || file_type == "jpg" || file_type == "mp4" || file_type == "mov")) {
-        //   //                                        ++files_num;
-        //   //                                        var modal = document.getElementById('myModal');
-        //   //                                        img_comment = document.getElementById('img_comment');
-        //   //                                        var modalImg = document.getElementById("img01");
-        //   //                                        var captionText = document.getElementById("caption");
-        //   //                                        temp.getElementsByClassName('mes_img')[files_num].onmousedown = attachment_photo.onclick = function() {
-        //   //                                            modal.style.display = "block";
-        //   //                                            modalImg.src = this.src;
-        //   //                                            document.querySelector("#media_display").style.display = "block";
-        //   ////                                            console.log(temp.querySelector(".message").getElementsByTagName("span")[0].textContent)
-        //   //                                            if (temp.querySelector(".message").getElementsByTagName("span")[0].textContent == undefined)
-        //   //                                                captionText.innerHTML = "";
-        //   //                                            else
-        //   //                                                captionText.innerHTML = temp.querySelector(".message").getElementsByTagName("span")[0].textContent;
-        //   //                                        }
-        //   //
-        //   //                                    }
-        //   //                            }
-
-        //   temp.querySelector('.message').setAttribute('value', messages.user);
-        //   setTimeout(function () {
-        //     temp.querySelector('.message').classList.add('active');
-        //   }, 0);
-
-        //   temp_full = document.createElement('div');
-        //   temp_full.setAttribute('class', 'temp_full');
-
-        //   let vw = window.innerWidth;
-        //   if (vw <= 768) {
-        //     temp.classList.add('right');
-        //     if (messages.user != document.querySelector('#username_id').value) {
-        //       temp_full.style.direction = 'ltr';
-        //     }
-        //   }
-
-        //   temp_full.appendChild(temp);
-        //   //                            console.log(all_photos_and_videos)
-
-        //   // if(counter_img % 2 != 0 && counter_img > 2)
-        //   //     temp.querySelector(".mes_img").style.width = "432px";
-        //   // if(counter_img % 2 != 0 && counter_img > 2 && window.innerWidth <= 768)
-        //   //     temp.querySelector(".mes_img").style.width = "90vw";
-
-        //   if (load_check) $('#display').prepend(temp_full);
-        //   else $('#display').append(temp_full);
-
-        //   all_messages_dives.push(temp_full);
-        //   //                            console.log(all_messages_dives);
-
-        //   temp_full.addEventListener('contextmenu', (e) => {
-        //     var tooltip = document.getElementById('myTooltip');
-        //     var selectionText = getSelectionText();
-        //     if (selectionText.length > 10)
-        //       selectionText = selectionText.slice(0, 10);
-        //     tooltip.innerHTML = 'Copied: ' + selectionText + '...';
-        //     e.preventDefault();
-        //     let x = e.pageX,
-        //       y = e.pageY,
-        //       winWidth = window.innerWidth,
-        //       winHeight = window.innerHeight,
-        //       cmWidth = contextMenu.offsetWidth,
-        //       cmHeight = contextMenu.offsetHeight;
-
-        //     contextMenu.style.left = `${x}px`;
-        //     contextMenu.style.top = `${y}px`;
-        //     contextMenu.style.display = 'unset';
-
-        //     window.addEventListener('mousemove', (e) => {
-        //       if (
-        //         e.clientY - contextMenu.offsetTop - contextMenu.offsetHeight >
-        //           50 ||
-        //         e.clientY - contextMenu.offsetTop < -50 ||
-        //         e.clientX - contextMenu.offsetLeft - contextMenu.offsetWidth >
-        //           50 ||
-        //         e.clientX - contextMenu.offsetLeft < -50
-        //       )
-        //         contextMenu.style.display = 'none';
-        //     });
-        //   });
-
-        //   function check_viewed() {
-        //     chatSocket[room].send(
-        //       JSON.stringify({
-        //         message_id: [temp.getAttribute('value')],
-        //         type: 'message_viewed',
-        //         room_id: room,
-        //         contacts_id: document.querySelector('#username_id').value,
-        //       })
-        //     );
-
-        //     temp_full.removeEventListener('mouseover', check_viewed);
-        //   }
-
-        //   if (messages.user != document.querySelector('#username_id').value) {
-        //     if (
-        //       !messages.viewed.includes(
-        //         parseInt(document.querySelector('#username_id').value)
-        //       )
-        //     ) {
-        //       unread_messages.add(temp_full);
-        //       temp_full.addEventListener('mouseover', check_viewed);
-        //     }
-        //   }
-
-        //   /*                            temp_full.onmousedown = function(){
-        //                         all_messages_dives[20].scrollIntoView({
-        //                             behavior: "smooth",
-        //                             block: "end",
-        //                             inline: "nearest",
-        //                         })
-        //                         all_messages_dives[20].classList.add("active");
-        //                         setTimeout(function(){all_messages_dives[20].classList.remove("active");},500);
-        //                     }*/
-
-        //   if (counter_img % 2 != 0)
-        //     temp.querySelector('.mes_img').style.width = '432px';
-        //   if (counter_img % 2 != 0 && window.innerWidth <= 768)
-        //     temp.querySelector('.mes_img').style.width = '100vw';
-
-        //   all_messages[temp.getAttribute('value')] = temp_full;
-
-        //   enableDoubleTap(temp, function () {
-        //     chatSocket[room].send(
-        //       JSON.stringify({
-        //         message_id: this.getAttribute('value'),
-        //         type: 'message_reaction',
-        //         room_id: room,
-        //         contacts_id: document.querySelector('#username_id').value,
-        //       })
-        //     );
-        //   });
-
-        //   temp.setAttribute('id', 'last_message');
-
-        //   //                            if (key == 0 || (key > 0 && messages.date.slice(0, 10) != response.messages.date.slice(0, 10))) {
-        //   //                                month = response.messages[key].date.slice(5, 7) - 1;
-        //   //                                block_date.setAttribute("id", "block_date");
-        //   //                                block_date.innerHTML = (months[month] + ' ' + (response.messages[key].date.slice(8, 10) - 0));
-        //   //                                $("#display").prepend(block_date);
-        //   //                                block_date_dict.push(block_date);
-        //   //                            }
-
-        //   if (document.querySelector('#block_date') != null)
-        //     document.querySelector('#block_date').onclick = function () {
-        //       document.querySelector('.calendar_div').style.display = 'block';
-        //       document.querySelector('#myModal').style.display = 'block';
-        //     };
-
-        //   if (auto_scroll) {
-        //     document.querySelector('#display').scrollTo({
-        //       top: document.querySelector('.room_body').scrollHeight,
-        //       behavior: 'smooth',
-        //     });
-        //   }
-
-        //   document
-        //     .querySelector('.scroll_down')
-        //     .addEventListener('click', function (event) {
-        //       event.preventDefault();
-        //       auto_scroll = true;
-        //       document.querySelector('#display').scrollTo({
-        //         behavior: 'smooth',
-        //         top: document.querySelector('.room_body').scrollHeight,
-        //       });
-        //     });
-        // }
       }
       if (data.type == 'message_reaction') {
         mes_reaction(data.message_id);
@@ -2005,7 +1664,6 @@ window.onload = function () {
         //                                    let data = JSON.parse(e.data)
         //                                    if(data.type == 'chat_message'){
         //                                        sender();
-        //                                        console.log(data);
         //                                        room_list[data.room_id].querySelector(".room_last_message").textContent = txtdecode(data.message_text,"1234");
         //                                    }
         ////                                    if(data.type == 'message_viewed'){
@@ -2099,7 +1757,6 @@ window.onload = function () {
       type: 'GET',
       url: '/getChats/',
       success: function (response) {
-        // console.log(response);
         $('.users_search').empty();
         var chat_counter = 0;
         chat = response.all_chats;
@@ -2111,7 +1768,6 @@ window.onload = function () {
 
         Promise.all(promises)
           .then(() => {
-            // console.log('All sender calls completed, creating UI...');
             createChatUI(chat, response, chat_counter);
           })
           .catch((error) => {
@@ -2400,7 +2056,6 @@ window.onload = function () {
     all_messages_dives = [];
 
     // e.preventDefault;
-    // console.log('hash', window.location.hash.slice(1));
     if (
       window.location.hash.slice(1) != '0' &&
       window.location.hash.slice(1) != ''
@@ -2432,11 +2087,9 @@ window.onload = function () {
 	}, 1000);*/
 
   function mes_viewed(mes_viewed_id) {
-    // console.log(all_data_rooms[room].messages[key].viewed);
     // all_data_rooms[room].messages[key].viewed.push(
     //   parseInt(document.querySelector('#username_id').value)
     // );
-    // console.log(all_data_rooms[room].messages[key].viewed);
     for (counter = 0; counter < mes_viewed_id.length; ++counter) {
       if (
         document.querySelector('#username_id').value ==
@@ -2509,7 +2162,6 @@ window.onload = function () {
     check_last_message_bar = false;
     document.querySelector('#opponent_title_name').classList.remove('hidden');
     document.querySelector('.send_div').style.display = 'flex';
-    // console.log(response);
     last_read = null;
 
     messages_response = response;
@@ -2524,20 +2176,15 @@ window.onload = function () {
     if (mes_amount - scroll_more <= 0) {
       check_mes_update = -50;
     }
-    // console.log(check_mes_update, mes_amount);
     if (new_message) {
-      // console.log('EBW');
       check_mes_update = messages.length;
       mes_amount = messages.length + 49;
     }
 
     for (var key = check_mes_update - 1; key >= mes_amount - 50; --key) {
-      // console.log(key);
-
       // for (var key = messages.length - 1; key >= 0; --key) {
       if (!response.messages[key]) continue;
       block_date = document.createElement('div');
-      //   console.log(key);
       if (
         this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) &&
         (key == 0 ||
@@ -2567,7 +2214,6 @@ window.onload = function () {
       var xhr = new XMLHttpRequest();
 
       files_message = messages[key].file;
-      // console.log(mes, files_message);
       //                    if(messages[key].file[0] != undefined) console.log(files_message, files_message.length)
       for (
         var files_key = files_message.length - 1;
@@ -2662,10 +2308,6 @@ window.onload = function () {
                     files_cnt -
                     1
                 ];
-
-                img.addEventListener('click', function () {
-                  // console.log('click');
-                });
 
                 img.onclick = attachment_photo.onclick = function () {
                   modal.style.display = 'block';
@@ -2835,12 +2477,10 @@ window.onload = function () {
           const el = entry.target;
 
           const rect = el.getBoundingClientRect();
-          // console.log(rect.width, rect.height);
           const parent = el.parentElement;
 
           parent.style.width = rect.width + 'px';
           parent.style.height = rect.height + 'px';
-          // parent.style.marginTop = `-${rect.height + 400}px`;
         });
       });
 
@@ -2921,7 +2561,7 @@ window.onload = function () {
                 modal.style.display = 'block';
                 modalImg.src = this.src;
                 document.querySelector('#media_display').style.display = 'flex';
-                //                                            console.log(temp.querySelector(".message").getElementsByTagName("span")[0].textContent)
+
                 if (
                   temp.querySelector('.message').getElementsByTagName('span')[0]
                     .textContent == undefined
@@ -3087,7 +2727,6 @@ window.onload = function () {
         const displayAfter = window.getComputedStyle(display, '::after');
         const heightString = displayAfter.height;
         const heightValue = parseInt(heightString) || 0;
-        console.log(heightValue);
         const old_scrollTop = display.scrollTop;
         $('#display').prepend(temp_full);
 
@@ -3264,14 +2903,11 @@ window.onload = function () {
       const display = document.querySelector('#display');
       const displayAfter = window.getComputedStyle(display, '::after');
       const heightString = displayAfter.height;
-      console.log(parseFloat(heightString));
       const heightValue = parseInt(heightString) || 0;
       document.documentElement.style.setProperty(
         '--display-after-height',
         `${parseFloat(heightValue) + 2 - 50 - safeAreaTop}px`
       );
-
-      // console.log(heightValue + 1);
 
       // document.querySelector('#display').scrollTo({
       //   top: document.querySelector('#display').scrollHeight,
@@ -3288,7 +2924,6 @@ window.onload = function () {
     }
 
     // Clone with events and data (true, true)
-    // console.log('display', document.querySelector('#display'));
     // Копируем HTML из #display в .display_clone
     // setTimeout(function () {
     //   document.querySelector('.display_clone').innerHTML =
@@ -3451,10 +3086,7 @@ window.onload = function () {
       const isVisible =
         elementRect.top < containerRect.bottom &&
         elementRect.bottom > containerRect.top;
-      // console.log(
-      //   elementRect.top < containerRect.bottom,
-      //   elementRect.bottom > containerRect.top
-      // );
+
       if (isVisible) {
         // Вычисляем, насколько элемент находится в зоне видимости
         const visibilityRatio = Math.min(
@@ -3701,19 +3333,18 @@ window.onload = function () {
   //
   //selectMessageDiv = function(event){
   //    window.addEventListener("mousemove", (e) => {
-  //        console.log(e.pageX, e.pageY);
   //    })
   //}
 
   shadow_degree = 0;
 
-  document.querySelector('#shadow_degree_chat').oninput = function (e) {
-    shadow_degree = document.querySelector('#shadow_degree_chat').value;
-    document.documentElement.style.setProperty(
-      '--shadow_degree',
-      `${shadow_degree}deg`
-    );
-  };
+  // document.querySelector('#shadow_degree_chat').oninput = function (e) {
+  //   shadow_degree = document.querySelector('#shadow_degree_chat').value;
+  //   document.documentElement.style.setProperty(
+  //     '--shadow_degree',
+  //     `${shadow_degree}deg`
+  //   );
+  // };
 
   document.querySelector('#shadow_degree_chat').onchange = function (e) {
     setCookie('room_BG_shadow', this.value, 7);
@@ -3990,7 +3621,6 @@ window.onload = function () {
   }
   const modalContainer = document.querySelector('#myModal');
   modalContainer.ontouchstart = modalContainer.onmousedown = function (e) {
-    // console.log(all_messages_dives);
     all_messages_dives.forEach((element) => {
       element.querySelector('.message_div').classList.remove('select');
       element.querySelector('.message_div').classList.remove('contextMenu');
@@ -4125,13 +3755,10 @@ window.onload = function () {
       viewed: [],
     };
 
-    // Добавляем сообщение
     all_data_rooms[room].messages.push(newMessage);
-    // console.log(all_data_rooms[room].messages);
 
     playOverlappingSound('static/Sounds/message-sent3.mp3', 1);
 
-    // console.log(all_data_rooms[room].messages);
     // message_initialization(all_data_rooms[room], true);
     $.ajax({
       type: 'POST',
@@ -4313,113 +3940,9 @@ window.onload = function () {
       });
     };
 
-  const pSBC = (p, c0, c1, l) => {
-    let r,
-      g,
-      b,
-      P,
-      f,
-      t,
-      h,
-      i = parseInt,
-      m = Math.round,
-      a = typeof c1 == 'string';
-    if (
-      typeof p != 'number' ||
-      p < -1 ||
-      p > 1 ||
-      typeof c0 != 'string' ||
-      (c0[0] != 'r' && c0[0] != '#') ||
-      (c1 && !a)
-    )
-      return null;
-    if (!this.pSBCr)
-      this.pSBCr = (d) => {
-        let n = d.length,
-          x = {};
-        if (n > 9) {
-          ([r, g, b, a] = d = d.split(',')), (n = d.length);
-          if (n < 3 || n > 4) return null;
-          (x.r = i(r[3] == 'a' ? r.slice(5) : r.slice(4))),
-            (x.g = i(g)),
-            (x.b = i(b)),
-            (x.a = a ? parseFloat(a) : -1);
-        } else {
-          if (n == 8 || n == 6 || n < 4) return null;
-          if (n < 6)
-            d =
-              '#' +
-              d[1] +
-              d[1] +
-              d[2] +
-              d[2] +
-              d[3] +
-              d[3] +
-              (n > 4 ? d[4] + d[4] : '');
-          d = i(d.slice(1), 16);
-          if (n == 9 || n == 5)
-            (x.r = (d >> 24) & 255),
-              (x.g = (d >> 16) & 255),
-              (x.b = (d >> 8) & 255),
-              (x.a = m((d & 255) / 0.255) / 1000);
-          else
-            (x.r = d >> 16),
-              (x.g = (d >> 8) & 255),
-              (x.b = d & 255),
-              (x.a = -1);
-        }
-        return x;
-      };
-    (h = c0.length > 9),
-      (h = a ? (c1.length > 9 ? true : c1 == 'c' ? !h : false) : h),
-      (f = this.pSBCr(c0)),
-      (P = p < 0),
-      (t =
-        c1 && c1 != 'c'
-          ? this.pSBCr(c1)
-          : P
-          ? { r: 0, g: 0, b: 0, a: -1 }
-          : { r: 255, g: 255, b: 255, a: -1 }),
-      (p = P ? p * -1 : p),
-      (P = 1 - p);
-    if (!f || !t) return null;
-    if (l)
-      (r = m(P * f.r + p * t.r)),
-        (g = m(P * f.g + p * t.g)),
-        (b = m(P * f.b + p * t.b));
-    else
-      (r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5)),
-        (g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5)),
-        (b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5));
-    (a = f.a),
-      (t = t.a),
-      (f = a >= 0 || t >= 0),
-      (a = f ? (a < 0 ? t : t < 0 ? a : a * P + t * p) : 0);
-    if (h)
-      return (
-        'rgb' +
-        (f ? 'a(' : '(') +
-        r +
-        ',' +
-        g +
-        ',' +
-        b +
-        (f ? ',' + m(a * 1000) / 1000 : '') +
-        ')'
-      );
-    else
-      return (
-        '#' +
-        (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0))
-          .toString(16)
-          .slice(1, f ? undefined : -2)
-      );
-  };
-
   document.documentElement.style.setProperty('--rooms_display', `flex`);
   document.querySelector('.search_field').onfocus = function (e) {
     // setTimeout(function () {
-    //   console.log('1s');
     //   // document.querySelector('.search_field').focus({ preventScroll: true });
     //   window.scrollTo(0, 100);
     // }, 1000);
@@ -4519,7 +4042,6 @@ window.onload = function () {
         `${pSBC(-0.8, room_BG_color_hex)}`
       );
       /*            document.querySelector(".darker").style.cssText = "background: red;";
-            console.log(document.querySelector(".darker").style.cssText)
             for(el in document.querySelectorAll(".darker"))
                 document.querySelectorAll(".darker")[el].style.background = room_BG_color_hex;
 /*            document.querySelector(".message").setAttribute("style", "background: blue;");*/
@@ -5368,57 +4890,140 @@ class StaticBackgroundFixedZoom {
 
     this.patternImage = new Image();
 
-    // if (getCookie('room_BG_shadow') == undefined) {
-    //   setCookie('room_BG_shadow', '45', 7);
-    // }
-    // if (getCookie('room_BG_color_hex') == undefined) {
-    //   setCookie('room_BG_color_hex', '#6c47ffff', 7);
-    // }
-    // room_BG_color_hex = getCookie('room_BG_color_hex');
-    // shadow_degree = getCookie('room_BG_shadow');
+    if (getCookie('room_BG_shadow') == undefined) {
+      setCookie('room_BG_shadow', '45', 7);
+    }
+    if (getCookie('room_BG_color_hex') == undefined) {
+      setCookie('room_BG_color_hex', '#6c47ffff', 7);
+    }
+    let room_BG_color_hex = getCookie('room_BG_color_hex');
+    let shadow_degree = getCookie('room_BG_shadow');
 
-    this.FIXED_HUE_1 = 200;
-    this.FIXED_HUE_2 = 260;
-    this.FIXED_HUE_3 = 320;
+    this.FIXED_HEX_1 = pSBC(-0.6, room_BG_color_hex);
+    this.FIXED_HEX_2 = pSBC(0, room_BG_color_hex);
+    this.FIXED_HEX_3 = pSBC(-0.8, room_BG_color_hex);
+    this.FIXED_SHADOW = shadow_degree;
     this.FIXED_SCALE = 2;
+
+    // Уменьшаем качество для производительности
+    this.RENDER_QUALITY = 2; // было 2
+    this.PATTERN_QUALITY = 2; // отдельное качество для паттерна
+
+    // Оптимизация: кэш для градиента
+    this.gradientCache = {
+      canvas: null,
+      shadow: null,
+      colors: null,
+    };
+
+    // Оптимизация: debounce для resize
+    this.resizeTimeout = null;
+    this.redrawTimeout = null;
 
     this.init();
   }
 
+  setupEventListeners() {
+    // Debounce для плавного изменения угла
+    let shadowTimeout;
+    document.querySelector('#shadow_degree_chat').oninput = (e) => {
+      clearTimeout(shadowTimeout);
+      shadowTimeout = setTimeout(() => {
+        this.FIXED_SHADOW = document.querySelector('#shadow_degree_chat').value;
+        setCookie('room_BG_shadow', this.FIXED_SHADOW, 7);
+        document.documentElement.style.setProperty(
+          '--shadow_degree',
+          `${this.FIXED_SHADOW}deg`
+        );
+
+        this.drawGradient();
+        this.drawPatternMask();
+      }, 16);
+    };
+
+    // Debounce для цвета
+    let colorTimeout;
+    document.querySelector('#color_chat_change').oninput = (e) => {
+      clearTimeout(colorTimeout);
+      colorTimeout = setTimeout(() => {
+        const newColor = document.querySelector('#color_chat_change').value;
+        setCookie('room_BG_color_hex', newColor, 7);
+
+        this.FIXED_HEX_1 = pSBC(-0.6, newColor);
+        this.FIXED_HEX_2 = pSBC(0, newColor);
+        this.FIXED_HEX_3 = pSBC(-0.8, newColor);
+
+        this.gradientCache.canvas = null;
+        this.createPatternCache.canvas = null;
+        this.drawGradient();
+        this.drawPatternMask();
+      }, 16);
+    };
+  }
+
   async init() {
-    this.patternImage.src = 'static/SVG/PATTERNS/pattern-34.svg';
+    this.patternImage.src = 'static/SVG/PATTERNS/pattern-29.svg';
+    this.patternImage.setAttribute('preserveAspectRatio', 'none');
 
     await new Promise((resolve) => {
-      this.patternImage.onload = resolve;
+      this.patternImage.onload = () => {
+        this.createPatternCache();
+        resolve();
+      };
     });
 
+    this.setupEventListeners();
     this.resize();
-    // Используем 'resize' и 'orientationchange' для покрытия всех случаев изменения размеров
-    window.addEventListener('resize', () => this.resize());
-    window.addEventListener('orientationchange', () => this.resize());
+
+    // Debounce для resize
+    window.addEventListener('resize', () => {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => this.resize(), 100);
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.resize(), 150);
+    });
+  }
+
+  createPatternCache() {
+    // Уменьшаем качество паттерна для производительности
+    const baseSize = 400 * this.FIXED_SCALE * this.PATTERN_QUALITY;
+    const cacheCanvas = document.createElement('canvas');
+    const cacheCtx = cacheCanvas.getContext('2d');
+
+    cacheCanvas.width = baseSize;
+    cacheCanvas.height = baseSize;
+
+    cacheCtx.imageSmoothingEnabled = true;
+    cacheCtx.imageSmoothingQuality = 'medium'; // было 'high'
+
+    cacheCtx.drawImage(this.patternImage, 0, 0, baseSize, baseSize);
+
+    this.patternCache = {
+      canvas: cacheCanvas,
+      scale: this.FIXED_SCALE,
+      quality: this.PATTERN_QUALITY,
+    };
   }
 
   resize() {
-    // *** Ключевое изменение: Используем clientWidth, который не меняется при зуме страницы ***
     const width = document.documentElement.clientWidth;
     const height = document.documentElement.clientHeight;
 
-    // Получаем коэффициент масштабирования экрана (для Retina/HiDPI)
-    const scaleFactor = window.devicePixelRatio || 1;
+    const scaleFactor = (window.devicePixelRatio || 1) * this.RENDER_QUALITY;
 
     [this.gradientCanvas, this.patternCanvas].forEach((canvas) => {
-      // 1. Устанавливаем CSS-размеры (визуальный размер, не зависит от зума)
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
-      // 2. Устанавливаем внутреннее разрешение для лучшей четкости на HiDPI
-      canvas.width = width * scaleFactor;
-      canvas.height = height * scaleFactor;
+      canvas.width = Math.floor(width * scaleFactor);
+      canvas.height = Math.floor(height * scaleFactor);
 
-      // 3. Масштабируем контекст, чтобы все операции рисования были в CSS-пикселях
-      canvas
-        .getContext('2d')
-        .setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'medium'; // было 'high'
     });
 
     this.drawGradient();
@@ -5426,19 +5031,79 @@ class StaticBackgroundFixedZoom {
   }
 
   drawGradient() {
+    // Проверяем кэш градиента
+    const cacheKey = `${this.FIXED_SHADOW}_${this.FIXED_HEX_1}_${this.FIXED_HEX_2}_${this.FIXED_HEX_3}`;
+
+    if (
+      this.gradientCache.canvas &&
+      this.gradientCache.shadow === this.FIXED_SHADOW &&
+      this.gradientCache.colors === cacheKey
+    ) {
+      // Используем кэшированный градиент
+      const ctx = this.gradientCtx;
+      const width = parseFloat(this.gradientCanvas.style.width);
+      const height = parseFloat(this.gradientCanvas.style.height);
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(this.gradientCache.canvas, 0, 0, width, height);
+      return;
+    }
+
     const ctx = this.gradientCtx;
-    // Рисуем в CSS-пикселях
     const width = parseFloat(this.gradientCanvas.style.width);
     const height = parseFloat(this.gradientCanvas.style.height);
 
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    const dpr = (window.devicePixelRatio || 1) * this.RENDER_QUALITY;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    gradient.addColorStop(0, `hsl(${this.FIXED_HUE_1}, 70%, 50%)`);
-    gradient.addColorStop(0.5, `hsl(${this.FIXED_HUE_2}, 80%, 60%)`);
-    gradient.addColorStop(1, `hsl(${this.FIXED_HUE_3}, 70%, 50%)`);
+    ctx.clearRect(0, 0, width, height);
+
+    // Упрощаем градиент - используем реальные размеры вместо увеличенных
+    const gradient = ctx.createLinearGradient(
+      0,
+      0,
+      Math.cos((this.FIXED_SHADOW * Math.PI) / 180) * width,
+      Math.sin((this.FIXED_SHADOW * Math.PI) / 180) * height
+    );
+
+    gradient.addColorStop(0, this.FIXED_HEX_1);
+    gradient.addColorStop(0.35, this.FIXED_HEX_2);
+    gradient.addColorStop(1, this.FIXED_HEX_3);
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
+
+    // Кэшируем градиент
+    this.cacheGradient(width, height, cacheKey);
+  }
+
+  cacheGradient(width, height, cacheKey) {
+    // Создаем кэш для градиента
+    const cacheCanvas = document.createElement('canvas');
+    const cacheCtx = cacheCanvas.getContext('2d');
+
+    cacheCanvas.width = width;
+    cacheCanvas.height = height;
+
+    const gradient = cacheCtx.createLinearGradient(
+      0,
+      0,
+      Math.cos((this.FIXED_SHADOW * Math.PI) / 180) * width,
+      Math.sin((this.FIXED_SHADOW * Math.PI) / 180) * height
+    );
+
+    gradient.addColorStop(0, this.FIXED_HEX_1);
+    gradient.addColorStop(0.35, this.FIXED_HEX_2);
+    gradient.addColorStop(1, this.FIXED_HEX_3);
+
+    cacheCtx.fillStyle = gradient;
+    cacheCtx.fillRect(0, 0, width, height);
+
+    this.gradientCache = {
+      canvas: cacheCanvas,
+      shadow: this.FIXED_SHADOW,
+      colors: cacheKey,
+    };
   }
 
   drawPatternMask() {
@@ -5449,43 +5114,44 @@ class StaticBackgroundFixedZoom {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.patternCanvas.width, this.patternCanvas.height);
 
-    ctx.setTransform(
-      window.devicePixelRatio || 1,
-      0,
-      0,
-      window.devicePixelRatio || 1,
-      0,
-      0
-    );
+    const dpr = (window.devicePixelRatio || 1) * this.RENDER_QUALITY;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium';
     ctx.globalCompositeOperation = 'source-over';
 
     const scale = this.FIXED_SCALE;
-    const patternSize = 400 * scale; // исходный базовый размер
-
-    // 🔧 теперь ширина паттерна в 2 раза меньше, чем высота
+    const patternSize = 400 * scale;
     const patternWidth = patternSize / (2960 / 1440);
     const patternHeight = patternSize;
 
+    // Уменьшаем количество отрисовываемых паттернов
     const cols = Math.ceil(width / patternWidth) + 1;
     const rows = Math.ceil(height / patternHeight) + 1;
 
-    const offsetX = 0;
-    const offsetY = 0;
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        const posX = x * patternWidth;
+        const posY = y * patternHeight;
 
-    for (let x = -1; x < cols; x++) {
-      for (let y = -1; y < rows; y++) {
-        const posX = x * patternWidth - offsetX;
-        const posY = y * patternHeight - offsetY;
-
-        ctx.globalAlpha = 1.0;
-        ctx.drawImage(
-          this.patternImage,
-          posX,
-          posY,
-          patternWidth,
-          patternHeight
-        );
+        if (this.patternCache.canvas) {
+          ctx.drawImage(
+            this.patternCache.canvas,
+            posX,
+            posY,
+            patternWidth,
+            patternHeight
+          );
+        } else {
+          ctx.drawImage(
+            this.patternImage,
+            posX,
+            posY,
+            patternWidth,
+            patternHeight
+          );
+        }
       }
     }
 
@@ -5494,16 +5160,20 @@ class StaticBackgroundFixedZoom {
 
   applyMask() {
     const ctx = this.gradientCtx;
-    const width = parseFloat(this.gradientCanvas.style.width);
-    const height = parseFloat(this.gradientCanvas.style.height);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium';
 
     ctx.globalCompositeOperation = 'destination-in';
-    // Рисуем паттерн, используя CSS-размеры
-    ctx.drawImage(this.patternCanvas, 0, 0, width, height);
+    ctx.drawImage(this.patternCanvas, 0, 0);
+
+    const dpr = (window.devicePixelRatio || 1) * this.RENDER_QUALITY;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.globalCompositeOperation = 'source-over';
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new StaticBackgroundFixedZoom();
+  const background = new StaticBackgroundFixedZoom();
 });

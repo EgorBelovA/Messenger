@@ -306,6 +306,7 @@ select {
   ) !important;
   /* -webkit-backdrop-filter: blur(2px); */
   backdrop-filter: blur(10px) saturate(200%);
+  -webkit-backdrop-filter: blur(10px) saturate(200%);
   border-radius: 20px 20px 0 0;
   padding: 5px 5px 5px 5px;
   /* height: 80px; */
@@ -509,6 +510,7 @@ select {
   padding-top: env(safe-area-inset-top, 0px);
   /* -webkit-backdrop-filter: blur(2px); */
   backdrop-filter: blur(10px) saturate(200%);
+  -webkit-backdrop-filter: blur(10px) saturate(200%);
 }
 
 #opponent_title_name.hidden {
@@ -718,6 +720,7 @@ select {
   border-radius: 20px 20px 0 0;
   background: rgba(35, 35, 35, 0.8);
   backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   width: 100%;
   height: calc(100% - 150px);
   bottom: 0;
@@ -1116,6 +1119,7 @@ select {
 
 #viewed_check {
   width: 18px;
+  aspect-ratio: 1 / 1;
   float: right;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -1827,19 +1831,24 @@ img[data-src] {
 }
 
 #liked_check {
-  width: 18px;
-  height: auto;
-  float: right;
+  width: 100%;
+  height: 100%;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  aspect-ratio: 1 / 1;
+  display: block;
+  max-width: 100%;
+  object-fit: contain;
 }
 
-#liked_check img {
+#reaction_span div {
   width: 100%;
   height: 100%;
+  position: relative;
+  display: block;
 }
 
 #viewed_span {
@@ -2377,6 +2386,7 @@ img[data-src] {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   backdrop-filter: blur(10px) saturate(300%);
+  -webkit-backdrop-filter: blur(10px) saturate(300%);
   z-index: -1;
 }
 
@@ -2406,6 +2416,7 @@ img[data-src] {
     );
 
   backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   z-index: -1;
 }
 
@@ -2566,6 +2577,7 @@ img[data-src] {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
   z-index: -1;
 }
 
@@ -3024,6 +3036,7 @@ img[data-src] {
   inset: 0;
   border-radius: 99rem;
   backdrop-filter: blur(1px) opacity(1);
+  -webkit-backdrop-filter: blur(1px) opacity(1);
   overflow: hidden;
 }
 
@@ -3047,6 +3060,8 @@ img[data-src] {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   backdrop-filter: saturate(300%) blur(10px) brightness(200%) opacity(100%);
+  -webkit-backdrop-filter: saturate(300%) blur(10px) brightness(200%)
+    opacity(100%);
   z-index: -1;
 }
 
@@ -3383,8 +3398,8 @@ h1 {
   border-radius: 50%;
   transform: scale(0.7);
   -webkit-transform: scale(0.7);
-  background: rgba(255, 255, 255, 1);
-  opacity: 0.01;
+  background: rgba(127, 127, 127, 0.1);
+  background: color-mix(in srgb, #fff 3%, transparent 97%);
   animation: ripple 2s forwards;
   -webkit-animation: ripple 2s forwards;
 }
@@ -4092,6 +4107,7 @@ input[type='range']:focus::-ms-fill-upper {
     inset: 0;
     border-radius: 99rem;
     backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     overflow: hidden;
   }
 
@@ -4250,6 +4266,8 @@ input[type='range']:focus::-ms-fill-upper {
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     backdrop-filter: saturate(200%) blur(30px) brightness(300%) opacity(100%);
+    -webkit-backdrop-filter: saturate(200%) blur(30px) brightness(300%)
+      opacity(100%);
     z-index: -1;
   }
 
@@ -4440,7 +4458,7 @@ input[type='range']:focus::-ms-fill-upper {
   width: 100%;
   height: 100%;
   z-index: -1;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 #gradient-canvas,
