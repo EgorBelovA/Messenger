@@ -5368,13 +5368,13 @@ class StaticBackgroundFixedZoom {
 
     this.patternImage = new Image();
 
-    if (getCookie('room_BG_shadow') == undefined) {
-      setCookie('room_BG_shadow', '45', 7);
-    }
-    if (getCookie('room_BG_color_hex') == undefined) {
-      setCookie('room_BG_color_hex', '#6c47ffff', 7);
-    }
-    room_BG_color_hex = getCookie('room_BG_color_hex');
+    // if (getCookie('room_BG_shadow') == undefined) {
+    //   setCookie('room_BG_shadow', '45', 7);
+    // }
+    // if (getCookie('room_BG_color_hex') == undefined) {
+    //   setCookie('room_BG_color_hex', '#6c47ffff', 7);
+    // }
+    // room_BG_color_hex = getCookie('room_BG_color_hex');
     // shadow_degree = getCookie('room_BG_shadow');
 
     this.FIXED_HUE_1 = 200;
