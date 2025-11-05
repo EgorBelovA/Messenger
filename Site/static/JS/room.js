@@ -2180,12 +2180,13 @@ window.onload = function () {
       check_mes_update = messages.length;
       mes_amount = messages.length + 49;
     }
-
+    let month = null;
     for (var key = check_mes_update - 1; key >= mes_amount - 50; --key) {
       // for (var key = messages.length - 1; key >= 0; --key) {
       if (!response.messages[key]) continue;
       block_date = document.createElement('div');
       if (
+        month != null &&
         this_date.getMonth() + 1 != response.messages[key].date.slice(5, 7) &&
         (key == 0 ||
           (key > 0 &&
@@ -2195,7 +2196,7 @@ window.onload = function () {
         new_month_check = 1;
         block_month = document.createElement('div');
         block_month.innerHTML = months[month];
-        block_month.setAttribute('id', 'block_date');
+        block_month.setAttribute('class', 'block_date');
       } else new_month_check = 0;
       let temp = document.createElement('div');
       let message_div_temp = document.createElement('div');
@@ -2874,18 +2875,20 @@ window.onload = function () {
             response.messages[key - 1].date.slice(0, 10))
       ) {
         month = response.messages[key].date.slice(5, 7) - 1;
-        block_date.setAttribute('id', 'block_date');
+        block_date.setAttribute('class', 'block_date');
         block_date.innerHTML =
           months[month] + ' ' + (response.messages[key].date.slice(8, 10) - 0);
         $('#display').append(block_date);
         block_date_dict[response.messages[key].date.slice(0, 10)] = temp_full;
       }
 
-      if (document.querySelector('#block_date') != null)
-        document.querySelector('#block_date').onclick = function () {
-          document.querySelector('.calendar_div').style.display = 'block';
-          document.querySelector('#myModal').style.display = 'block';
-        };
+      if (document.querySelector('.block_date') != null)
+        document.querySelectorAll('.block_date').forEach((element) => {
+          element.onclick = function () {
+            document.querySelector('.calendar_div').style.display = 'block';
+            document.querySelector('#myModal').style.display = 'block';
+          };
+        });
     }
 
     if (load_check) {
@@ -3434,7 +3437,7 @@ window.onload = function () {
     }, 500);
   }
 
-  document.querySelector('#creation_group_NEXT_GROUPNAME').mousedown =
+  document.querySelector('#creation_group_NEXT_GROUPNAME').onmousedown =
     document.querySelector('#creation_group_NEXT_GROUPNAME').ontouchstart =
       function (e) {
         e.preventDefault();
@@ -3601,19 +3604,36 @@ window.onload = function () {
     }
     this.style.height = 0;
     this.style.height = this.scrollHeight + 'px';
+    this.scrollTop = this.scrollHeight;
   });
 
-  if (window.screen.availWidth >= 576) {
-    $('.textarea').keypress(function (e) {
-      if (e.which == 13 && !e.shiftKey) {
-        e.preventDefault();
-        this.style.height = 28 + 'px';
-        //                document.querySelector(".scroll_down").style.bottom = 60 + "px";
-        if ($('.textarea').val().replace(/\s/g, '').length && send_allowed)
-          $(this).closest('form').submit();
-      }
-    });
-  }
+  $('.textarea').on('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey || e.altKey) && e.which === 13) {
+      e.preventDefault();
+
+      const textarea = this;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+
+      textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+
+      textarea.selectionEnd = start + 1;
+
+      $(textarea).trigger('input');
+    } else if (
+      e.which === 13 &&
+      !e.shiftKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.metaKey
+    ) {
+      e.preventDefault();
+      this.style.height = 28 + 'px';
+      if ($(this).val().replace(/\s/g, '').length && send_allowed)
+        $(this).closest('form').submit();
+    }
+  });
 
   function isEmpty(str) {
     if (str.trim() == '') return true;
@@ -3757,7 +3777,7 @@ window.onload = function () {
 
     all_data_rooms[room].messages.push(newMessage);
 
-    playOverlappingSound('static/Sounds/message-sent3.mp3', 1);
+    // playOverlappingSound('static/Sounds/message-sent3.mp3', 1);
 
     // message_initialization(all_data_rooms[room], true);
     $.ajax({
@@ -4077,14 +4097,14 @@ window.onload = function () {
     deltaMode: 0,
   });
 
-  document.querySelector('.tab').addEventListener(
-    'wheel',
-    (evt) => {
-      evt.preventDefault();
-      document.querySelector('.tab').scrollLeft += Math.sign(evt.deltaY) * 20;
-    },
-    { passive: false }
-  );
+  // document.querySelector('.tab').addEventListener(
+  //   'wheel',
+  //   (evt) => {
+  //     evt.preventDefault();
+  //     document.querySelector('.tab').scrollLeft += Math.sign(evt.deltaY) * 20;
+  //   },
+  //   { passive: false }
+  // );
 
   document.querySelector('#dark_mode').onmousedown = function () {
     if (getCookie('theme_mode') == 'L') setCookie('theme_mode', 'D', 7);
@@ -4299,18 +4319,16 @@ window.onload = function () {
   document
     .querySelector('#opponent_title_name')
     .addEventListener('click', (e) => {
-      if (e.target != document.querySelector('.arrow-left')) {
-        document.querySelector('.attachments').classList.add('active');
-        document
-          .querySelector('.close-menu')
-          .classList.add('close-menu-active');
-        document.querySelector('.send_div_class').classList.add('active');
-        document.querySelector('.room_body').classList.add('active');
-        document.querySelector('#opponent_title_name').classList.add('active');
-        document
-          .querySelector('.chat-background-image')
-          .classList.add('active');
-      }
+      if (e.target.closest('.go_home_page') || e.target.closest('.arrow-left'))
+        return;
+      document.querySelector('.attachments').classList.add('active');
+      document.querySelector('.close-menu').classList.add('close-menu-active');
+      document.querySelector('.send_div_class').classList.add('active');
+      document.querySelector('.room_body').classList.add('active');
+      document.querySelector('#opponent_title_name').classList.add('active');
+      // document
+      //   .querySelector('.chat-background-image')
+      //   .classList.add('active');
     });
 
   document.querySelector('.close-menu').addEventListener('click', (e) => {
@@ -4319,7 +4337,7 @@ window.onload = function () {
     document.querySelector('.send_div_class').classList.remove('active');
     document.querySelector('.room_body').classList.remove('active');
     document.querySelector('#opponent_title_name').classList.remove('active');
-    document.querySelector('.chat-background-image').classList.remove('active');
+    // document.querySelector('.chat-background-image').classList.remove('active');
   });
 
   $(document).on('mousedown', function (e) {
@@ -4377,8 +4395,8 @@ window.onload = function () {
       preventScroll: true,
     });
     // document.querySelector('.settings_menu').classList.remove('active');
-    document.querySelector('#img01').removeAttribute('src');
-    document.querySelector('#myModal').style.display = 'block';
+    // document.querySelector('#img01').removeAttribute('src');
+    // document.querySelector('#myModal').style.display = 'block';
     document.querySelector('#create_new_group_room').classList.add('active');
   });
 
@@ -4396,9 +4414,6 @@ window.onload = function () {
   let date = new Date(),
     currYear = date.getFullYear(),
     currMonth = date.getMonth();
-
-  /*const months_ = ["January", "February", "March", "April", "May", "June", "July",
-              "August", "September", "October", "November", "December"];*/
 
   const renderCalendar = () => {
     let firstDayofMonth = new Date(currYear, currMonth, 1).getDay(),

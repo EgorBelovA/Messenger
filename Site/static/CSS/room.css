@@ -137,7 +137,7 @@ body {
   font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica',
     'Arial', sans-serif;
   font-size: 106.25%;
-  font-weight: 400;
+  font-weight: 100;
   background-size: cover;
   background-attachment: fixed;
   background-color: rgb(15, 15, 15);
@@ -403,7 +403,7 @@ select {
   font-size: 16px;
   color: var(--textarea_font);
   transition: color 1s, width 1s;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 .textarea:focus {
@@ -581,6 +581,11 @@ select {
 }
 
 #creation_group_GIVE_A_NAME_input {
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  outline: none;
+  border: none;
   background: transparent;
   color: #fff;
   font-size: 1.5rem;
@@ -891,7 +896,7 @@ select {
   }
 }*/
 
-#block_date {
+.block_date {
   text-align: left;
   display: inline-block;
   padding: 3px 7px 3px 7px;
@@ -909,7 +914,7 @@ select {
   user-select: none;
 }
 
-#block_date:first-child {
+.block_date:first-child {
   margin-top: 5px;
 }
 
@@ -1118,7 +1123,7 @@ select {
 }
 
 #viewed_check {
-  width: 18px;
+  width: 16px;
   aspect-ratio: 1 / 1;
   float: right;
   -webkit-user-select: none;
@@ -1738,6 +1743,9 @@ html.is-animating .transition-fade {
 }
 
 .search_field {
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
   outline: none;
   border: none;
   height: 30px;
@@ -1918,7 +1926,7 @@ img[data-src] {
 
 .time-left {
   font-size: 60%;
-  color: rgb(150, 150, 150);
+  color: #bbb;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   -moz-user-select: none;
