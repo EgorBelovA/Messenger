@@ -5358,7 +5358,7 @@ function logoutUser(button) {
     });
 }
 
-class AnimatedBackground {
+class StaticBackgroundFixedZoom {
   constructor() {
     this.gradientCanvas = document.getElementById('gradient-canvas');
     this.patternCanvas = document.getElementById('pattern-canvas');
@@ -5367,8 +5367,20 @@ class AnimatedBackground {
     this.patternCtx = this.patternCanvas.getContext('2d');
 
     this.patternImage = new Image();
-    this.originalWidth = 0;
-    this.originalHeight = 0;
+
+    if (getCookie('room_BG_shadow') == undefined) {
+      setCookie('room_BG_shadow', '45', 7);
+    }
+    if (getCookie('room_BG_color_hex') == undefined) {
+      setCookie('room_BG_color_hex', '#6c47ffff', 7);
+    }
+    room_BG_color_hex = getCookie('room_BG_color_hex');
+    // shadow_degree = getCookie('room_BG_shadow');
+
+    this.FIXED_HUE_1 = 200;
+    this.FIXED_HUE_2 = 260;
+    this.FIXED_HUE_3 = 320;
+    this.FIXED_SCALE = 2;
 
     this.init();
   }
@@ -5377,29 +5389,36 @@ class AnimatedBackground {
     this.patternImage.src = 'static/SVG/PATTERNS/pattern-34.svg';
 
     await new Promise((resolve) => {
-      this.patternImage.onload = () => {
-        // Используем натуральные размеры SVG
-        this.originalWidth = 300;
-        this.originalHeight = (300 * 16) / 9;
-        console.log('Original SVG size:', {
-          width: this.originalWidth,
-          height: this.originalHeight,
-        });
-        resolve();
-      };
+      this.patternImage.onload = resolve;
     });
 
     this.resize();
+    // Используем 'resize' и 'orientationchange' для покрытия всех случаев изменения размеров
     window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => this.resize());
   }
 
   resize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    // *** Ключевое изменение: Используем clientWidth, который не меняется при зуме страницы ***
+    const width = document.documentElement.clientWidth;
+    const height = document.documentElement.clientHeight;
+
+    // Получаем коэффициент масштабирования экрана (для Retina/HiDPI)
+    const scaleFactor = window.devicePixelRatio || 1;
 
     [this.gradientCanvas, this.patternCanvas].forEach((canvas) => {
-      canvas.width = width;
-      canvas.height = height;
+      // 1. Устанавливаем CSS-размеры (визуальный размер, не зависит от зума)
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      // 2. Устанавливаем внутреннее разрешение для лучшей четкости на HiDPI
+      canvas.width = width * scaleFactor;
+      canvas.height = height * scaleFactor;
+
+      // 3. Масштабируем контекст, чтобы все операции рисования были в CSS-пикселях
+      canvas
+        .getContext('2d')
+        .setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
     });
 
     this.drawGradient();
@@ -5407,53 +5426,60 @@ class AnimatedBackground {
   }
 
   drawGradient() {
-    const gradient = this.gradientCtx.createLinearGradient(
-      0,
-      0,
-      this.gradientCanvas.width,
-      this.gradientCanvas.height
-    );
+    const ctx = this.gradientCtx;
+    // Рисуем в CSS-пикселях
+    const width = parseFloat(this.gradientCanvas.style.width);
+    const height = parseFloat(this.gradientCanvas.style.height);
 
-    gradient.addColorStop(0, 'hsl(200, 70%, 50%)');
-    gradient.addColorStop(0.5, 'hsl(260, 80%, 60%)');
-    gradient.addColorStop(1, 'hsl(320, 70%, 50%)');
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
 
-    this.gradientCtx.fillStyle = gradient;
-    this.gradientCtx.fillRect(
-      0,
-      0,
-      this.gradientCanvas.width,
-      this.gradientCanvas.height
-    );
+    gradient.addColorStop(0, `hsl(${this.FIXED_HUE_1}, 70%, 50%)`);
+    gradient.addColorStop(0.5, `hsl(${this.FIXED_HUE_2}, 80%, 60%)`);
+    gradient.addColorStop(1, `hsl(${this.FIXED_HUE_3}, 70%, 50%)`);
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
   }
 
   drawPatternMask() {
-    this.patternCtx.clearRect(
+    const ctx = this.patternCtx;
+    const width = parseFloat(this.patternCanvas.style.width);
+    const height = parseFloat(this.patternCanvas.style.height);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.patternCanvas.width, this.patternCanvas.height);
+
+    ctx.setTransform(
+      window.devicePixelRatio || 1,
       0,
       0,
-      this.patternCanvas.width,
-      this.patternCanvas.height
+      window.devicePixelRatio || 1,
+      0,
+      0
     );
 
-    this.patternCtx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = 'source-over';
 
-    // Используем оригинальные размеры или умножаем на коэффициент качества
-    const qualityScale = 2; // Увеличиваем в 2 раза для лучшего качества
-    const patternWidth = this.originalWidth * qualityScale;
-    const patternHeight = this.originalHeight * qualityScale;
+    const scale = this.FIXED_SCALE;
+    const patternSize = 400 * scale; // исходный базовый размер
 
-    const cols = Math.ceil(this.patternCanvas.width / patternWidth) + 2;
-    const rows = Math.ceil(this.patternCanvas.height / patternHeight) + 2;
+    // 🔧 теперь ширина паттерна в 2 раза меньше, чем высота
+    const patternWidth = patternSize / (2960 / 1440);
+    const patternHeight = patternSize;
+
+    const cols = Math.ceil(width / patternWidth) + 1;
+    const rows = Math.ceil(height / patternHeight) + 1;
+
+    const offsetX = 0;
+    const offsetY = 0;
 
     for (let x = -1; x < cols; x++) {
       for (let y = -1; y < rows; y++) {
-        const posX = x * patternWidth;
-        const posY = y * patternHeight;
+        const posX = x * patternWidth - offsetX;
+        const posY = y * patternHeight - offsetY;
 
-        this.patternCtx.globalAlpha = 0.8;
-
-        // Рисуем с оригинальными размерами, увеличенными для качества
-        this.patternCtx.drawImage(
+        ctx.globalAlpha = 1.0;
+        ctx.drawImage(
           this.patternImage,
           posX,
           posY,
@@ -5467,10 +5493,17 @@ class AnimatedBackground {
   }
 
   applyMask() {
-    this.gradientCtx.globalCompositeOperation = 'destination-in';
-    this.gradientCtx.drawImage(this.patternCanvas, 0, 0);
-    this.gradientCtx.globalCompositeOperation = 'source-over';
+    const ctx = this.gradientCtx;
+    const width = parseFloat(this.gradientCanvas.style.width);
+    const height = parseFloat(this.gradientCanvas.style.height);
+
+    ctx.globalCompositeOperation = 'destination-in';
+    // Рисуем паттерн, используя CSS-размеры
+    ctx.drawImage(this.patternCanvas, 0, 0, width, height);
+    ctx.globalCompositeOperation = 'source-over';
   }
 }
 
-// const animatedBackground = new AnimatedBackground();
+document.addEventListener('DOMContentLoaded', () => {
+  new StaticBackgroundFixedZoom();
+});
