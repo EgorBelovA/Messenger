@@ -413,49 +413,50 @@
             <use href="#arrow"></use>
           </svg>
         </div>
-        <form
-          id="post-form"
-          class="send_div send_div_class"
-          enctype="multipart/form-data"
-          action="send"
-        >
-          {% csrf_token %}
+        <div class="send_div_container">
+          <form
+            id="post-form"
+            class="send_div send_div_class"
+            enctype="multipart/form-data"
+            action="send"
+          >
+            {% csrf_token %}
 
-          <div id="file_div">
-            <input type="file" multiple name="file" id="file" download />
-            <svg id="input_attach">
-              <use href="#input-attach"></use>
-            </svg>
-          </div>
+            <div id="file_div">
+              <input type="file" multiple name="file" id="file" download />
+              <svg id="input_attach">
+                <use href="#input-attach"></use>
+              </svg>
+            </div>
 
-          <input
-            type="hidden"
-            name="username"
-            id="username"
-            value="{{username.id}}"
-          />
-          <input
-            type="hidden"
-            name="room_id"
-            id="room_id"
-            value="{{room_details.id}}"
-          />
-          <input
-            type="hidden"
-            name="room"
-            id="room"
-            value="{{room_details.name}}"
-          />
-          <div class="textarea_container">
-            <textarea
-              type="text"
-              placeholder="Message"
-              name="message"
-              class="textarea"
-            ></textarea>
-          </div>
+            <input
+              type="hidden"
+              name="username"
+              id="username"
+              value="{{username.id}}"
+            />
+            <input
+              type="hidden"
+              name="room_id"
+              id="room_id"
+              value="{{room_details.id}}"
+            />
+            <input
+              type="hidden"
+              name="room"
+              id="room"
+              value="{{room_details.name}}"
+            />
+            <div class="textarea_container">
+              <textarea
+                type="text"
+                placeholder="Message"
+                name="message"
+                class="textarea"
+              ></textarea>
+            </div>
 
-          <!-- <div>
+            <!-- <div>
           <svg
             id="sticker_menu_icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -466,29 +467,30 @@
             />
           </svg>
         </div> -->
-          <div id="selfie">
-            <input
-              type="file"
-              id="picture"
-              name="file"
-              accept="image/*"
-              capture="environment"
-            />
-            <svg class="camera_svg">
-              <use href="#camera-svg"></use>
-            </svg>
-          </div>
-          <div class="input_submit">
-            <!-- <object
+            <div id="selfie" style="display: none">
+              <input
+                type="file"
+                id="picture"
+                name="file"
+                accept="image/*"
+                capture="environment"
+              />
+              <svg class="camera_svg">
+                <use href="#camera-svg"></use>
+              </svg>
+            </div>
+            <div class="input_submit">
+              <!-- <object
             class="send_svg"
             data="{% static 'SVG/send_phone.svg' %}"
           ></object> -->
-            <svg class="send_svg">
-              <use href="#send-phone"></use>
-            </svg>
-          </div>
-          <!--                        <img src="{% static 'Images/stellar_particles.gif' %}"/>-->
-        </form>
+              <svg class="send_svg">
+                <use href="#send-phone"></use>
+              </svg>
+            </div>
+            <!--                        <img src="{% static 'Images/stellar_particles.gif' %}"/>-->
+          </form>
+        </div>
       </div>
       <!--              <progress id="progressBar" value="0" max="100" style="width:300px;"></progress>-->
       <!--              <h3 id="status"></h3>-->
@@ -602,7 +604,23 @@
   <defs>
     <linearGradient id="strokeGradient">
       <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="#999" />
+      <stop offset="100%" stop-color="#ccc" />
+    </linearGradient>
+  </defs>
+</svg>
+
+<svg width="0" height="0" opacity="0" visibility="hidden">
+  <defs>
+    <linearGradient
+      id="strokeGradientCustomColor"
+      x1="0%"
+      y1="0%"
+      x2="0%"
+      y2="100%"
+    >
+      <stop offset="0%" stop-color="var(--myColor3)" />
+      <stop offset="35%" stop-color="var(--myColor2)" />
+      <stop offset="100%" stop-color="var(--myColor1)" />
     </linearGradient>
   </defs>
 </svg>

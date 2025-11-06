@@ -4286,6 +4286,10 @@ window.onload = function () {
     '--dark_mode_color',
     `${room_BG_color_hex}`
   );
+  document.documentElement.style.setProperty(
+    '--room_BG_color_hex',
+    `${room_BG_color_hex}`
+  );
 
   document.documentElement.style.setProperty(
     '--myColor1',
