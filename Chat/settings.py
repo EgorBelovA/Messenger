@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'debug_toolbar',
     'social_django',
+    'sslserver',
 
     'django.contrib.sites',
     'allauth',

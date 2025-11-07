@@ -9,3 +9,5 @@ __pycache__/
 *.swp
 *.swo
 *.log
+server.crt
+server.key

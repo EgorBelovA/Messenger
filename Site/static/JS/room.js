@@ -499,6 +499,271 @@ function throttle(func, delay) {
   };
 }
 
+class SecureTextCoder {
+  static #ALGORITHM = 'AES-GCM';
+  static #SALT_LENGTH = 16;
+  static #IV_LENGTH = 12;
+  static #KEY_LENGTH = 256;
+  static #ITERATIONS = 100000;
+
+  /**
+   * Безопасное кодирование текста
+   */
+  static async encode(plainText, password) {
+    if (!plainText || !password) throw new Error('Text and password required');
+
+    try {
+      // Генерируем соль и IV
+      const salt = crypto.getRandomValues(new Uint8Array(this.#SALT_LENGTH));
+      const iv = crypto.getRandomValues(new Uint8Array(this.#IV_LENGTH));
+
+      // Создаем ключ из пароля
+      const key = await this.#deriveKey(password, salt);
+
+      // Шифруем
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plainText);
+
+      const encrypted = await window.crypto.subtle.encrypt(
+        {
+          name: this.#ALGORITHM,
+          iv: iv,
+        },
+        key,
+        data
+      );
+
+      // Объединяем все компоненты
+      const encryptedArray = new Uint8Array(encrypted);
+      const result = new Uint8Array(
+        salt.length + iv.length + encryptedArray.length
+      );
+
+      result.set(salt, 0);
+      result.set(iv, salt.length);
+      result.set(encryptedArray, salt.length + iv.length);
+
+      return this.#arrayToBase64(result);
+    } catch (error) {
+      throw new Error(`Encryption failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Безопасное декодирование текста
+   */
+  static async decode(encodedText, password) {
+    if (!encodedText || !password)
+      throw new Error('Encoded text and password required');
+
+    try {
+      // Разбираем компоненты
+      const data = this.#base64ToArray(encodedText);
+
+      const salt = data.subarray(0, this.#SALT_LENGTH);
+      const iv = data.subarray(
+        this.#SALT_LENGTH,
+        this.#SALT_LENGTH + this.#IV_LENGTH
+      );
+      const encrypted = data.subarray(this.#SALT_LENGTH + this.#IV_LENGTH);
+
+      // Восстанавливаем ключ
+      const key = await this.#deriveKey(password, salt);
+
+      // Дешифруем
+      const decrypted = await window.crypto.subtle.decrypt(
+        {
+          name: this.#ALGORITHM,
+          iv: iv,
+        },
+        key,
+        encrypted
+      );
+
+      const decoder = new TextDecoder();
+      return decoder.decode(decrypted);
+    } catch (error) {
+      throw new Error(`Decryption failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Создание ключа с помощью PBKDF2
+   */
+  static async #deriveKey(password, salt) {
+    const encoder = new TextEncoder();
+    const passwordBuffer = encoder.encode(password);
+
+    // Импортируем пароль как ключ
+    const importedKey = await window.crypto.subtle.importKey(
+      'raw',
+      passwordBuffer,
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
+
+    // Производим ключ
+    return await window.crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: this.#ITERATIONS,
+        hash: 'SHA-256',
+      },
+      importedKey,
+      {
+        name: this.#ALGORITHM,
+        length: this.#KEY_LENGTH,
+      },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  /**
+   * Конвертация Uint8Array в Base64
+   */
+  static #arrayToBase64(array) {
+    return btoa(String.fromCharCode(...array));
+  }
+
+  /**
+   * Конвертация Base64 в Uint8Array
+   */
+  static #base64ToArray(base64) {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  /**
+   * Безопасное хеширование пароля
+   */
+  static async hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+
+    const importedKey = await window.crypto.subtle.importKey(
+      'raw',
+      data,
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+
+    const hash = await window.crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: this.#ITERATIONS,
+        hash: 'SHA-256',
+      },
+      importedKey,
+      256
+    );
+
+    return `${this.#arrayToHex(salt)}:${this.#arrayToHex(
+      new Uint8Array(hash)
+    )}`;
+  }
+
+  /**
+   * Проверка пароля против хеша
+   */
+  static async verifyPassword(password, storedHash) {
+    const [saltHex, hashHex] = storedHash.split(':');
+    const salt = this.#hexToArray(saltHex);
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+
+    const importedKey = await window.crypto.subtle.importKey(
+      'raw',
+      data,
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+
+    const verifyHash = await window.crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: this.#ITERATIONS,
+        hash: 'SHA-256',
+      },
+      importedKey,
+      256
+    );
+
+    const verifyHashHex = this.#arrayToHex(new Uint8Array(verifyHash));
+    return this.#timingSafeEqual(hashHex, verifyHashHex);
+  }
+
+  /**
+   * Конвертация массива в hex строку
+   */
+  static #arrayToHex(array) {
+    return Array.from(array)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  /**
+   * Конвертация hex строки в массив
+   */
+  static #hexToArray(hex) {
+    const result = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < hex.length; i += 2) {
+      result[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+    }
+    return result;
+  }
+
+  /**
+   * Безопасное сравнение строк (timing-safe)
+   */
+  static #timingSafeEqual(a, b) {
+    if (a.length !== b.length) return false;
+
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+      result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+    return result === 0;
+  }
+}
+
+// Простой пример использования
+async function demo() {
+  try {
+    const original = 'Hello World!';
+    const password = 'strong_password_123';
+
+    console.log('Original:', original);
+
+    // Шифрование
+    const encoded = await SecureTextCoder.encode(original, password);
+    console.log('Encrypted:', encoded);
+
+    // Дешифрование
+    const decoded = await SecureTextCoder.decode(encoded, password);
+    console.log('Decrypted:', decoded);
+    console.log('Match:', original === decoded);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
+
+// Запуск демо при загрузке страницы
+// if (typeof window !== 'undefined') {
+//   demo();
+// }
 let clearChatTimeOut;
 
 window.onload = function () {
@@ -1860,9 +2125,9 @@ window.onload = function () {
         avatar.setAttribute(
           'style',
           'background: linear-gradient(0deg, ' +
-            pSBC(-0.6, backgroundColor) +
+            pSBC(-0.8, backgroundColor) +
             ' 0%, ' +
-            pSBC(-0.4, backgroundColor) +
+            pSBC(-0.6, backgroundColor) +
             ' 35%, ' +
             backgroundColor +
             ' 100%);'
@@ -2215,7 +2480,6 @@ window.onload = function () {
       var xhr = new XMLHttpRequest();
 
       files_message = messages[key].file;
-      //                    if(messages[key].file[0] != undefined) console.log(files_message, files_message.length)
       for (
         var files_key = files_message.length - 1;
         files_key >= 0;
@@ -2759,10 +3023,10 @@ window.onload = function () {
         setTimeout(async function () {
           await smoothScrollToTop(display);
 
-          document.documentElement.style.setProperty(
-            '--display-after-height',
-            `${heightValue - temp_full.offsetHeight}px`
-          );
+          // document.documentElement.style.setProperty(
+          //   '--display-after-height',
+          //   `${heightValue - temp_full.offsetHeight}px`
+          // );
         }, 10);
       } else $('#display').append(temp_full);
 
@@ -2843,7 +3107,6 @@ window.onload = function () {
       //                            document.querySelector("#display").addEventListener('scroll', function() {
       ////                                if(Visible(temp) && response.messages[key].viewed == false && response.messages[key].user != document.querySelector("#username_id").value) {
       //                                    console.clear();
-      //                                    console.log(temp);
       ////                                    chatSocket_current.send(JSON.stringify({
       ////                                        'message_id': temp.getAttribute('value'),
       ////                                        'type': "message_viewed",
@@ -3714,6 +3977,13 @@ window.onload = function () {
   $(document).on('submit', '#post-form', function (e) {
     e.preventDefault();
     let message = txtencode(e.target.message.value, '1234');
+
+    // const original = 'Hello World!';
+    // const password = 'strong_password_123';
+
+    // Шифрование
+    // let message = SecureTextCoder.encode(e.target.message.value, '1234');
+
     // loading_sign = document.createElement('div');
     // loading_sign_image = document.createElement('img');
     // loading_sign_image.classList.add('loading_sign_image');

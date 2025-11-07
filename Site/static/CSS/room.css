@@ -307,7 +307,7 @@ select {
   position: absolute;
   bottom: 0;
   width: 100%;
-  padding: 0px 10px 0px 10px;
+  padding: 0px 12px 0px 12px;
 }
 
 .send_div {
@@ -325,7 +325,7 @@ select {
   backdrop-filter: blur(10px) saturate(200%);
   -webkit-backdrop-filter: blur(10px) saturate(200%);
   border-radius: 99rem;
-  padding: 5px 7px 5px 7px;
+  padding: 3px 3px 3px 3px;
   /* height: 80px; */
   position: relative;
   transition: background 1s, width 1s;
@@ -460,15 +460,59 @@ select {
   height: 40px;
   padding: 5px;
   width: auto;
-  aspect-ratio: 1/1; /* ширина / высота SVG */
-  border-radius: 20px;
+  aspect-ratio: 1/1;
+  border-radius: 99rem;
   cursor: pointer;
   fill: var(--input_submit_color);
   stroke: none;
   background: transparent;
   /* box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1); */
-  box-shadow: inset 1px 1px 0px 0 rgba(255, 255, 255, 0.3),
-    inset -1px -1px 1px 0px rgba(255, 255, 255, 0.3);
+  /* box-shadow: inset 1px 1px 0px 0 rgba(255, 255, 255, 0.3),
+    inset -1px -1px 1px 0px rgba(255, 255, 255, 0.3); */
+  box-shadow: inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--c-light) calc(var(--glass-reflex-light) * 10%),
+        transparent
+      ),
+    inset 1.8px 3px 0px -2px color-mix(in srgb, var(--c-light)
+          calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0px -2px color-mix(in srgb, var(--c-light)
+          calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light)
+          calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 12%),
+        transparent
+      ),
+    inset -1.5px 2.5px 0px -2px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 20%),
+        transparent
+      ),
+    inset 0px 3px 4px -2px color-mix(in srgb, var(--c-dark)
+          calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 10%),
+        transparent
+      ),
+    0px 1px 5px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 10%),
+        transparent
+      ),
+    0px 6px 16px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 8%),
+        transparent
+      );
   transform: scale(1);
   transition: 0.2s ease;
   -webkit-touch-callout: none;
@@ -488,8 +532,52 @@ select {
   background: var(--room_BG_color_hex);
   background: color-mix(in srgb, var(--room_BG_color_hex) 70%, transparent);
   /* box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1); */
-  box-shadow: inset 1px 1px 0px 0 rgba(255, 255, 255, 0.3),
-    inset -1px -1px 1px 0px rgba(255, 255, 255, 0.3);
+  /* box-shadow: inset 1px 1px 0px 0 rgba(255, 255, 255, 0.3),
+    inset -1px -1px 1px 0px rgba(255, 255, 255, 0.3); */
+  box-shadow: inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--c-light) calc(var(--glass-reflex-light) * 10%),
+        transparent
+      ),
+    inset 1.8px 3px 0px -2px color-mix(in srgb, var(--c-light)
+          calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0px -2px color-mix(in srgb, var(--c-light)
+          calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light)
+          calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 12%),
+        transparent
+      ),
+    inset -1.5px 2.5px 0px -2px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 20%),
+        transparent
+      ),
+    inset 0px 3px 4px -2px color-mix(in srgb, var(--c-dark)
+          calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 10%),
+        transparent
+      ),
+    0px 1px 5px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 10%),
+        transparent
+      ),
+    0px 6px 16px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 8%),
+        transparent
+      );
   transform: scale(1);
   transition: 0.2s ease;
   -webkit-touch-callout: none;
@@ -588,7 +676,9 @@ select {
 
   /* display: none; */
   position: absolute;
-  padding-bottom: calc((env(safe-area-inset-bottom, 20px) + 10px) * 2 + 48px);
+  padding-bottom: calc(
+    (min(env(safe-area-inset-bottom, 0px), 10px) + 10px) * 2 + 48px
+  );
   /* padding-top: calc(env(safe-area-inset-top, 20px) + 60px); */
 }
 
@@ -2078,7 +2168,7 @@ img[data-src] {
 }
 .message_div {
   display: flex;
-  margin: 3px 10px;
+  margin: 3px 15px;
   z-index: 0;
   /* border-radius: 1rem; */
   clip-path: polygon(
@@ -2629,7 +2719,7 @@ img[data-src] {
 }
 
 .tab-indicator::before {
-  content: '';
+  /* content: ''; */
   position: absolute;
   /* background-color: color-mix(in srgb, black 40%, transparent); */
 
@@ -4059,13 +4149,13 @@ input[type='range']:focus::-ms-fill-upper {
 
   .users_full_form {
     width: 100%;
-    padding: 0 25px 0 15px;
+    padding: 0 15px 0 15px;
     border-radius: 0;
   }
 
   .users_full_form::after {
     left: 95px;
-    right: 25px;
+    right: 15px;
     height: 1px;
   }
 
@@ -4303,7 +4393,8 @@ input[type='range']:focus::-ms-fill-upper {
     /* max-width: calc(100% - 100px); */
     /* opacity: 0.5; */
     /* bottom: env(safe-area-inset-bottom, 20px); */
-    bottom: calc(env(safe-area-inset-bottom, 20px) + 10px);
+    /* bottom: calc(env(safe-area-inset-bottom, 20px) + 10px); */
+    bottom: calc(min(env(safe-area-inset-bottom, 0px), 10px) + 10px);
     border-radius: 99rem;
     margin-top: 50px;
     /* background: rgba(30, 30, 30, 1) !important; */
@@ -4447,6 +4538,7 @@ input[type='range']:focus::-ms-fill-upper {
   .left-menu {
     padding-top: calc(env(safe-area-inset-top, 20px) + 60px);
     padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 45px + 30px);
+    /* bottom: calc(min(env(safe-area-inset-bottom, 0px), 10px) + 10px); */
     order: 2;
   }
 
