@@ -18,6 +18,19 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/'
 LOGOUT_URL = reverse_lazy('logout')
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = []
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATICFILES = [STATIC_DIR]
+STATICFILES_DIRS = (
+    BASE_DIR.joinpath('app', 'dist'),
+)
+
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_COOKIE_AGE = 1209600  # 2 недели
@@ -87,7 +100,9 @@ ROOT_URLCONF = 'Chat.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR.joinpath('app')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -191,11 +206,7 @@ WSGI_APPLICATION = 'Chat.wsgi.application'
 #     },
 # }
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = []
 
 
 MEDIA_URL = '/media/'

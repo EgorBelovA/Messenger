@@ -4,7 +4,7 @@
   <head>
     <title>Chillin` - Chat</title>
     <link rel="manifest" href="{% static 'manifest.json' %}" />
-    <meta name="theme-color" content="#0e0e0e" />
+    <meta name="theme-color" content="#f00" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, shrink-to-fit=no"
@@ -106,7 +106,10 @@
               aria-label="Search"
             ></object>
           </div>
-          <input class="search_field" name="term" placeholder="Search" />
+          <div class="search_field_input">
+            <input class="search_field" name="term" placeholder=" " />
+            <span class="search_field_placeholder">Search</span>
+          </div>
         </div>
         <div class="search_cross_div">
           <object
@@ -227,6 +230,17 @@
                   step="1"
                   value="0"
                 />
+              </div>
+            </div>
+            <div class="appearance_option">
+              <div id="reduce_animations">
+                Reduce Animations
+                <div class="switch_div">
+                  <label class="switch" for="reduce_animations_check">
+                    <input type="checkbox" id="reduce_animations_check" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -450,10 +464,11 @@
             <div class="textarea_container">
               <textarea
                 type="text"
-                placeholder="Message"
+                placeholder=""
                 name="message"
                 class="textarea"
               ></textarea>
+              <span class="textarea_placeholder">Message</span>
             </div>
 
             <!-- <div>
@@ -673,4 +688,48 @@
       d="M3,9A1,1,0,0,0,4,8V5A1,1,0,0,1,5,4H8A1,1,0,0,0,8,2H5A3,3,0,0,0,2,5V8A1,1,0,0,0,3,9ZM8,20H5a1,1,0,0,1-1-1V16a1,1,0,0,0-2,0v3a3,3,0,0,0,3,3H8a1,1,0,0,0,0-2ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14ZM19,2H16a1,1,0,0,0,0,2h3a1,1,0,0,1,1,1V8a1,1,0,0,0,2,0V5A3,3,0,0,0,19,2Zm2,13a1,1,0,0,0-1,1v3a1,1,0,0,1-1,1H16a1,1,0,0,0,0,2h3a3,3,0,0,0,3-3V16A1,1,0,0,0,21,15Z"
     ></path>
   </symbol>
+</svg>
+
+<svg width="0" height="0">
+  <filter id="pageBulge">
+    <feImage
+      result="map"
+      xlink:href="data:image/svg+xml;utf8,
+          <svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'>
+            <radialGradient id='grad' cx='50%' cy='85%' r='60%'>
+              <stop offset='0%' stop-color='rgb(255,255,255)'/>
+              <stop offset='30%' stop-color='rgb(220,220,220)'/>
+              <stop offset='70%' stop-color='rgb(160,160,160)'/>
+              <stop offset='100%' stop-color='rgb(128,128,128)'/>
+            </radialGradient>
+            <rect width='1920' height='1080' fill='url(%23grad)'/>
+          </svg>"
+    />
+    <feDisplacementMap
+      in="SourceGraphic"
+      in2="map"
+      scale="30"
+      xChannelSelector="R"
+      yChannelSelector="G"
+    >
+      <animate
+        id="scaleDown"
+        attributeName="scale"
+        from="30"
+        to="0"
+        dur="0.3s"
+        fill="freeze"
+        begin="indefinite"
+      />
+      <animate
+        id="scaleUp"
+        attributeName="scale"
+        from="0"
+        to="30"
+        dur="0.3s"
+        fill="freeze"
+        begin="indefinite"
+      />
+    </feDisplacementMap>
+  </filter>
 </svg>

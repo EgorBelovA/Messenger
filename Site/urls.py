@@ -9,6 +9,11 @@ from django.views.generic.base import TemplateView
 
 from django.views.static import serve as mediaserve
 
+from django.shortcuts import render
+
+def index_view(request):
+    return render(request, 'dist/index.html')
+
 urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('message_reaction', views.ms_reaction, name='ms_reaction'),
@@ -37,6 +42,7 @@ urlpatterns = [
     ),
     # path('getMessages/<str:room>/', views.getMessages, name='getMessages'),
     # path('getLastMessage/<str:room>/', views.getLastMessage, name='getLastMessage'),
+    # path('ind/', index_view, name='ind'),
 ]
 
 

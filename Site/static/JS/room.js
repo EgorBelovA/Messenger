@@ -115,7 +115,7 @@ function openCity(evt, cityName) {
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].className = tablinks[i].className.replace(' active', '');
   }
-  document.getElementById(cityName).style.display = 'block';
+  document.getElementById(cityName).style.display = 'flex';
   evt.currentTarget.className += ' active';
 
   /*    document.querySelector(".attachments").scrollIntoView({
@@ -212,7 +212,8 @@ function enableDoubleTap(element, callback) {
   );
 
   element.addEventListener('touchend', function (event) {
-    // event.preventDefault();
+    if (event.target.closest('.user_file_pres')) return;
+    if (event.cancelable) event.preventDefault();
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
 
@@ -767,7 +768,11 @@ async function demo() {
 let clearChatTimeOut;
 
 window.onload = function () {
-  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  // const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const searchDivPlaceHolder = document.querySelector(
+    '.search_field_placeholder'
+  );
+  const textAreaPlaceHolder = document.querySelector('.textarea_placeholder');
   const signal = controller.signal;
   window.history.replaceState(null, null, null);
 
@@ -839,10 +844,26 @@ window.onload = function () {
     document.querySelector('.main_chat_window').classList.add('swipe');
     document
       .querySelector('#display')
-      .addEventListener('touchmove', throttle(handleSwipeDirection, 8));
+      .addEventListener('touchmove', throttleWithRAF(handleSwipeDirection), {
+        passive: false,
+      });
   };
 
+  function throttleWithRAF(callback) {
+    let rafId = null;
+
+    return function (...args) {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          callback.apply(this, args);
+          rafId = null;
+        });
+      }
+    };
+  }
+
   document.querySelector('#display').ontouchend = function (event) {
+    document.querySelector('#display').classList.remove('scrollNone');
     var endTime = Date.now();
     var duration = endTime - startTime;
     var shouldSwipe = false;
@@ -888,7 +909,9 @@ window.onload = function () {
 
     document
       .querySelector('#display')
-      .removeEventListener('touchmove', handleSwipeDirection);
+      .addEventListener('touchmove', throttleWithRAF(handleSwipeDirection), {
+        passive: false,
+      });
     isSwiping = false;
   };
 
@@ -897,33 +920,33 @@ window.onload = function () {
       !document.querySelector('.main_chat_window').classList.contains('swipe')
     )
       return;
-    var currentTime = Date.now();
-    var duration = currentTime - startTime;
 
     currentX = event.changedTouches[0].clientX;
     currentY = event.changedTouches[0].clientY;
     deltaX = currentX - startX;
     deltaY = currentY - startY;
-
     if (!isSwiping) {
       if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
         isSwiping = true;
         document.querySelector('#display').classList.add('swipe');
+        startX = currentX;
+        startY = currentY;
+        deltaX = 0;
+        deltaY = 0;
       } else if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
         document.querySelector('.main_chat_window').classList.remove('swipe');
         return;
       }
     }
 
-    if (isSwiping && deltaX > 0) {
+    if (isSwiping) {
       if (event.cancelable) event.preventDefault();
+      document.querySelector('#display').classList.add('scrollNone');
       document.querySelector('.choose_list').classList.remove('swiped');
-      var velocity = Math.abs(deltaX) / Math.max(duration, 1);
-      var extraMargin = velocity * 10;
       textareaElement.blur();
       document.documentElement.style.setProperty(
         '--swipe-margin',
-        `${deltaX + extraMargin}px`
+        `${Math.max(0, deltaX)}px`
       );
     }
   }
@@ -1183,7 +1206,7 @@ window.onload = function () {
         }/socket-server/user/${document.querySelector('#username_id').value}/`;
         chatSocket_user = new WebSocket(url_user);
 
-        chatSocket_user.onopen = function () {};
+        chatSocket_user.onopen = function (e) {};
 
         chatSocket_user.onmessage = function (e) {
           let data = JSON.parse(e.data);
@@ -1722,9 +1745,10 @@ window.onload = function () {
         };
 
         chatSocket_user.onclose = function (e) {
+          console.log(e.code);
           console.log(
             'Socket is closed. Reconnect will be attempted in 0.1 second.',
-            e.reason
+            e
           );
           setTimeout(function () {
             connect_user();
@@ -2177,7 +2201,7 @@ window.onload = function () {
         user_contact_name.appendChild(roomLastMessageDate);
       }
 
-      users_list.onmousedown = function (event) {
+      users_list.onmousedown = function chatOpen(event) {
         scroll_more = 0;
 
         event.preventDefault();
@@ -2374,29 +2398,61 @@ window.onload = function () {
   }
 
   function mes_reaction(mes_react_id) {
-    if (
-      !all_messages[mes_react_id]
-        .querySelector('#reaction_span')
-        .classList.contains('active')
-    ) {
-      all_messages[mes_react_id]
-        .querySelector('#reaction_span')
-        .classList.add('active');
-      all_messages[mes_react_id].querySelector(
-        '#stellar_particles'
-      ).style.display = 'unset';
-      setTimeout(function () {
-        all_messages[mes_react_id].querySelector(
-          '#stellar_particles'
-        ).style.display = 'none';
+    const msg = all_messages[mes_react_id];
+    const reaction = msg.querySelector('#reaction_span');
+    const particles = msg.querySelector('#stellar_particles');
+
+    if (particles._animationTimer) {
+      clearTimeout(particles._animationTimer);
+    }
+    if (particles._hideTimer) {
+      clearTimeout(particles._hideTimer);
+    }
+
+    function updateFixedPosition() {
+      const container = document.querySelector('.main_chat_window');
+      const containerRect = container.getBoundingClientRect();
+      const parentRect = reaction.getBoundingClientRect();
+
+      const centerX =
+        parentRect.left - containerRect.left + parentRect.width / 2;
+      const centerY =
+        parentRect.top - containerRect.top + parentRect.height / 2;
+
+      particles.style.left = centerX - particles.offsetWidth / 2 + 'px';
+      particles.style.top = centerY - particles.offsetHeight / 2 + 'px';
+    }
+
+    if (!reaction.classList.contains('active')) {
+      reaction.classList.add('active');
+      particles.style.display = 'block';
+
+      document
+        .querySelector('#display')
+        .addEventListener('scroll', updateFixedPosition);
+      window.addEventListener('resize', updateFixedPosition);
+      updateFixedPosition();
+      requestAnimationFrame(() => {
+        particles.classList.add('active');
+      });
+
+      particles._animationTimer = setTimeout(() => {
+        particles.classList.remove('active');
+
+        particles._hideTimer = setTimeout(() => {
+          particles.style.display = 'none';
+          delete particles._animationTimer;
+          delete particles._hideTimer;
+        }, 500);
       }, 1500);
     } else {
-      all_messages[mes_react_id]
-        .querySelector('#reaction_span')
-        .classList.remove('active');
-      all_messages[mes_react_id].querySelector(
-        '#stellar_particles'
-      ).style.display = 'none';
+      reaction.classList.remove('active');
+      particles.classList.remove('active');
+
+      particles._hideTimer = setTimeout(() => {
+        particles.style.display = 'none';
+        delete particles._hideTimer;
+      }, 500);
     }
   }
 
@@ -2703,8 +2759,13 @@ window.onload = function () {
 
       stellar_particles = document.createElement('img');
       stellar_particles.setAttribute('id', 'stellar_particles');
-      stellar_particles.src =
+      url =
         '//' + window.location.host + '/static/Images/stellar_particles.gif';
+      // url =
+      //   '//' +
+      //   window.location.host +
+      //   '/static/Images/ba22df081398487fb3599e23fbacaa5b.webm';
+      stellar_particles.src = url;
 
       if (response.messages[key].liked == true) {
         liked.style.display = 'unset';
@@ -2730,7 +2791,12 @@ window.onload = function () {
 
       time_left = document.createElement('span');
       time_left.classList.add('time-left');
-      time_left.textContent = response.messages[key].date.slice(11, 16);
+      const timeString = response.messages[key].date.slice(11, 16);
+      const [hours, minutes] = timeString.split(':');
+      let hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      time_left.textContent = `${hour}:${minutes} ${ampm}`;
 
       reaction_span.setAttribute('id', 'reaction_span');
       reaction_span.appendChild(liked_div);
@@ -2749,7 +2815,7 @@ window.onload = function () {
         });
       });
 
-      elements.forEach((el) => ro.observe(el));
+      // elements.forEach((el) => ro.observe(el));
 
       message_div_temp_separator = document.createElement('div');
       message_div_temp_separator.classList.add('message_div_temp_separator');
@@ -2895,7 +2961,7 @@ window.onload = function () {
           clearTimeout(modalTimer);
           touchTimer = null;
           modalTimer = null;
-          themeMeta.content = '#050505';
+          // themeMeta.content = '#050505';
         }
       });
 
@@ -3861,9 +3927,11 @@ window.onload = function () {
 
   $('textarea').on('input', function () {
     if (this.value.length == 0) {
+      textAreaPlaceHolder.classList.remove('input');
       document.querySelector('#selfie').classList.remove('hidden');
     } else {
       document.querySelector('#selfie').classList.add('hidden');
+      textAreaPlaceHolder.classList.add('input');
     }
     this.style.height = 0;
     this.style.height = this.scrollHeight + 'px';
@@ -4251,6 +4319,8 @@ window.onload = function () {
 
   document.querySelector('.search_field').oninput = function () {
     if ($('.search_field').val().replace(/\s/g, '').length) {
+      if (!searchDivPlaceHolder.classList.contains('input'))
+        searchDivPlaceHolder.classList.add('input');
       //                document.querySelector(".users_search").setAttribute("style", "display: flex");
       if (chatSocket_user != null && chatSocket_user.readyState) {
         document.documentElement.style.setProperty('--rooms_display', `none`);
@@ -4258,6 +4328,8 @@ window.onload = function () {
       }
     } else {
       //   document.documentElement.style.setProperty('--rooms_display', `flex`);
+      if (searchDivPlaceHolder.classList.contains('input'))
+        searchDivPlaceHolder.classList.remove('input');
       document
         .querySelectorAll('.users_full_form.search')
         .forEach(function (e) {
@@ -4388,6 +4460,12 @@ window.onload = function () {
       event.preventDefault();
     });
 
+  document
+    .getElementById('reduce_animations_check')
+    .addEventListener('click', function (event) {
+      // this.checked = !this.checked;
+    });
+
   if (getCookie('theme_mode') == null) setCookie('theme_mode', 'D', 1);
 
   $(document).ready(set_theme);
@@ -4443,23 +4521,24 @@ window.onload = function () {
       document
         .querySelector('.search_div')
         .setAttribute('style', 'background-color: #FFF;');
-      document
-        .querySelector('.search_field')
-        .setAttribute('style', 'background-color: #EEE; color: #000;');
+      // document
+      //   .querySelector('.search_field')
+      //   .setAttribute('style', 'background-color: #EEE; color: #000;');
       document
         .querySelector('.attachments')
         .setAttribute('style', 'background-color: #FFF;');
       document
         .querySelector('.settings_menu')
         .setAttribute('style', 'background-color: #FFF;');
-      document
-        .querySelector('.scroll_down')
-        .setAttribute('style', 'background: #EEE;');
+      // document
+      //   .querySelector('.scroll_down')
+      //   .setAttribute('style', 'background: #EEE;');
       document.querySelector('#dark_mode_check').checked = false;
     } else if (getCookie('theme_mode') == 'D') {
       message_color = 'rgba(28,28, 28)';
       main_color = '#FFF';
-      darker_ = '#7469a6ff';
+      darker_ = pSBC(-0.3, getCookie('room_BG_color_hex'));
+      // darker_ = '#7469a6ff';
       attachment_tabs = '##1E1E1E';
       document.documentElement.style.setProperty(
         '--message_color',
@@ -4486,7 +4565,7 @@ window.onload = function () {
         '--attachment_tabs_font',
         `${main_color}`
       );
-      themeMeta.content = '#000000';
+      // themeMeta.content = '#000000';
       document
         .querySelector('.settings')
         .setAttribute('style', 'background: #222;');
@@ -4515,9 +4594,9 @@ window.onload = function () {
       document
         .querySelector('.settings_menu')
         .setAttribute('style', 'background-color: #000000;');
-      document
-        .querySelector('.scroll_down')
-        .setAttribute('style', 'background: rgb(25,25,25, 0.8);');
+      // document
+      //   .querySelector('.scroll_down')
+      //   .setAttribute('style', 'background: rgb(25,25,25, 0.8);');
       document.querySelector('#dark_mode_check').checked = true;
     }
   }
@@ -4525,7 +4604,7 @@ window.onload = function () {
     setCookie('room_BG_shadow', '45', 7);
   }
   if (getCookie('room_BG_color_hex') == undefined) {
-    setCookie('room_BG_color_hex', '#6c47ffff', 7);
+    setCookie('room_BG_color_hex', '#6c47ff', 7);
   }
   document.querySelector('#color_chat_change').value = room_BG_color_hex =
     getCookie('room_BG_color_hex');
@@ -4887,8 +4966,9 @@ function adapt() {
       .setAttribute('style', 'display: flex;');
   }
   if (vw > 1700) {
-    // document.querySelector(".main_chat_window").setAttribute("style","width: 1200;");
-    document.querySelector('.main_chat_window').style.width = '1200px';
+    document
+      .querySelector('.main_chat_window')
+      .setAttribute('style', 'width: 1200;');
     document
       .querySelector('.choose_list')
       .setAttribute('style', 'max-width: 400;');
@@ -4919,16 +4999,21 @@ jQuery(function ($) {
 
     var initPos = $self.css('position'),
       offs = $self.offset(),
-      x = e.pageX - offs.left,
-      y = e.pageY - offs.top,
-      dia = Math.min(this.offsetHeight, this.offsetWidth, 100), // start diameter
+      // Для touch событий
+      touch =
+        e.originalEvent && e.originalEvent.touches
+          ? e.originalEvent.touches[0]
+          : e,
+      x = touch.pageX - offs.left,
+      y = touch.pageY - offs.top,
+      dia = Math.min(this.offsetHeight, this.offsetWidth, 100),
       $ripple = $('<div/>', { class: 'ripple', appendTo: $self });
 
     if (!initPos || initPos === 'static') {
       $self.css({ position: 'relative' });
     }
 
-    $('<div/>', {
+    var $wave = $('<div/>', {
       class: 'rippleWave',
       css: {
         background: $self.data('ripple'),
@@ -4938,12 +5023,21 @@ jQuery(function ($) {
         top: y - dia / 2,
       },
       appendTo: $ripple,
-      one: {
-        animationend: function () {
-          $ripple.remove();
-        },
-      },
     });
+
+    // Обработка окончания анимации с несколькими событиями
+    function removeRipple() {
+      $ripple.remove();
+      $wave.off('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd');
+    }
+
+    $wave.on(
+      'animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd',
+      removeRipple
+    );
+
+    // Fallback таймер на случай если события не сработают
+    setTimeout(removeRipple, 1000);
   });
 });
 
@@ -5169,6 +5263,123 @@ function logoutUser(button) {
     });
 }
 
+function generateGradientColors(hexColor) {
+  // Преобразуем HEX в RGB
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
+  }
+
+  // Преобразуем RGB в HEX
+  function rgbToHex(r, g, b) {
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  // Корректируем цвет (осветляем или затемняем)
+  function adjustColor(rgb, factor) {
+    return {
+      r: Math.min(255, Math.max(0, Math.round(rgb.r * factor))),
+      g: Math.min(255, Math.max(0, Math.round(rgb.g * factor))),
+      b: Math.min(255, Math.max(0, Math.round(rgb.b * factor))),
+    };
+  }
+
+  // Создаем аналогичный цвет (сдвигаем hue)
+  function createAnalogous(rgb, hueShift) {
+    // Конвертируем RGB в HSL
+    let r = rgb.r / 255;
+    let g = rgb.g / 255;
+    let b = rgb.b / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h,
+      s,
+      l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0; // ахроматический
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+
+    // Сдвигаем hue
+    h = (h + hueShift / 360) % 1;
+    if (h < 0) h += 1;
+
+    // Конвертируем обратно в RGB
+    function hueToRgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    }
+
+    let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    let p = 2 * l - q;
+
+    r = hueToRgb(p, q, h + 1 / 3);
+    g = hueToRgb(p, q, h);
+    b = hueToRgb(p, q, h - 1 / 3);
+
+    return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255),
+    };
+  }
+
+  const baseRgb = hexToRgb(hexColor);
+  if (!baseRgb) {
+    throw new Error('Неверный HEX формат цвета');
+  }
+
+  // Генерируем 4 гармоничных цвета
+  const gradientColors = [];
+
+  // 1. Исходный цвет (немного осветленный)
+  const color1 = adjustColor(baseRgb, 1.1);
+  gradientColors.push(rgbToHex(color1.r, color1.g, color1.b));
+
+  // 2. Исходный цвет
+  gradientColors.push(hexColor);
+
+  // 3. Аналогичный цвет (сдвиг hue на 30 градусов)
+  const analogous1 = createAnalogous(baseRgb, 30);
+  gradientColors.push(rgbToHex(analogous1.r, analogous1.g, analogous1.b));
+
+  // 4. Дополнительный цвет (сдвиг hue на 150 градусов)
+  const analogous2 = createAnalogous(baseRgb, 150);
+  gradientColors.push(rgbToHex(analogous2.r, analogous2.g, analogous2.b));
+
+  return gradientColors;
+}
+
+// Пример использования:
+// Возвращает массив из 4 HEX цветов для градиента
+
 class StaticBackgroundFixedZoom {
   constructor() {
     this.gradientCanvas = document.getElementById('gradient-canvas');
@@ -5178,34 +5389,47 @@ class StaticBackgroundFixedZoom {
     this.patternCtx = this.patternCanvas.getContext('2d');
 
     this.patternImage = new Image();
-
+    let room_BG_color_hex = getCookie('room_BG_color_hex');
     if (getCookie('room_BG_shadow') == undefined) {
       setCookie('room_BG_shadow', '45', 7);
     }
-    if (getCookie('room_BG_color_hex') == undefined) {
-      setCookie('room_BG_color_hex', '#6c47ffff', 7);
-    }
-    let room_BG_color_hex = getCookie('room_BG_color_hex');
+    let gradientColors = [];
     let shadow_degree = getCookie('room_BG_shadow');
+    if (!Number.isInteger(shadow_degree)) {
+      shadow_degree = 45;
+    }
+    try {
+      gradientColors = Array.from(generateGradientColors(room_BG_color_hex));
+    } catch (e) {
+      room_BG_color_hex = '#6c47ff';
+      gradientColors = Array.from(generateGradientColors(room_BG_color_hex));
+    }
+
+    if (getCookie('room_BG_color_hex') == undefined) {
+      setCookie('room_BG_color_hex', '#6c47ff', 7);
+      room_BG_color_hex = '#6c47ff';
+    }
+    // console.log(room_BG_color_hex);
 
     this.FIXED_HEX_1 = pSBC(-0.6, room_BG_color_hex);
     this.FIXED_HEX_2 = pSBC(0, room_BG_color_hex);
     this.FIXED_HEX_3 = pSBC(-0.8, room_BG_color_hex);
+
+    // this.FIXED_HEX_1 = gradientColors[1];
+    // this.FIXED_HEX_2 = gradientColors[2];
+    // this.FIXED_HEX_3 = gradientColors[3];
     this.FIXED_SHADOW = shadow_degree;
     this.FIXED_SCALE = 2;
 
-    // Уменьшаем качество для производительности
-    this.RENDER_QUALITY = 2; // было 2
-    this.PATTERN_QUALITY = 2; // отдельное качество для паттерна
+    this.RENDER_QUALITY = 2;
+    this.PATTERN_QUALITY = 2;
 
-    // Оптимизация: кэш для градиента
     this.gradientCache = {
       canvas: null,
       shadow: null,
       colors: null,
     };
 
-    // Оптимизация: debounce для resize
     this.resizeTimeout = null;
     this.redrawTimeout = null;
 
@@ -5213,7 +5437,6 @@ class StaticBackgroundFixedZoom {
   }
 
   setupEventListeners() {
-    // Debounce для плавного изменения угла
     let shadowTimeout;
     document.querySelector('#shadow_degree_chat').oninput = (e) => {
       clearTimeout(shadowTimeout);
@@ -5230,7 +5453,6 @@ class StaticBackgroundFixedZoom {
       }, 16);
     };
 
-    // Debounce для цвета
     let colorTimeout;
     document.querySelector('#color_chat_change').oninput = (e) => {
       clearTimeout(colorTimeout);
@@ -5264,7 +5486,6 @@ class StaticBackgroundFixedZoom {
     this.setupEventListeners();
     this.resize();
 
-    // Debounce для resize
     window.addEventListener('resize', () => {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => this.resize(), 100);
@@ -5276,7 +5497,6 @@ class StaticBackgroundFixedZoom {
   }
 
   createPatternCache() {
-    // Уменьшаем качество паттерна для производительности
     const baseSize = 400 * this.FIXED_SCALE * this.PATTERN_QUALITY;
     const cacheCanvas = document.createElement('canvas');
     const cacheCtx = cacheCanvas.getContext('2d');
@@ -5285,7 +5505,7 @@ class StaticBackgroundFixedZoom {
     cacheCanvas.height = baseSize;
 
     cacheCtx.imageSmoothingEnabled = true;
-    cacheCtx.imageSmoothingQuality = 'medium'; // было 'high'
+    cacheCtx.imageSmoothingQuality = 'medium';
 
     cacheCtx.drawImage(this.patternImage, 0, 0, baseSize, baseSize);
 
@@ -5297,8 +5517,10 @@ class StaticBackgroundFixedZoom {
   }
 
   resize() {
-    const width = document.documentElement.clientWidth;
-    const height = document.documentElement.clientHeight;
+    const mainChatWindow = document.querySelector('.main_chat_window');
+    // console.log(mainChatWindow.clientWidth);
+    const width = mainChatWindow.clientWidth;
+    const height = mainChatWindow.clientHeight;
 
     const scaleFactor = (window.devicePixelRatio || 1) * this.RENDER_QUALITY;
 
@@ -5312,7 +5534,7 @@ class StaticBackgroundFixedZoom {
       const ctx = canvas.getContext('2d');
       ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
       ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'medium'; // было 'high'
+      ctx.imageSmoothingQuality = 'medium';
     });
 
     this.drawGradient();
@@ -5320,7 +5542,6 @@ class StaticBackgroundFixedZoom {
   }
 
   drawGradient() {
-    // Проверяем кэш градиента
     const cacheKey = `${this.FIXED_SHADOW}_${this.FIXED_HEX_1}_${this.FIXED_HEX_2}_${this.FIXED_HEX_3}`;
 
     if (
@@ -5328,7 +5549,6 @@ class StaticBackgroundFixedZoom {
       this.gradientCache.shadow === this.FIXED_SHADOW &&
       this.gradientCache.colors === cacheKey
     ) {
-      // Используем кэшированный градиент
       const ctx = this.gradientCtx;
       const width = parseFloat(this.gradientCanvas.style.width);
       const height = parseFloat(this.gradientCanvas.style.height);
@@ -5347,7 +5567,6 @@ class StaticBackgroundFixedZoom {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Упрощаем градиент - используем реальные размеры вместо увеличенных
     const gradient = ctx.createLinearGradient(
       0,
       0,
@@ -5362,12 +5581,10 @@ class StaticBackgroundFixedZoom {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
-    // Кэшируем градиент
     this.cacheGradient(width, height, cacheKey);
   }
 
   cacheGradient(width, height, cacheKey) {
-    // Создаем кэш для градиента
     const cacheCanvas = document.createElement('canvas');
     const cacheCtx = cacheCanvas.getContext('2d');
 
@@ -5415,7 +5632,6 @@ class StaticBackgroundFixedZoom {
     const patternWidth = patternSize / (2960 / 1440);
     const patternHeight = patternSize;
 
-    // Уменьшаем количество отрисовываемых паттернов
     const cols = Math.ceil(width / patternWidth) + 1;
     const rows = Math.ceil(height / patternHeight) + 1;
 
