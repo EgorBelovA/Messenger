@@ -91,3 +91,4 @@ websocket-client==1.4.2
 wsproto==1.0.0
 yarg==0.1.9
 zipp==3.10.0
+django-sslserver==0.22
